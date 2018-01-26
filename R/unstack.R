@@ -1,6 +1,6 @@
-#' Fix apparent coding error in Dodson and Tobler's digitization of Snow's map.
+#' Fix apparent coding errors in Dodson and Tobler's digitization of Snow's map.
 #'
-#' Fixes two apparent coding errors using three misplaced cases in Dodson and Tobler's data.
+#' Fix two apparent coding errors using three misplaced cases.
 #' @seealso \code{vignette("duplicate.missing.cases")}
 #' @return An R data frame.
 #' @export
@@ -16,12 +16,12 @@ fixFatalities <- function() {
 #' Unstack "stacks" in Snow's cholera map.
 #'
 #' Unstacks fatalities data by 1) assigning the coordinates of the base case to all cases in a stack and 2) setting the base case as an "address" and making the number of fatalities an attribute.
-#' @param multi.core Logical or Numeric. TRUE uses parallel::detectCores(). FALSE uses one, single core. With Numeric, you specify the number logical cores (rounds with as.integer()). On Windows, only "multi.core = FALSE" is available.
+#' @param multi.core Logical or Numeric. TRUE uses parallel::detectCores(). FALSE uses one, single core. With Numeric, you specify the number logical cores. On Windows, only "multi.core = FALSE" is available.
 #' @param fatalities Corrected fatalities data from cholera::fixFatalities(). For original data, use HistData::Snow.deaths.
 #' @param compute Logical. TRUE computes data. FALSE uses pre-computed data.
 #' @seealso \code{vignette("unstacking.fatalities")}
 #' @return An R list that includes anchor.case, fatalities.address, fatalities.unstacked and ortho.proj.
-#' @section Notes: This function is computationally intensive. On a 2.3 GHz Intel Core i7, it takes approximately 5 minutes to run on one core and approximately 70 seconds to run on eight logical (four physical) cores. This function documents the code that generates \code{\link{anchor.case}}, \code{\link{fatalities.address}}, \code{\link{fatalities.unstacked}} and \code{\link{ortho.proj}}.
+#' @section Notes: This function is computationally intensive. On a 2.3 GHz Intel Core i7, it takes approximately 5 minutes to run on one core and approximately 70 seconds to run on eight logical (four physical) cores. These functions document the code that generates \code{\link{anchor.case}}, \code{\link{fatalities.address}}, \code{\link{fatalities.unstacked}} and \code{\link{ortho.proj}}.
 #' @export
 
 unstackFatalities <- function(multi.core = FALSE, compute = FALSE,
@@ -160,7 +160,8 @@ unstackFatalities <- function(multi.core = FALSE, compute = FALSE,
       "178-1" = 85,
       "231-1" = 341,
       "160-3" = 558,
-      "269-1" = 462)
+      "269-1" = 462,
+      "326-2" = 483)
 
     # Recompute orthogonal distances
 
@@ -246,6 +247,28 @@ unstackFatalities <- function(multi.core = FALSE, compute = FALSE,
 
     ortho.projB <- rbind(ortho.projB, data.fix)
 
+    ## St James Workhouse: [369] 434, 11, 53, 193 ##
+    # move anchor 369 and associated cases to endpoint of St James Workhouse
+    # segment
+    # ortho.proj[ortho.proj$case %in% case.select, ]
+
+    old.st <- "194-1"
+    new.st <- "148-1"
+
+    case.select <- c(369, 434, 11, 53, 193)
+    case <- fatalities[fatalities$case %in% case.select, ]
+    x.proj <- road.segments[road.segments$id == new.st, "x1"]
+    y.proj <- road.segments[road.segments$id == new.st, "y1"]
+
+    ortho.dist <- vapply(case$case, function(x) {
+      stats::dist(rbind(case[case$case == x, c("x", "y")], c(x.proj, y.proj)))
+    }, numeric(1L))
+
+    data.fix <- data.frame(road.segment = new.st, x.proj, y.proj,
+      ortho.dist = ortho.dist, case = case$case)
+
+    ortho.projB <- rbind(ortho.projB, data.fix)
+
     ## Re-assemble ##
 
     ortho.proj[ortho.proj$case %in% ortho.projB$case, ] <- ortho.projB
@@ -261,8 +284,8 @@ unstackFatalities <- function(multi.core = FALSE, compute = FALSE,
 
     single.obs <- road.incidence[road.incidence$count == 1, ]
     single.address <- lapply(single.obs$id, function(i) {
-      data.frame(id = i, 
-                 case = ortho.proj[ortho.proj$road.segment == i, "case"])
+      data.frame(id = i, case = ortho.proj[ortho.proj$road.segment == i,
+        "case"])
     })
 
     cutpoint <- 0.05
@@ -352,7 +375,7 @@ unstackFatalities <- function(multi.core = FALSE, compute = FALSE,
     single.unstacked$multiple.obs.seg <- "No"
 
     unstacked <- rbind(multiple.unstacked, single.unstacked)
-    unstacked <- merge(unstacked, fatalities, by.x = "anchor.case", 
+    unstacked <- merge(unstacked, fatalities, by.x = "anchor.case",
       by.y = "case")
 
     fatalities.unstacked <- unstacked[, c("case", "x", "y")]
@@ -372,7 +395,7 @@ unstackFatalities <- function(multi.core = FALSE, compute = FALSE,
          ortho.proj = ortho.proj)
 
   } else {
-   list(anchor.case = cholera::anchor.case,
+    list(anchor.case = cholera::anchor.case,
         fatalities.address = cholera::fatalities.address,
         fatalities.unstacked = cholera::fatalities.unstacked,
         ortho.proj = cholera::ortho.proj)

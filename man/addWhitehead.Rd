@@ -2,13 +2,13 @@
 % Please edit documentation in R/addWhitehead.R
 \name{addWhitehead}
 \alias{addWhitehead}
-\title{Add Whitehead's Broad Street pump neighborhood.}
+\title{Add Rev. Henry Whitehead's Broad Street pump neighborhood.}
 \usage{
 addWhitehead(pump = "Broad Street", radius = 210, color = "black",
   line.type = "solid", vestry = FALSE, ...)
 }
 \arguments{
-\item{pump}{Character. The name of the pump, the street name where it is located. See \code{pumps} or \code{pumps.vestry}.}
+\item{pump}{Character. Name of selected pump (road name). See \code{pumps} or \code{pumps.vestry}.}
 
 \item{radius}{Numeric. Distance from a pump in yards}
 
@@ -21,10 +21,10 @@ addWhitehead(pump = "Broad Street", radius = 210, color = "black",
 \item{...}{Additional plotting parameters.}
 }
 \value{
-Draws a circle, based on multiple line segments, to a graphics plot.
+Adds a circle (polygon) to a graphics plot.
 }
 \description{
-Adds a circle with a given radius from a specified water pump. By default, the function draws Whitehead's Broad Street pump neighborhood: a circle, centered on the Broad Street pump, with a radius of 210 yards.
+A circle (polygon), centered around a desired pump with a radius of 210 yards. The Broad Street pump is the default.
 }
 \examples{
 snowMap(add.landmarks = FALSE)
@@ -32,6 +32,7 @@ addWhitehead()
 }
 \seealso{
 \code{\link{snowMap}},
+\code{\link{addIndexCase}},
 \code{\link{addKernelDensity}},
 \code{\link{addLandmarks}},
 \code{\link{addPlaguePit}},

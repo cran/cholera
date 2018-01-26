@@ -4,21 +4,25 @@
 \alias{streetNameLocator}
 \title{Locate road by name.}
 \usage{
-streetNameLocator(road.name, zoom = FALSE, radius = 1)
+streetNameLocator(road.name, zoom = FALSE, radius = 0.1,
+  cases = "anchors", unit = NULL)
 }
 \arguments{
 \item{road.name}{Character vector. Note that \code{streetNameLocator}() tries to correct for case and to remove extra spaces.}
 
 \item{zoom}{Logical.}
 
-\item{radius}{Numeric. Controls the degree of zoom. For "radius" <= 5, the anchor case number is plotted.}
+\item{radius}{Numeric. Controls the degree of zoom.}
+
+\item{cases}{Character. Plot cases: NULL, "anchors" or "all".}
+
+\item{unit}{Character. Unit of measurement: "meter" or "yard". Default is NULL, which returns the map's native scale.}
 }
 \value{
 A base R graphics plot.
 }
 \description{
-Plots John Snow's map of the 1854 London cholera outbreak and highlights the
-selected road. See the list of road names in \code{vignette}("road.names").
+Highlight a road and its cases. See the list of road names in \code{vignette}("road.names").
 }
 \examples{
 streetNameLocator("Oxford Street")

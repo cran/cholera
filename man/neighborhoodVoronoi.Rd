@@ -2,19 +2,19 @@
 % Please edit documentation in R/voronoi.R
 \name{neighborhoodVoronoi}
 \alias{neighborhoodVoronoi}
-\title{Compute Voronoi neighborhoods.}
+\title{Compute Voronoi pump neighborhoods.}
 \usage{
 neighborhoodVoronoi(pump.select = NULL, vestry = FALSE, statistic = NULL,
   polygon.vertices = FALSE)
 }
 \arguments{
-\item{pump.select}{Numeric. Default is NULL: all pumps are used. Otherwise, selection by a vector of numeric IDs: 1 to 13 for \code{pumps}; 1 to 14 for \code{pumps.vestry}.}
+\item{pump.select}{Numeric. Default is NULL: all pumps are used. Otherwise, selection by a vector of numeric IDs: 1 to 13 for \code{pumps}; 1 to 14 for \code{pumps.vestry}. Exclusion (negative selection) is possible (e.g., -6).}
 
 \item{vestry}{Logical. TRUE uses the 14 pumps from the Vestry Report. FALSE uses the 13 in the original map.}
 
 \item{statistic}{NULL or Character. NULL, the default, makes no summary computation. "address" computes the number of addresses in each selected pump neighborhood. "fatality" computes the number of fatalities in pump neighborhoods.}
 
-\item{polygon.vertices}{Logical. TRUE returns a list of x-y coordinates of the vertices of Voronoi cells. Useful for sp::point.in.polygon() as used in summary.voronoi() method.}
+\item{polygon.vertices}{Logical. TRUE returns a list of x-y coordinates of the vertices of Voronoi cells. Useful for sp::point.in.polygon() as used in print.voronoi() method.}
 }
 \value{
 An R list with 12 objects.
@@ -25,7 +25,7 @@ An R list with 12 objects.
   \item{\code{x.rng}: range of x for plot.}
   \item{\code{y.rng}: range of y for plot.}
   \item{\code{select.string}: description of "pump.select" for plot title.}
-  \item{\code{expected.data}:  expected neighborhood fatality counts, based on Voronoi cell area.}
+  \item{\code{expected.data}: expected neighborhood fatality counts, based on Voronoi cell area.}
   \item{\code{coordinates}: polygon vertices of Voronoi cells.}
   \item{\code{statistic.data}: observed neighborhood fatality counts.}
   \item{\code{pump.select}: "pump.select" from neighborhoodVoronoi().}
@@ -34,7 +34,7 @@ An R list with 12 objects.
 }
 }
 \description{
-Data for Voronoi tessellation of John Snow's 1854 London cholera data.
+Group cases into neighborhoods using Voronoi tessellation.
 }
 \examples{
 neighborhoodVoronoi()
@@ -48,5 +48,5 @@ dat <- neighborhoodVoronoi(pump.select = -6)
 dat$coordinates
 }
 \seealso{
-\code{\link{addVoronoi}}, \code{\link{plot.voronoi}}, \code{\link{summary.voronoi}}, \code{vignette("pump.neighborhoods")}
+\code{\link{addVoronoi}}, \code{\link{plot.voronoi}}, \code{\link{print.voronoi}}, \code{vignette("pump.neighborhoods")}
 }

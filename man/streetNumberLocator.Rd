@@ -2,23 +2,27 @@
 % Please edit documentation in R/streetNumberLocator.R
 \name{streetNumberLocator}
 \alias{streetNumberLocator}
-\title{Locate road by its numerical ID.}
+\title{Locate road by numerical ID.}
 \usage{
-streetNumberLocator(road.number, zoom = FALSE, radius = 1)
+streetNumberLocator(road.number, zoom = FALSE, radius = 1,
+  cases = "anchors", unit = NULL)
 }
 \arguments{
 \item{road.number}{Numeric or integer. A whole number between 1 and 528.}
 
 \item{zoom}{Logical.}
 
-\item{radius}{Numeric. Controls the degree of zoom. For values <= 5, the anchor case number is plotted.}
+\item{radius}{Numeric. Controls the degree of zoom.}
+
+\item{cases}{Character. Plot cases: NULL, "anchors" or "all".}
+
+\item{unit}{Character. Unit of measurement: "meter" or "yard". Default is NULL, which returns the map's native scale.}
 }
 \value{
 A base R graphics plot.
 }
 \description{
-Plots John Snow's map of the 1854 London cholera outbreak and highlights the
-selected road. See cholera::roads for numerical IDs and \code{vignette}("road.names") for details.
+Highlight a road and its cases. See cholera::roads for numerical IDs and \code{vignette}("road.names") for details.
 }
 \examples{
 streetNumberLocator(243)

@@ -1,12 +1,13 @@
-#' Adds Snow's Annotation  of the Broad Street pump walking neighborhood.
+#' Adds Snow's graphical annotation of the Broad Street pump walking neighborhood.
 #'
-#' Reproduces Snow's graphic annotation in the Vestry Report.
-#' @param streets Logical. TRUE plots streets. FALSE plots orthogonal area.
-#' @param color Character. Color for neighborhood annotation.
-#' @param alpha.st Numeric. A value in [0, 1] to set alpha level for street neighborhood annotation.
-#' @param alpha.area Numeric. A value in [0, 1] to set alpha level for area neighborhood annotation.
+#' Uses alphahull::ashape().
+#' @param type Character. Type of annotation plot: "area", "boundary" or "street".
+#' @param color Character. Neighborhood color.
+#' @param alpha.level Numeric. Alpha level transparency: a value in [0, 1].
+#' @param line.width Numeric. Line width for "street" and "boundary".
 #' @param ... Additional plotting parameters.
 #' @seealso \code{\link{snowMap}},
+#' \code{\link{addIndexCase}},
 #' \code{\link{addKernelDensity}},
 #' \code{\link{addLandmarks}},
 #' \code{\link{addPlaguePit}},
@@ -15,43 +16,56 @@
 #' @import graphics
 #' @export
 #' @examples
-#' plot(neighborhoodVoronoi())
-#' addSnow()
+#' # plot(neighborhoodVoronoi())
+#' # addSnow()
 
-addSnow <- function(streets = TRUE, color = "dodgerblue", alpha.st = 0.75,
-  alpha.area = 1/3, ...) {
+addSnow <- function(type = "street", color = "dodgerblue", alpha.level = 0.25,
+  line.width = 2, ...) {
 
-  if (streets) {
-    snow <- sysdata[["snow"]]$pump.seg$p7
-    for (i in seq_along(snow$id)) {
-      segments(snow[i, "x1"], snow[i, "y1"], snow[i, "x2"], snow[i, "y2"],
-        lwd = 6, col = scales::alpha(color, alpha.st))
+  if (type %in% c("area", "boundary", "street") == FALSE) {
+    stop('"type" must be "area", "boundary" or "street".')
+  }
+
+  edges <- neighborhoodData()$edges
+  snow <- cholera::snowNeighborhood()
+
+  if (type == "street") {
+    invisible(lapply(c(snow$obs.edges, snow$other.edges), function(x) {
+      n.edges <- edges[x, ]
+      segments(n.edges$x1, n.edges$y1, n.edges$x2, n.edges$y2, lwd = line.width,
+        col = color)
+    }))
+  } else if (type == "area" | type == "boundary") {
+    snow.area <- cholera::regular.cases[snow$sim.case, ]
+    snow.hull <- suppressWarnings(alphahull::ashape(snow.area, alpha = 0.2))
+    e <- data.frame(snow.hull$edges)
+
+    if (type == "boundary") {
+      invisible(lapply(seq_len(nrow(e)), function(i) {
+        segments(e[i, "x1"], e[i, "y1"], e[i, "x2"], e[i, "y2"], col = color,
+          lwd = line.width)
+      }))
+    } else if (type == "area") {
+      e2 <- e[, c("ind1", "ind2")]
+      ordered.vertices <- vector(length = nrow(e))
+
+      # manually set a first node.
+      ordered.vertices[1] <- 3
+
+      for (i in 2:length(ordered.vertices)) {
+        dat <- e2[e2$ind1 == ordered.vertices[i - 1] |
+                  e2$ind2 == ordered.vertices[i - 1], ]
+        if (!all(dat[1, ] %in% ordered.vertices)) {
+          ordered.vertices[i] <- unlist(dat[1, ][dat[1, ] %in%
+            ordered.vertices == FALSE])
+        } else if (!all(dat[2, c("ind1", "ind2")] %in% ordered.vertices)) {
+          ordered.vertices[i] <- unlist(dat[2, ][dat[2, ] %in%
+            ordered.vertices == FALSE])
+        }
+      }
+
+      polygon(snow.area[ordered.vertices, ],
+        col = grDevices::adjustcolor(color, alpha.level))
     }
-  } else {
-    snow <- sysdata[["snow"]]$pump.seg$p7
-    trimmed <- snow[snow$trimmed == TRUE, ]
-    trim.seg <- trimmed$id
-    whole.seg <- snow[snow$trimmed == FALSE, "id"]
-
-    sel <- cholera::sim.ortho.proj$road.segment %in% trim.seg
-    trim.reg.proj <- cholera::sim.ortho.proj[sel, ]
-
-    snow.trim <- lapply(trimmed$id, function(x) {
-      a <- trim.reg.proj[trim.reg.proj$road.segment == x, ]
-      b <- trimmed[trimmed$id == x, ]
-      xs <- unlist(sort(b[, c("x1", "x2")]))
-      ys <- unlist(sort(b[, c("y1", "y2")]))
-      x.test <- a$x.proj >= xs[1] & a$x.proj <= xs[2]
-      y.test <- a$y.proj >= ys[1] & a$y.proj <= ys[2]
-      sel <- x.test & y.test
-      a[sel, "case"]
-    })
-
-    points(cholera::regular.cases[unlist(snow.trim), ], pch = 15, cex = 1,
-      col = scales::alpha(color, alpha.area))
-    sel <- cholera::sim.ortho.proj$road.segment %in% whole.seg
-    snow.whole <- cholera::sim.ortho.proj[sel, "case"]
-    points(cholera::regular.cases[snow.whole, ], pch = 15, cex = 1,
-      col = scales::alpha(color, alpha.area))
   }
 }

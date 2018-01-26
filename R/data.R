@@ -99,7 +99,7 @@
 
 #' Orthogonal projection of observed cases onto road network.
 #'
-#' @format A data frame with 5 variable that records the position of the orthogonal projection of the 578 cases onto the network of roads.
+#' @format A data frame with 5 variables that records the position of the orthogonal projection of the 578 cases onto the network of roads.
 #'  \describe{
 #'     \item{\code{road.segment}}{"address" road segment}
 #'     \item{\code{x.proj}}{x-coordinate}
@@ -113,7 +113,7 @@
 
 #' Orthogonal projection of simulated "expected" cases onto road network.
 #'
-#' @format A data frame with 5 variable that records the position of the orthogonal projection of the 4993 cases onto the network of roads. Excluding isolates (Pump 2 at  Adam and Eve Court; Falconberg Court and Falconberg Mews), there are 4972 cases.
+#' @format A data frame with 5 variables that records the position of the orthogonal projection of the 4993 cases onto the network of roads. Excluding isolates (Pump 2 at  Adam and Eve Court; Falconberg Court and Falconberg Mews), there are 4972 cases.
 #' \describe{
 #'     \item{\code{road.segment}}{"address" road segment}
 #'     \item{\code{x.proj}}{x-coordinate}
@@ -127,7 +127,7 @@
 
 #' Orthogonal projection of 13 original pumps.
 #'
-#' @format A data frame with 5 variable that records the position of the orthogonal projection of the 13 original pumps onto the network of roads.
+#' @format A data frame with 5 variables that records the position of the orthogonal projection of the 13 original pumps onto the network of roads.
 #'  \describe{
 #'     \item{\code{road.segment}}{"address" road segment}
 #'     \item{\code{x.proj}}{x-coordinate}
@@ -141,7 +141,7 @@
 
 #' Orthogonal projection of the 14 pumps from the Vestry Report.
 #'
-#' @format A data frame with 5 variable that records the position of the orthogonal projection of the 14 pumps onto the network of roads.
+#' @format A data frame with 5 variables that records the position of the orthogonal projection of the 14 pumps onto the network of roads.
 #'  \describe{
 #'     \item{\code{road.segment}}{"address" road segment}
 #'     \item{\code{x.proj}}{x-coordinate}
@@ -164,7 +164,7 @@
 #' @docType data
 "plague.pit"
 
-#' List of the observed fatality "addresses" grouped by pump neighborhood.
+#' List of the observed fatality "addresses" grouped by walking-distance pump neighborhood.
 #'
 #' @format A list 321 IDs spread over 13 vectors.
 #' \describe{
@@ -174,11 +174,11 @@
 #'
 #' For details, see \code{vignette}("pump.neighborhoods").
 #' @examples
-#' neighborhoodWalking()$pump.case
+#' # pumpCase(neighborhoodWalking())
 #' @docType data
 "pump.case"
 
-#' List of "simulated" fatalities grouped by pump neighborhood.
+#' List of "simulated" fatalities grouped by walking-distance pump neighborhood.
 #'
 #' @format A list 4972 IDs spread over 13 vectors.
 #' \describe{
@@ -188,7 +188,7 @@
 #'
 #' For details, see \code{vignette}("pump.neighborhoods").
 #' @examples
-#' neighborhoodWalking()$sim.pump.case
+#' # pumpCase(neighborhoodWalking(case.set = "expected"))
 #' @docType data
 "sim.pump.case"
 
@@ -210,7 +210,7 @@
 
 #' Vestry report pump data.
 #'
-#' From the map Snow includes in the Vestry Report, this data set adds the pump at Hanover Square and relocates the Broad Street pump.
+#' These data include the fourteenth pump, at Hanover Square, and the "corrected" location of the Broad Street pump that Snow includes in the second version of his map in the Vestry report.
 #'
 #' @format A data frame with 14 observations and 4 variables.
 #' \describe{

@@ -18,9 +18,16 @@ A R list with two objects: "data" and "source" ("snow" or "vestry").
 }
 }
 \description{
-For use in integrating pumps and cases into road network needed to compute walking neighborhoods.
+Aggregate time series fatality data from the Vestry report.
 }
 \section{Note}{
- the "snow" data appears on p. 117 of the report; the "vestry" data appear in Appendix B on p.175.
+ The "snow" data appears on p. 117 of the report; the "vestry" data appear in Appendix B on p.175.
 }
 
+\examples{
+timeSeries(vestr = TRUE)
+plot(timeSeries())
+}
+\seealso{
+\code{\link{plot.time_series}}, \code{\link{print.time_series}}, \code{vignette("time.series")}
+}

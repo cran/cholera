@@ -2,7 +2,7 @@
 % Please edit documentation in R/pumpCase.R
 \name{pumpCase}
 \alias{pumpCase}
-\title{Extract numeric case IDs by neighborhood.}
+\title{Numeric case IDs by pump neighborhood.}
 \usage{
 pumpCase(obj)
 }
@@ -10,14 +10,14 @@ pumpCase(obj)
 \item{obj}{An object created by neighborhoodVoronoi() or neighborhoodWalking().}
 }
 \value{
-A list of pump neighborhoods with the numeric ID of observed cases.
+A list of pump neighborhoods with the numeric ID of cases.
 }
 \description{
-Extract numeric case IDs by neighborhood.
+Numeric case IDs by pump neighborhood.
 }
 \examples{
-pumpCase(neighborhoodVoronoi())
-pumpCase(neighborhoodWalking())
+# pumpCase(neighborhoodVoronoi())
+# pumpCase(neighborhoodWalking())
 }
 \seealso{
 \code{\link{neighborhoodVoronoi}}, \code{\link{neighborhoodWalking}},

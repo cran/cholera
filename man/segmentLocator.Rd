@@ -2,27 +2,40 @@
 % Please edit documentation in R/segmentLocator.R
 \name{segmentLocator}
 \alias{segmentLocator}
-\title{Locate road segment by its character ID.}
+\title{Locate road segment by ID.}
 \usage{
-segmentLocator(id, zoom = TRUE, radius = 0.5)
+segmentLocator(id, zoom = FALSE, radius = 0.5, cases = "anchors",
+  unit = NULL, title = TRUE, subtitle = TRUE)
 }
 \arguments{
 \item{id}{Character. A concatenation of a street's numeric ID, a whole number between 1 and 528, and a second number to identify the segment.}
 
-\item{zoom}{Logical.}
+\item{zoom}{Logical. Default is FALSE.}
 
-\item{radius}{Numeric. Controls the degree of zoom. For values <= 5, the anchor case number is plotted.}
+\item{radius}{Numeric. Controls the degree of zoom. For values <= 5, the numeric ID of all cases or just the anchor case is plotted.}
+
+\item{cases}{Character. Plot cases: NULL, "anchors" or "all".}
+
+\item{unit}{Character. Unit of measurement: "meter" or "yard". Default is NULL, which returns the map's native scale.}
+
+\item{title}{Logical. Print title.}
+
+\item{subtitle}{Logical. Print subtitle.}
 }
 \value{
 A base R graphics plot.
 }
 \description{
-Plots John Snow's map of the 1854 London cholera outbreak and highlights the
-selected road segment. With Dodson and Tobler's data, a street (e.g., Broad Street) is often comprised of multiple straight line segments. To identify each segment individually, an additional identifying number is appended to form a text string (e.g., "116-2").
+Highlights the selected road segment and its cases.
 }
+\section{Notes}{
+ With Dodson and Tobler's data, a street (e.g., Broad Street) is often comprised of multiple straight line segments. To identify each segment individually, an additional number is appended to form a text string ID (e.g., "116-2").  See cholera::road.segments.
+}
+
 \examples{
 segmentLocator("190-1")
 segmentLocator("216-1")
+segmentLocator("216-1", unit = "meter")
 }
 \seealso{
 \code{\link{road.segments}}

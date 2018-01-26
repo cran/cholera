@@ -1,6 +1,5 @@
 #' Aggregate time series fatality data from the Vestry report.
 #'
-#' For use in integrating pumps and cases into road network needed to compute walking neighborhoods.
 #' @param vestry Logical. TRUE returns the data from the Vestry committee (Appendix B, p. 175). FALSE (default) returns John Snow's contribution to the report (p.117).
 #' @return A R list with two objects: "data" and "source" ("snow" or "vestry").
 #' \itemize{
@@ -8,8 +7,12 @@
 #'   \item{\code{deaths}: measure of fatality.}
 #'   \item{\code{fatal.attacks}: measure of fatality.}
 #' }
-#' @section Note: the "snow" data appears on p. 117 of the report; the "vestry" data appear in Appendix B on p.175.
+#' @section Note: The "snow" data appears on p. 117 of the report; the "vestry" data appear in Appendix B on p.175.
+#' @seealso \code{\link{plot.time_series}}, \code{\link{print.time_series}}, \code{vignette("time.series")}
 #' @export
+#' @examples
+#' timeSeries(vestr = TRUE)
+#' plot(timeSeries())
 
 timeSeries <- function(vestry = FALSE) {
   if (vestry) {
@@ -51,14 +54,14 @@ timeSeries <- function(vestry = FALSE) {
       day)), deaths, fatal.attacks))
   }
 
-  class(output) <- "time.series"
+  class(output) <- "time_series"
   output
 }
 
 #' Plot aggregate time series data from Vestry report.
 #'
 #' Plot aggregate fatality data and indicates the date of the removal of the handle of the Broad Street pump.
-#' @param x An object of class "time.series" from timeSeries().
+#' @param x An object of class "time_series" from timeSeries().
 #' @param statistic Character. Fatality measure: either "fatal.attacks", which is the default, or "deaths".
 #' @param pump.handle Logical. Indicate date of removal of Broad Street pump handle.
 #' @param ... Additional plotting parameters.
@@ -68,23 +71,41 @@ timeSeries <- function(vestry = FALSE) {
 #' plot(timeSeries())
 #' plot(timeSeries(), statistic = "deaths")
 
-plot.time.series <- function(x, statistic = "fatal.attacks",
+plot.time_series <- function(x, statistic = "fatal.attacks",
   pump.handle = TRUE, ...) {
 
-  if (class(x) != "time.series") {
-    stop('Input object\'s class needs to be "time.series".')
+  if (class(x) != "time_series") {
+    stop('Input object\'s class needs to be "time_series".')
   }
 
   if (all(statistic %in% c("deaths", "fatal.attacks")) == FALSE) {
     stop('"statistic" must either be "deaths" or "fatal.attacks".')
   }
 
-time.series <- x$data
+  dat <- x$data
 
-  plot(time.series$date, time.series[, statistic], type = "o", xlab = "Date",
-    ylab = statistic)
+  plot(dat$date, dat[, statistic], type = "o", xlab = "Date", ylab = statistic)
 
   if (pump.handle) pumpHandle()
+}
+
+#' Print summary data for timeSeries().
+#'
+#' Return summary results.
+#' @param x An object of class "time_series" created by timeSeries().
+#' @param ... Additional parameters.
+#' @return An R data frame.
+#' @export
+#' @examples
+#' timeSeries()
+#' print(timeSeries())
+
+print.time_series <- function(x, ...) {
+  if (class(x) != "time_series") {
+    stop('"x"\'s class needs to be "time_series".')
+  }
+
+  print(x$data)
 }
 
 pumpHandle <- function() {

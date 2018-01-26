@@ -14,10 +14,10 @@ pumpData(vestry = FALSE, orthogonal = FALSE, multi.core = FALSE)
 \item{multi.core}{Logical or Numeric. TRUE uses parallel::detectCores(). FALSE uses one, single core. With Numeric, you specify the number logical cores (rounds with as.integer()). On Windows, only "multi.core = FALSE" is available.}
 }
 \value{
-An R dataframe.
+An R data frame.
 }
 \description{
-Returns the Dodson and Tobler coordinates for the original thirteen pumps, appended with name of nearest road. Adds "approximate" locations for the fourteenth pump and the relocated Broad Street pump that are included in Snow's second version of the pump in the Vestry report.
+Returns either the Dodson and Tobler coordinates for the original thirteen pumps, appended with name of nearest road or the fourteen pumps included in the second version of Snow's map in the Vestry report. Note that the location of the fourteenth pump, at Hanover Square, and the "correct" location of the Broad Street pump are approximate.
 }
 \section{Notes}{
  This function documents the code that generates \code{\link{pumps}}, \code{\link{pumps.vestry}}, \code{\link{ortho.proj.pump}} and \code{\link{ortho.proj.pump.vestry}}.

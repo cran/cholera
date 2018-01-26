@@ -2,31 +2,32 @@
 % Please edit documentation in R/addSnow.R
 \name{addSnow}
 \alias{addSnow}
-\title{Adds Snow's Annotation  of the Broad Street pump walking neighborhood.}
+\title{Adds Snow's graphical annotation of the Broad Street pump walking neighborhood.}
 \usage{
-addSnow(streets = TRUE, color = "dodgerblue", alpha.st = 0.75,
-  alpha.area = 1/3, ...)
+addSnow(type = "street", color = "dodgerblue", alpha.level = 0.25,
+  line.width = 2, ...)
 }
 \arguments{
-\item{streets}{Logical. TRUE plots streets. FALSE plots orthogonal area.}
+\item{type}{Character. Type of annotation plot: "area", "boundary" or "street".}
 
-\item{color}{Character. Color for neighborhood annotation.}
+\item{color}{Character. Neighborhood color.}
 
-\item{alpha.st}{Numeric. A value in [0, 1] to set alpha level for street neighborhood annotation.}
+\item{alpha.level}{Numeric. Alpha level transparency: a value in [0, 1].}
 
-\item{alpha.area}{Numeric. A value in [0, 1] to set alpha level for area neighborhood annotation.}
+\item{line.width}{Numeric. Line width for "street" and "boundary".}
 
 \item{...}{Additional plotting parameters.}
 }
 \description{
-Reproduces Snow's graphic annotation in the Vestry Report.
+Uses alphahull::ashape().
 }
 \examples{
-plot(neighborhoodVoronoi())
-addSnow()
+# plot(neighborhoodVoronoi())
+# addSnow()
 }
 \seealso{
 \code{\link{snowMap}},
+\code{\link{addIndexCase}},
 \code{\link{addKernelDensity}},
 \code{\link{addLandmarks}},
 \code{\link{addPlaguePit}},

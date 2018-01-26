@@ -1,4 +1,4 @@
-#' Add 2D kernel density contours to a plot.
+#' Add 2D kernel density contours.
 #'
 #' Uses KernSmooth::bkde2D().
 #' @param bandwidth Numeric. Bandwidth for kernel density estimation.
@@ -8,6 +8,7 @@
 #' @param ... Additional plotting parameters.
 #' @return Add contours to a graphics plot.
 #' @seealso \code{\link{snowMap}},
+#' \code{\link{addIndexCase}},
 #' \code{\link{addLandmarks}},
 #' \code{\link{addPlaguePit}},
 #' \code{\link{addSnow}},

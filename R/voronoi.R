@@ -1,10 +1,10 @@
-#' Compute Voronoi neighborhoods.
+#' Compute Voronoi pump neighborhoods.
 #'
-#' Data for Voronoi tessellation of John Snow's 1854 London cholera data.
-#' @param pump.select Numeric. Default is NULL: all pumps are used. Otherwise, selection by a vector of numeric IDs: 1 to 13 for \code{pumps}; 1 to 14 for \code{pumps.vestry}.
+#' Group cases into neighborhoods using Voronoi tessellation.
+#' @param pump.select Numeric. Default is NULL: all pumps are used. Otherwise, selection by a vector of numeric IDs: 1 to 13 for \code{pumps}; 1 to 14 for \code{pumps.vestry}. Exclusion (negative selection) is possible (e.g., -6).
 #' @param vestry Logical. TRUE uses the 14 pumps from the Vestry Report. FALSE uses the 13 in the original map.
 #' @param statistic NULL or Character. NULL, the default, makes no summary computation. "address" computes the number of addresses in each selected pump neighborhood. "fatality" computes the number of fatalities in pump neighborhoods.
-#' @param polygon.vertices Logical. TRUE returns a list of x-y coordinates of the vertices of Voronoi cells. Useful for sp::point.in.polygon() as used in summary.voronoi() method.
+#' @param polygon.vertices Logical. TRUE returns a list of x-y coordinates of the vertices of Voronoi cells. Useful for sp::point.in.polygon() as used in print.voronoi() method.
 #' @return An R list with 12 objects.
 #' \itemize{
 #'   \item{\code{pump.id}: vector of selected pumps}
@@ -13,14 +13,14 @@
 #'   \item{\code{x.rng}: range of x for plot.}
 #'   \item{\code{y.rng}: range of y for plot.}
 #'   \item{\code{select.string}: description of "pump.select" for plot title.}
-#'   \item{\code{expected.data}:  expected neighborhood fatality counts, based on Voronoi cell area.}
+#'   \item{\code{expected.data}: expected neighborhood fatality counts, based on Voronoi cell area.}
 #'   \item{\code{coordinates}: polygon vertices of Voronoi cells.}
 #'   \item{\code{statistic.data}: observed neighborhood fatality counts.}
 #'   \item{\code{pump.select}: "pump.select" from neighborhoodVoronoi().}
 #'   \item{\code{statistic}: "statistic" from neighborhoodVoronoi().}
 #'   \item{\code{vestry}: "vestry" from neighborhoodVoronoi().}
 #' }
-#' @seealso \code{\link{addVoronoi}}, \code{\link{plot.voronoi}}, \code{\link{summary.voronoi}}, \code{vignette("pump.neighborhoods")}
+#' @seealso \code{\link{addVoronoi}}, \code{\link{plot.voronoi}}, \code{\link{print.voronoi}}, \code{vignette("pump.neighborhoods")}
 #' @export
 #' @examples
 #' neighborhoodVoronoi()
@@ -171,7 +171,7 @@ neighborhoodVoronoi <- function(pump.select = NULL, vestry = FALSE,
 
 plot.voronoi <- function(x, ...) {
   if (class(x) != "voronoi") {
-    stop('Input objectect\'s class needs to be "voronoi".')
+    stop('"x"\'s class needs to be "voronoi".')
   }
 
   rd <- cholera::roads[cholera::roads$street %in% cholera::border == FALSE, ]
@@ -181,6 +181,9 @@ plot.voronoi <- function(x, ...) {
 
   plot(cholera::fatalities.address[, c("x", "y")], xlim = x$x.rng,
     ylim = x$y.rng, pch = NA, asp = 1)
+
+  invisible(lapply(roads.list, lines, col = "lightgray"))
+  invisible(lapply(border.list, lines))
 
   if (is.null(x$statistic)) {
     if (is.null(x$pump.select)) {
@@ -194,7 +197,7 @@ plot.voronoi <- function(x, ...) {
         text(cholera::pumps[, c("x", "y")], label = paste0("p", x$pump.id),
           pos = 1)
       }
-      title(main = "Snow Addresses by Neighborhood")
+      title(main = "Pump Neighborhoods: Voronoi (address)")
 
     } else {
       if (x$vestry) {
@@ -208,9 +211,12 @@ plot.voronoi <- function(x, ...) {
         text(cholera::pumps[x$pump.select, c("x", "y")],
           label = paste0("p", x$pump.id), pos = 1)
       }
-      title(main = paste0("Snow Addresses by Neighborhood", "\n",
+      title(main = paste0("Pump Neighborhoods: Voronoi (address)", "\n",
         "Pumps ", paste(sort(x$pump.select), collapse = ", ")))
     }
+
+    plot(x$voronoi, add = TRUE, wline = "tess", wpoints = "none",
+      lty = "solid")
 
     voronoi.case.id <- cholera::pumpCase(x)
     voronoi.colors <- vector(length = length(unlist(voronoi.case.id)))
@@ -221,27 +227,10 @@ plot.voronoi <- function(x, ...) {
       voronoi.colors[names(voronoi.colors) %in% id] <- x$snow.colors[i]
     }
 
-    invisible(lapply(roads.list, lines, col = "lightgray"))
-    invisible(lapply(border.list, lines))
-
-    plot(x$voronoi, add = TRUE, wline = "tess", wpoints = "none",
-      lty = "solid")
-
-    if (is.null(x$statistic)) {
-       points(cholera::fatalities.address[, c("x", "y")], col = voronoi.colors,
-         pch = 20, cex = 0.75)
-    } else if (x$statistic == "address") {
-      points(cholera::fatalities.address[, c("x", "y")], col = voronoi.colors,
-         pch = 20, cex = 0.75)
-    } else if (x$statistic == "fatality") {
-      points(cholera::fatalities[, c("x", "y")], col = voronoi.colors, pch = 20,
-        cex = 0.75)
-    }
+    points(cholera::fatalities.address[, c("x", "y")], col = voronoi.colors,
+      pch = 20, cex = 0.75)
 
   } else {
-    invisible(lapply(roads.list, lines, col = "gray"))
-    invisible(lapply(border.list, lines))
-
     stat.data <- summary(x)
     polygon.cols <- polygonColors(stat.data$Pearson)
 
@@ -253,10 +242,13 @@ plot.voronoi <- function(x, ...) {
     plot(x$voronoi, add = TRUE, wline = "tess", wpoints = "none",
       lty = "solid")
 
+    invisible(lapply(roads.list, lines, col = "lightgray"))
+    invisible(lapply(border.list, lines))
+
     if (x$statistic == "address") {
-      caption <- "Snow Address Count by Pump Neighborhood"
+      caption <- "Pump Neighborhoods: Voronoi (address count)"
     } else if (x$statistic == "fatality") {
-      caption <- "Snow Fatality Count by Pump Neighborhood"
+      caption <- "Pump Neighborhoods: Voronoi (fatality count)"
     }
 
     if (is.null(x$pump.select)) {
@@ -289,30 +281,41 @@ plot.voronoi <- function(x, ...) {
   }
 }
 
-#' Compute summary statistics for Voronoi neighborhoods.
+#' Print method for neighborhoodVoronoi().
 #'
-#' @param object An object of class "voronoi" created by neighborhoodVoronoi().
+#' Return summary statistics for Voronoi neighborhoods.
+#' @param x An object of class "voronoi" created by neighborhoodVoronoi().
 #' @param ... Additional arguments.
 #' @return A data frame with observed and expected counts, observed percentage, and the Pearson residual, (observed - expected) / sqrt(expected).
 #' @seealso \code{addVoronoi()}
 #' \code{plot.voronoi()}
 #' @export
 #' @examples
-#' summary(neighborhoodVoronoi())
+#' neighborhoodVoronoi()
+#' print(neighborhoodVoronoi())
 
-summary.voronoi <- function(object, ...) {
-  if (class(object) != "voronoi") {
-    stop('Input objectect\'s class needs to be "voronoi".')
+print.voronoi <- function(x, ...) {
+  if (class(x) != "voronoi") {
+    stop('x\'s class needs to be "voronoi".')
   }
 
-  census <- object$statistic.data
+  output <- summary(x)
+  print(output)
+}
+
+summary.voronoi <- function(x, ...) {
+  if (class(x) != "voronoi") {
+    stop('x\'s class needs to be "voronoi".')
+  }
+
+  census <- x$statistic.data
   count <- vapply(census, sum, numeric(1L))
 
   output <- data.frame(pump.id = as.numeric(names(count)),
                        Count = count,
                        Percent = round(100 * count / sum(count), 2))
 
-  output <- merge(output, object$expected.data[, c("pump", "pct")],
+  output <- merge(output, x$expected.data[, c("pump", "pct")],
     by.x = "pump.id", by.y = "pump")
 
   output$Expected <- output$pct * sum(output$Count)
@@ -406,10 +409,10 @@ polygonColors <- function(resid.vector, upper.limit = 67, alpha = FALSE) {
 
   if (alpha) {
     col <- scales::col_numeric("RdBu", domain = NULL)(seq_along(vec))[color.id]
-    scales::alpha(col, 0.5)
+    # scales::alpha(col, 0.5)
+    grDevices::adjustcolor(col, alpha.f = 0.75)
   } else {
-    col <- scales::col_numeric("RdBu", domain = NULL)(seq_along(vec))[color.id]
-    scales::alpha(col, 0.5)
+    scales::col_numeric("RdBu", domain = NULL)(seq_along(vec))[color.id]
   }
 }
 

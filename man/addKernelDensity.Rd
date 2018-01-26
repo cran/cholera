@@ -2,7 +2,7 @@
 % Please edit documentation in R/addKernelDensity.R
 \name{addKernelDensity}
 \alias{addKernelDensity}
-\title{Add 2D kernel density contours to a plot.}
+\title{Add 2D kernel density contours.}
 \usage{
 addKernelDensity(bandwidth = 0.5, color = "black", line.type = "solid",
   data = NULL, ...)
@@ -30,6 +30,7 @@ addKernelDensity()
 }
 \seealso{
 \code{\link{snowMap}},
+\code{\link{addIndexCase}},
 \code{\link{addLandmarks}},
 \code{\link{addPlaguePit}},
 \code{\link{addSnow}},

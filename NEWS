@@ -1,3 +1,57 @@
+cholera 0.4.0
+==================
+
+# Data Changes #
+
+- ortho.proj.pump and ortho.proj.pump.vestry now include node ID.
+
+- roads and road.segments amend street names:
+    "Unknown-B" to "Tent Court" (Edmund Cooper's map).
+    "Unknown-D" to "St James's Market" (https://maps.nls.uk).
+    "Unknown-E" to "Market Street (II)" (https://maps.nls.uk).
+
+# Function Changes #
+
+- addKernelDensity()
+  uses "pump.subset" and "pump.select" arguments.
+
+- addLandmarks()
+  add landmarks from Edmund Cooper's map.
+
+- classifierAudit() can return coordinates of address.
+
+- nearestPump() now incorporates nearestPath().
+
+- neighborhoodWalking()
+  segment and sub-segment implementation.
+
+- pumpData()
+  returns node ID.
+
+- timeSeries()
+  includes day of the week.
+
+- walkingDistance()
+  add "simulated" expected cases.
+
+# New Functions #
+
+- addNeighborhood()
+
+# New S3 Implementations #
+
+- plot.walking
+  type = "area.points" and type = "area-polygons".
+  type = "area-polygons" via pearlString() replaces alphahull::ashape().
+
+- print.walking() uses expectedCount().
+
+# Vignette Changes #
+
+- add "Kernel Density Plot".
+- update "Pump Neighborhoods" with discussion of area plots.
+
+
 cholera 0.3.0
 ==================
 
@@ -7,7 +61,7 @@ cholera 0.3.0
     reclassify case 483:
       Pulteney Court (I) ("242-1") -> Little Windmill Street ("326-2").
     reclassify cases 369, 434, 11, 53, 193:
-      from Poland Street ("194-1") -> St James Workhouse ("148-1").
+      Poland Street ("194-1") -> St James Workhouse ("148-1").
 
 # Function Changes #
 

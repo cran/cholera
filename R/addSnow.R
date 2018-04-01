@@ -1,6 +1,5 @@
 #' Adds Snow's graphical annotation of the Broad Street pump walking neighborhood.
 #'
-#' Uses alphahull::ashape().
 #' @param type Character. Type of annotation plot: "area", "boundary" or "street".
 #' @param color Character. Neighborhood color.
 #' @param alpha.level Numeric. Alpha level transparency: a value in [0, 1].
@@ -19,14 +18,14 @@
 #' # plot(neighborhoodVoronoi())
 #' # addSnow()
 
-addSnow <- function(type = "street", color = "dodgerblue", alpha.level = 0.25,
+addSnow <- function(type = "area", color = "dodgerblue", alpha.level = 0.25,
   line.width = 2, ...) {
 
   if (type %in% c("area", "boundary", "street") == FALSE) {
     stop('"type" must be "area", "boundary" or "street".')
   }
 
-  edges <- neighborhoodData()$edges
+  edges <- cholera::neighborhoodData(case.set = "snow")$edges
   snow <- cholera::snowNeighborhood()
 
   if (type == "street") {
@@ -37,35 +36,15 @@ addSnow <- function(type = "street", color = "dodgerblue", alpha.level = 0.25,
     }))
   } else if (type == "area" | type == "boundary") {
     snow.area <- cholera::regular.cases[snow$sim.case, ]
-    snow.hull <- suppressWarnings(alphahull::ashape(snow.area, alpha = 0.2))
-    e <- data.frame(snow.hull$edges)
+    radius <- c(stats::dist(cholera::regular.cases[c(1, 3), ]))
+    periphery.cases <- peripheryCases(row.names(snow.area), pearlStringRadius())
+    pearl.string <- pearlString(periphery.cases, pearlStringRadius())
 
     if (type == "boundary") {
-      invisible(lapply(seq_len(nrow(e)), function(i) {
-        segments(e[i, "x1"], e[i, "y1"], e[i, "x2"], e[i, "y2"], col = color,
-          lwd = line.width)
-      }))
+      polygon(cholera::regular.cases[pearl.string, ], border = color, col = NA)
     } else if (type == "area") {
-      e2 <- e[, c("ind1", "ind2")]
-      ordered.vertices <- vector(length = nrow(e))
-
-      # manually set a first node.
-      ordered.vertices[1] <- 3
-
-      for (i in 2:length(ordered.vertices)) {
-        dat <- e2[e2$ind1 == ordered.vertices[i - 1] |
-                  e2$ind2 == ordered.vertices[i - 1], ]
-        if (!all(dat[1, ] %in% ordered.vertices)) {
-          ordered.vertices[i] <- unlist(dat[1, ][dat[1, ] %in%
-            ordered.vertices == FALSE])
-        } else if (!all(dat[2, c("ind1", "ind2")] %in% ordered.vertices)) {
-          ordered.vertices[i] <- unlist(dat[2, ][dat[2, ] %in%
-            ordered.vertices == FALSE])
-        }
-      }
-
-      polygon(snow.area[ordered.vertices, ],
-        col = grDevices::adjustcolor(color, alpha.level))
+      polygon(cholera::regular.cases[pearl.string, ], border = "black",
+        col = grDevices::adjustcolor(color, alpha.f = alpha.level))
     }
   }
 }

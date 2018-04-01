@@ -1,5 +1,6 @@
 ## ---- echo = FALSE, message = FALSE--------------------------------------
-knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+# knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+knitr::opts_chunk$set(collapse = TRUE, comment = "")
 library(cholera)
 
 ## ------------------------------------------------------------------------
@@ -36,4 +37,10 @@ length(border)
 #  roads[roads$name == "Queen Street (I)", "n"] <- 4
 #  roads[roads$name == "Marlborough Mews", "n"] <- 3
 #  roads <- roads[order(roads$id), ]
+
+## ---- echo = FALSE-------------------------------------------------------
+road.names <- sort(unique(roads$name))
+road.names <- road.names[road.names != "Map Frame"]
+road.names <- stats::setNames(data.frame(matrix(road.names, ncol = 2)), NULL)
+print(road.names, right = FALSE)
 

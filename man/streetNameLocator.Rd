@@ -5,7 +5,8 @@
 \title{Locate road by name.}
 \usage{
 streetNameLocator(road.name, zoom = FALSE, radius = 0.1,
-  cases = "anchors", unit = NULL)
+  cases = "anchors", add.title = TRUE, add.pump = TRUE, vestry = FALSE,
+  highlight = TRUE, unit = "meter")
 }
 \arguments{
 \item{road.name}{Character vector. Note that \code{streetNameLocator}() tries to correct for case and to remove extra spaces.}
@@ -16,7 +17,15 @@ streetNameLocator(road.name, zoom = FALSE, radius = 0.1,
 
 \item{cases}{Character. Plot cases: NULL, "anchors" or "all".}
 
-\item{unit}{Character. Unit of measurement: "meter" or "yard". Default is NULL, which returns the map's native scale.}
+\item{add.title}{Logical. Include title.}
+
+\item{add.pump}{Logical. Include nearby pumps.}
+
+\item{vestry}{Logical. TRUE uses the 14 pumps from the Vestry Report. FALSE uses the 13 in the original map.}
+
+\item{highlight}{Logical. Highlight selected road.}
+
+\item{unit}{Character. Unit of measurement: "meter" or "yard". NULL returns the map's native scale.}
 }
 \value{
 A base R graphics plot.

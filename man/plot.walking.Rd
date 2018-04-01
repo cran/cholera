@@ -4,12 +4,12 @@
 \alias{plot.walking}
 \title{Plot method for neighborhoodWalking().}
 \usage{
-\method{plot}{walking}(x, area = FALSE, ...)
+\method{plot}{walking}(x, type = "road", ...)
 }
 \arguments{
 \item{x}{An object of class "walking" created by neighborhoodWalking().}
 
-\item{area}{Logical. TRUE returns area plot. FALSE returns walking paths plot. Works only with case.set = "expected" or case.set = "snow".}
+\item{type}{Character. "road", "area.points" or "area.polygons". "area" flavors only valid when case.set = "expected".}
 
 \item{...}{Additional plotting parameters.}
 }
@@ -19,8 +19,13 @@ A base R plot.
 \description{
 Plot method for neighborhoodWalking().
 }
+\section{Note}{
+ "area.polygons" is under development and, for certain configurations, may return an error. For now, "area.points" is the more robust choice, especially for data exploration.
+}
+
 \examples{
 # plot(neighborhoodWalking())
 # plot(neighborhoodWalking(case.set = "expected"))
-# plot(neighborhoodWalking(case.set = "expected"), area = TRUE)
+# plot(neighborhoodWalking(case.set = "expected"), type = "area.points")
+# plot(neighborhoodWalking(case.set = "expected"), type = "area.polygons")
 }

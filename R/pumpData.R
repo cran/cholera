@@ -38,28 +38,7 @@ pumpData <- function(vestry = FALSE, orthogonal = FALSE, multi.core = FALSE) {
   if (orthogonal == FALSE) {
     pumps
   } else {
-    if (is.logical(multi.core)) {
-      if (multi.core == TRUE) {
-        cores <- parallel::detectCores()
-      } else {
-        if (is.numeric(multi.core)) {
-          if (is.integer(multi.core)) {
-            cores <- multi.core
-          } else {
-            cores <- as.integer(multi.core)
-          }
-        } else {
-          cores <- 1L
-        }
-      }
-    } else if (is.numeric(multi.core)) {
-      if (is.integer(multi.core)) {
-        cores <- multi.core
-      } else {
-        cores <- as.integer(multi.core)
-      }
-    }
-
+    cores <- multiCore(multi.core)
     rd <- cholera::roads[cholera::roads$street %in% cholera::border == FALSE, ]
     map.frame <- cholera::roads[cholera::roads$street %in% cholera::border, ]
     roads.list <- split(rd[, c("x", "y")], rd$street)
@@ -136,6 +115,7 @@ pumpData <- function(vestry = FALSE, orthogonal = FALSE, multi.core = FALSE) {
         out <- out[1, ]
       }
 
+      out$node <- paste0(out$x.proj, "-", out$y.proj)
       out$pump.id <- i
       row.names(out) <- NULL
       out

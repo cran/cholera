@@ -3,10 +3,13 @@
 #' @param origin Numeric or Integer. Numeric ID of case or pump.
 #' @param destination Numeric or Integer. Numeric ID(s) of case(s) or pump(s). Exclusion is possible via negative selection (e.g., -7). Default is NULL: this returns closest pump or "anchor" case.
 #' @param type Character "case-pump", "cases" or "pumps".
+#' @param observed Logical. Use observed or "simulated" expected data.
 #' @param weighted Logical. TRUE computes shortest path in terms of road length. FALSE computes shortest path in terms of nodes.
 #' @param vestry Logical. TRUE uses the 14 pumps from the Vestry Report. FALSE uses the 13 in the original map.
 #' @param unit Character. Unit of measurement: "meter" or "yard". Default is NULL, which returns the map's native scale. Meaningful only when "weighted" is TRUE. See \code{vignette("roads")} for information on unit distances.
-#' @note The function uses a case's "address" or "anchor" case to compute distance. Because Adam and Eve Court is disconnected from the larger road network (an isolate), only cases on that road can reach pump 2. All others will return Inf.
+#' @note The function uses a case's "address" or "anchor" case to compute distance.
+#'
+#' Adam and Eve Court, and Falconberg Court and Falconberg Mews, are disconnected from the larger road network and form two isolated subgraphs. This has two consequences: first, only cases on Adam and Eve Court can reach pump 2 and those cases cannot reach any other pump; second, cases on Falconberg Court and Mews cannot reach any pump. Unreachable pumps will return distances of "Inf".
 #' @return An R list.
 #' @seealso \code{\link{fatalities}}, \code{vignette("pump.neighborhoods")}
 #' @export
@@ -30,10 +33,10 @@
 #' # walkingDistance(1, 6, type = "pumps")
 #'
 #' # Plot result
-#' plot(walkingDistance(1, unit = "meter"))
+#' # plot(walkingDistance(1, unit = "meter"))
 
 walkingDistance <- function(origin, destination = NULL, type = "case-pump",
-  weighted = TRUE, vestry = FALSE, unit = NULL) {
+  observed = TRUE, weighted = TRUE, vestry = FALSE, unit = NULL) {
 
   if (is.null(unit) == FALSE) {
     if (unit %in% c("meter", "yard") == FALSE)
@@ -44,10 +47,19 @@ walkingDistance <- function(origin, destination = NULL, type = "case-pump",
     stop('"type" must be "case-pump", "cases" or "pumps".')
   }
 
-  if (vestry) {
-    node.data <- cholera::nodeData(vestry = TRUE)
+  if (observed) {
+    if (vestry) {
+      node.data <- cholera::neighborhoodData(vestry = TRUE)
+    } else {
+      node.data <- cholera::neighborhoodData()
+    }
   } else {
-    node.data <- cholera::nodeData()
+    if (vestry) {
+      node.data <- cholera::neighborhoodData(vestry = TRUE,
+        case.set = "expected")
+    } else {
+      node.data <- cholera::neighborhoodData(case.set = "expected")
+    }
   }
 
   nodes <- node.data$nodes
@@ -55,8 +67,18 @@ walkingDistance <- function(origin, destination = NULL, type = "case-pump",
   g <- node.data$g
 
   if (type == "case-pump") {
-    if (origin %in% 1:578 == FALSE) {
-      stop('With type = "case-pump", "origin" must be between 1 and 578.')
+    if (observed) {
+      if (origin %in% 1:578 == FALSE) {
+        txt1 <- 'With type = "case-pump" and "observed" = TRUE,'
+        txt2 <- '"origin" must be between 1 and 578.'
+        stop(paste(txt1, txt2))
+      }
+    } else {
+      if (origin %in% 1:4993 == FALSE) {
+        txt1 <- 'With type = "case-pump" and "observed" = FALSE,'
+        txt2 <- '"origin" must be between 1 and 4993.'
+        stop(paste(txt1, txt2))
+      }
     }
 
     if (!is.null(destination)) {
@@ -85,9 +107,14 @@ walkingDistance <- function(origin, destination = NULL, type = "case-pump",
       }
     }
 
-    ego.id <- cholera::anchor.case[cholera::anchor.case$case == origin,
-      "anchor.case"]
-    ego.node <- nodes[nodes$anchor == ego.id, "node"]
+    if (observed) {
+      ego.id <- cholera::anchor.case[cholera::anchor.case$case == origin,
+        "anchor.case"]
+      ego.node <- nodes[nodes$anchor == ego.id, "node"]
+    } else {
+      ego.id <- origin
+      ego.node <- nodes[nodes$anchor == ego.id, "node"]
+    }
 
     if (!is.null(destination)) {
       if (all(destination < 0)) {
@@ -110,38 +137,70 @@ walkingDistance <- function(origin, destination = NULL, type = "case-pump",
       }, numeric(1L))
     }
 
-    sel <- which.min(d)
-    alter.id <- nodes[nodes$node %in% names(sel), "pump"]
+    if (all(is.infinite(d))) {
+      sel <- which.min(d)
+      alter.id <- NA
+      p.name <- NA
+      alter.node <- NA
+    } else {
+      sel <- which.min(d)
+      alter.id <- nodes[nodes$node %in% names(sel), "pump"]
+      p.name <- pumps[pumps$id == alter.id, "street"]
+      alter.node <- names(sel)
+    }
 
     out <- data.frame(case = origin,
                       anchor = ego.id,
                       pump = alter.id,
-                      pump.name = pumps[pumps$id == alter.id, "street"],
+                      pump.name = p.name,
                       distance = d[sel],
                       stringsAsFactors = FALSE,
                       row.names = NULL)
 
   } else if (type == "cases") {
-    if (any(abs(c(origin, destination)) %in% 1:578 == FALSE)) {
-      txt1 <- 'With type = "cases", the absolute value of both "origin"'
-      txt2 <- 'and "destination" must be between 1 and 578.'
-      stop(paste(txt1, txt2))
+    if (observed) {
+      if (any(abs(c(origin, destination)) %in% 1:578 == FALSE)) {
+        txt1 <- 'With type = "cases", the absolute value of both "origin"'
+        txt2 <- 'and "destination" must be a whole number between 1 and 578.'
+        stop(paste(txt1, txt2))
+      }
+    } else {
+      if (any(abs(c(origin, destination)) %in% 1:4993 == FALSE)) {
+        txt1 <- 'With type = "case-pump" and "observed" = FALSE,'
+        txt2 <- 'both "origin" and "destination" must be whole numbers between'
+        txt3 <- '1 and 4993.'
+        stop(paste(txt1, txt2, txt3))
+      }
     }
 
-    ego.id <- cholera::anchor.case[cholera::anchor.case$case == origin,
-      "anchor.case"]
-    ego.node <- nodes[nodes$anchor == ego.id, "node"]
+    if (observed) {
+      ego.id <- cholera::anchor.case[cholera::anchor.case$case == origin,
+        "anchor.case"]
+      ego.node <- nodes[nodes$anchor == ego.id, "node"]
+    } else {
+      ego.id <- origin
+      ego.node <- nodes[nodes$anchor == ego.id, "node"]
+    }
 
     if (is.null(destination)) {
       alters <- nodes[nodes$anchor != 0 & nodes$node != ego.node, "node"]
     } else {
-      if (all(destination > 0)) {
-        alter.case <- unique(cholera::anchor.case[cholera::anchor.case$case %in%
-          destination, "anchor.case"])
-      } else if (all(destination < 0)) {
-        alter.case <- unique(cholera::anchor.case[cholera::anchor.case$case %in%
-          abs(destination) == FALSE, "anchor.case"])
+      if (observed) {
+        if (all(destination > 0)) {
+          alter.case <- unique(cholera::anchor.case[cholera::anchor.case$case
+            %in% destination, "anchor.case"])
+        } else if (all(destination < 0)) {
+          alter.case <- unique(cholera::anchor.case[cholera::anchor.case$case
+            %in% abs(destination) == FALSE, "anchor.case"])
+        }
+      } else {
+        if (all(destination > 0)) {
+          alter.case <- nodes$anchor[nodes$anchor %in% destination]
+        } else if (all(destination < 0)) {
+          alter.case <- nodes$anchor[nodes$anchor %in% destination == FALSE]
+        }
       }
+
       alters <- nodes$node[nodes$anchor %in% alter.case &
                            nodes$node != ego.node]
     }
@@ -156,8 +215,14 @@ walkingDistance <- function(origin, destination = NULL, type = "case-pump",
       }, numeric(1L))
     }
 
-    sel <- which.min(d)
-    alter.id <- nodes[nodes$node %in% names(sel), "anchor"]
+    if (all(is.infinite(d))) {
+      alter.id <- NA
+      alter.node <- NA
+    } else {
+      sel <- which.min(d)
+      alter.id <- nodes[nodes$node %in% names(sel), "anchor"]
+      alter.node <- names(sel)
+    }
 
     if (is.null(destination) | all(destination < 0)) {
       out <- data.frame(caseA = origin,
@@ -193,7 +258,7 @@ walkingDistance <- function(origin, destination = NULL, type = "case-pump",
 
       if (any(abs(c(origin, destination)) %in% 1:14 == FALSE)) {
         txt1 <- 'With type = "pumps" and "vestry = TRUE",'
-        txt2 <- 'origin and destination must be 1 >= |x| <= 14.'
+        txt2 <- 'origin and destination must whole numbers 1 >= |x| <= 14.'
         stop(paste(txt1, txt2))
       }
     } else {
@@ -201,7 +266,7 @@ walkingDistance <- function(origin, destination = NULL, type = "case-pump",
 
       if (any(abs(c(origin, destination)) %in% 1:13 == FALSE)) {
         txt1 <- 'With type = "pumps" and "vestry = FALSE",'
-        txt2 <- 'origin and destination must be 1 >= |x| <= 13.'
+        txt2 <- 'origin and destination must be whole numbers 1 >= |x| <= 13.'
         stop(paste(txt1, txt2))
       }
     }
@@ -231,9 +296,17 @@ walkingDistance <- function(origin, destination = NULL, type = "case-pump",
       }, numeric(1L))
     }
 
-    sel <- which.min(d)
     A <- p.nodes[p.nodes$node == ego.node, "pump"]
-    B <- p.nodes[p.nodes$node == names(sel), "pump"]
+    ego.node <- p.nodes[p.nodes$node == ego.node, "node"]
+
+    if (all(is.infinite(d))) {
+      B <- NA
+      alter.node <- NA
+    } else {
+      sel <- which.min(d)
+      B <- p.nodes[p.nodes$node == names(sel), "pump"]
+      alter.node <- p.nodes[p.nodes$node == names(sel), "node"]
+    }
 
     out <- data.frame(pumpA = A,
                       nameA = pumps[pumps$id == A, "street"],
@@ -252,10 +325,20 @@ walkingDistance <- function(origin, destination = NULL, type = "case-pump",
     }
   }
 
-  output <- list(origin = origin, destination = destination, type = type,
-    weighted = weighted, vestry = vestry, unit = unit, nodes = nodes,
-    edges = edges, g = g, ego.node = ego.node, alter.node = names(sel),
-    d = out$distance,summary = out)
+  output <- list(origin = origin,
+                 destination = destination,
+                 type = type,
+                 observed = observed,
+                 weighted = weighted,
+                 vestry = vestry,
+                 unit = unit,
+                 nodes = nodes,
+                 edges = edges,
+                 g = g,
+                 ego.node = ego.node,
+                 alter.node = alter.node,
+                 d = out$distance,
+                 summary = out)
 
   class(output) <- "walking_distance"
   output
@@ -269,8 +352,8 @@ walkingDistance <- function(origin, destination = NULL, type = "case-pump",
 #' @return An R data frame.
 #' @export
 #' @examples
-#' walkingDistance(1)
-#' print(walkingDistance(1))
+#' # walkingDistance(1)
+#' # print(walkingDistance(1))
 
 print.walking_distance <- function(x, ...) {
   if (class(x) != "walking_distance") {
@@ -289,11 +372,17 @@ print.walking_distance <- function(x, ...) {
 #' @return A base R plot.
 #' @export
 #' @examples
-#' plot(walkingDistance(1))
+#' # plot(walkingDistance(1))
 
 plot.walking_distance <- function(x, zoom = TRUE, radius = 0.5, ...) {
   if (class(x) != "walking_distance") {
     stop('"x"\'s class needs to be "walking_distance".')
+  }
+
+  if (is.na(x$alter.node)) {
+    txt1 <- paste("Case", x$origin, "is part of an isolated subgraph.")
+    txt2 <- "It (technically) has no neareast pump."
+    stop(paste(txt1, txt2))
   }
 
   rd <- cholera::roads[cholera::roads$street %in% cholera::border == FALSE, ]
@@ -345,22 +434,42 @@ plot.walking_distance <- function(x, zoom = TRUE, radius = 0.5, ...) {
   if (x$type == "case-pump") {
     alter <- nodes[nodes$node == alter.node, "pump"]
     case.color <- colors[alter]
-    origin.obs <- cholera::fatalities[cholera::fatalities$case == x$origin,
-      c("x", "y")]
+
+    if (x$observed) {
+      origin.obs <- cholera::fatalities[cholera::fatalities$case == x$origin,
+        c("x", "y")]
+    } else {
+      origin.obs <- cholera::regular.cases[x$origin, ]
+    }
+
   } else if (x$type == "cases") {
     alter <- nodes[nodes$node == alter.node, "anchor"]
     case.color <- "blue"
 
-    origin.obs <- cholera::fatalities[cholera::fatalities$case == x$origin,
-      c("x", "y")]
-
-    if (is.null(x$destination)) {
-      destination.obs <- cholera::fatalities[cholera::fatalities$case == alter,
+    if (x$observed) {
+      origin.obs <- cholera::fatalities[cholera::fatalities$case == x$origin,
         c("x", "y")]
     } else {
+      origin.obs <- cholera::regular.cases[x$origin, ]
+    }
+
+    if (is.null(x$destination)) {
+      if (x$observed) {
+        destination.obs <- cholera::fatalities[cholera::fatalities$case ==
+          alter, c("x", "y")]
+      } else {
+        destination.obs <-  cholera::regular.cases[alter, ]
+      }
+    } else {
       id <- x$destination[x$sel]
-      destination.obs <- cholera::fatalities[cholera::fatalities$case == id,
-        c("x", "y")]
+
+      if (x$observed) {
+        destination.obs <- cholera::fatalities[cholera::fatalities$case == id,
+          c("x", "y")]
+      } else {
+        destination.obs <- cholera::regular.cases[id, ]
+      }
+
     }
   } else if (x$type == "pumps") {
     alter <- nodes[nodes$node == alter.node, "pump"]
@@ -400,8 +509,21 @@ plot.walking_distance <- function(x, zoom = TRUE, radius = 0.5, ...) {
   points(dat[nrow(dat), c("x", "y")], col = case.color, pch = 0)
 
   if (zoom) {
-    text(cholera::fatalities[cholera::fatalities$case == x$origin,
-      c("x", "y")], labels = x$origin, pos = 1, col = "red")
+    if (x$observed) {
+      text(cholera::fatalities[cholera::fatalities$case == x$origin,
+        c("x", "y")], labels = x$origin, pos = 1, col = "red")
+      if (x$type == "cases") {
+        text(cholera::fatalities[cholera::fatalities$case == x$summary$caseB,
+          c("x", "y")], labels = x$summary$caseB, pos = 1, col = "red")
+      }
+    } else {
+      text(cholera::regular.cases[x$origin, ], labels = x$origin, pos = 1,
+        col = "red")
+      if (x$type == "cases") {
+        text(cholera::regular.cases[x$summary$caseB, ],
+          labels = x$summary$caseB, pos = 1, col = "red")
+      }
+    }
   }
 
   if (sum(intermediate.roads) >= 2) {

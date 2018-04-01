@@ -12,7 +12,7 @@
 
 <meta name="author" content="lindbrook" />
 
-<meta name="date" content="2018-01-26" />
+<meta name="date" content="2018-03-31" />
 
 <title>Roads</title>
 
@@ -70,7 +70,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">Roads</h1>
 <h4 class="author"><em>lindbrook</em></h4>
-<h4 class="date"><em>2018-01-26</em></h4>
+<h4 class="date"><em>2018-03-31</em></h4>
 
 
 
@@ -82,17 +82,17 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <h2>Roads data</h2>
 <p>Before discussing names, some discussion of the structure of <em>roads</em> is warranted. The data contain 1241 pairs of x-y coordinates. These coordinates define the endpoints of the straight line segments used to describe 528 numerically identified “streets”.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">head</span>(roads)
-<span class="co">#&gt;   street n        x        y id      name</span>
-<span class="co">#&gt; 1      1 2 16.73800 18.69600  1 Map Frame</span>
-<span class="co">#&gt; 2      1 2 17.66000 18.71200  2 Map Frame</span>
-<span class="co">#&gt; 3      2 2 14.46200 18.65500  3 Map Frame</span>
-<span class="co">#&gt; 4      2 2 16.73800 18.69600  4 Map Frame</span>
-<span class="co">#&gt; 5      3 2 12.79388 18.61613  5 Map Frame</span>
-<span class="co">#&gt; 6      3 2 14.46200 18.65500  6 Map Frame</span>
+  street n        x        y id      name
+<span class="dv">1</span>      <span class="dv">1</span> <span class="dv">2</span> <span class="fl">16.73800</span> <span class="fl">18.69600</span>  <span class="dv">1</span> Map Frame
+<span class="dv">2</span>      <span class="dv">1</span> <span class="dv">2</span> <span class="fl">17.66000</span> <span class="fl">18.71200</span>  <span class="dv">2</span> Map Frame
+<span class="dv">3</span>      <span class="dv">2</span> <span class="dv">2</span> <span class="fl">14.46200</span> <span class="fl">18.65500</span>  <span class="dv">3</span> Map Frame
+<span class="dv">4</span>      <span class="dv">2</span> <span class="dv">2</span> <span class="fl">16.73800</span> <span class="fl">18.69600</span>  <span class="dv">4</span> Map Frame
+<span class="dv">5</span>      <span class="dv">3</span> <span class="dv">2</span> <span class="fl">12.79388</span> <span class="fl">18.61613</span>  <span class="dv">5</span> Map Frame
+<span class="dv">6</span>      <span class="dv">3</span> <span class="dv">2</span> <span class="fl">14.46200</span> <span class="fl">18.65500</span>  <span class="dv">6</span> Map Frame
 <span class="kw">nrow</span>(roads)
-<span class="co">#&gt; [1] 1241</span>
+[<span class="dv">1</span>] <span class="dv">1241</span>
 <span class="kw">length</span>(<span class="kw">unique</span>(roads<span class="op">$</span>street))
-<span class="co">#&gt; [1] 528</span></code></pre></div>
+[<span class="dv">1</span>] <span class="dv">528</span></code></pre></div>
 <p>These 528 “streets” do not correspond to real-world streets. Excluding the 50 “streets” used to describe the map’s frame, the remaining 478 “streets” describe 206 “real-world” roads (e.g., Oxford Street, Regent Street). This discrepancy emerges because 40% of “real-world” roads are composed of multiple “street” segments. For example, Oxford Street consists of 26 line segments and Broad Street consists of 6.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Map Border &quot;Streets&quot; #</span>
 
@@ -103,13 +103,13 @@ left &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">31
 border &lt;-<span class="st"> </span><span class="kw">sort</span>(<span class="kw">c</span>(bottom, left, top, right))
 
 <span class="kw">length</span>(border)
-<span class="co">#&gt; [1] 50</span></code></pre></div>
+[<span class="dv">1</span>] <span class="dv">50</span></code></pre></div>
 </div>
 <div id="road-names" class="section level2">
 <h2>Road names</h2>
 <p>The primary source for road names is Snow’s map. A high resolution version is available <a href="http://www.ph.ucla.edu/epi/snow/highressnowmap.html">here</a>. While great effort was made to correctly record and cross-reference names, there may still be errors. Error reports and suggestions for amendments are welcome.</p>
-<p>Some roads on the map do not have a name. In those cases, I attached unique labels like “Unknown-D”.</p>
-<p>Some names appear multiple times even though they lie at different locations. For these, I use Roman numerals to distinguish them (e.g., “King Street (I)” and “King Street (II)”).</p>
+<p>Some roads on the map do not have a name. In those cases, I attached unique labels like “Unknown-C”.</p>
+<p>Some names appear multiple times even though they lie at different locations. For these, I use Roman numerals to distinguish them (e.g., “King Street (I)” and “King Street (II)”).<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a></p>
 </div>
 <div id="queen-street-i-and-marlborough-mews" class="section level2">
 <h2>Queen Street (I) and Marlborough Mews</h2>
@@ -141,372 +141,115 @@ roads &lt;-<span class="st"> </span>roads[<span class="kw">order</span>(roads<sp
 <div id="list-of-road-names" class="section level2">
 <h2>List of road names</h2>
 <p>There are 206 “valid” road names; 207, if we include “Map Frame”:</p>
-<table>
-<thead>
-<tr class="header">
-<th>1 -70</th>
-<th>71 - 140</th>
-<th>141 - 207</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Adam and Eve Court</td>
-<td>Greek Street</td>
-<td>Phoenix Yard</td>
-</tr>
-<tr class="even">
-<td>Air Street</td>
-<td>Green Dragon Yard</td>
-<td>Picadilly</td>
-</tr>
-<tr class="odd">
-<td>Albany Street</td>
-<td>Greens Court</td>
-<td>Plough Yard</td>
-</tr>
-<tr class="even">
-<td>Albemarle Street</td>
-<td>Ham Yard</td>
-<td>Poland Street</td>
-</tr>
-<tr class="odd">
-<td>Allens Court</td>
-<td>Hanover Street</td>
-<td>Pollen Street</td>
-</tr>
-<tr class="even">
-<td>Angel Court</td>
-<td>Hanway Street</td>
-<td>Portland Mews</td>
-</tr>
-<tr class="odd">
-<td>Archer Street</td>
-<td>Haymarket</td>
-<td>Portland Street</td>
-</tr>
-<tr class="even">
-<td>Argyll Place</td>
-<td>Heddon Court</td>
-<td>Princes Street (I)</td>
-</tr>
-<tr class="odd">
-<td>Argyll Street</td>
-<td>Heddon Street</td>
-<td>Princes Street (II)</td>
-</tr>
-<tr class="even">
-<td>Arundel Place</td>
-<td>Hollen Street</td>
-<td>Princes Street (III)</td>
-</tr>
-<tr class="odd">
-<td>Arundel Street</td>
-<td>Hopkins Street</td>
-<td>Princes Street/Hanover Square</td>
-</tr>
-<tr class="even">
-<td>Batemans Buildings</td>
-<td>Jermyn Street</td>
-<td>Pulteney Court (I)</td>
-</tr>
-<tr class="odd">
-<td>Beak Street</td>
-<td>John Street</td>
-<td>Pulteney Court (II)</td>
-</tr>
-<tr class="even">
-<td>Bentinck Street</td>
-<td>Kemps Court</td>
-<td>Queen Street (I)</td>
-</tr>
-<tr class="odd">
-<td>Berners Street</td>
-<td>King Street (I)</td>
-<td>Queen Street (II)</td>
-</tr>
-<tr class="even">
-<td>Berwick Street</td>
-<td>King Street (II)</td>
-<td>Queen Street (III)</td>
-</tr>
-<tr class="odd">
-<td>Black Lion Court</td>
-<td>Kings Arms Yard</td>
-<td>Queens Head Court</td>
-</tr>
-<tr class="even">
-<td>Blenheim Mews</td>
-<td>Leicester Street (I)</td>
-<td>Rathbone Place</td>
-</tr>
-<tr class="odd">
-<td>Blenheim Street</td>
-<td>Leicester Street (II)</td>
-<td>Regent Street</td>
-</tr>
-<tr class="even">
-<td>Boyle Street</td>
-<td>Lisle Street</td>
-<td>Regents Quadrant</td>
-</tr>
-<tr class="odd">
-<td>Brewer Street</td>
-<td>Little Argyll Street</td>
-<td>Richmond Buildings/Mews</td>
-</tr>
-<tr class="even">
-<td>Bridle Street</td>
-<td>Little Chapel Street</td>
-<td>Richmond Street</td>
-</tr>
-<tr class="odd">
-<td>Broad Street</td>
-<td>Little Crown Court</td>
-<td>Rupert Street</td>
-</tr>
-<tr class="even">
-<td>Bruton Street</td>
-<td>Little Dean Street</td>
-<td>Sackville Street</td>
-</tr>
-<tr class="odd">
-<td>Bull Yard</td>
-<td>Little Marlborough Street</td>
-<td>Saville Row</td>
-</tr>
-<tr class="even">
-<td>Burlington Arcade</td>
-<td>Little Pulteney Street</td>
-<td>Sherrard Street</td>
-</tr>
-<tr class="odd">
-<td>Burlington Gardens</td>
-<td>Little Windmill Street</td>
-<td>Ship Yard</td>
-</tr>
-<tr class="even">
-<td>Cambridge Street</td>
-<td>Lower James Street</td>
-<td>Sidney Alley</td>
-</tr>
-<tr class="odd">
-<td>Carlisle Street</td>
-<td>Lower John Street</td>
-<td>Silver Street</td>
-</tr>
-<tr class="even">
-<td>Carnaby Court</td>
-<td>Lowndes Court</td>
-<td>Smiths Court/Yard</td>
-</tr>
-<tr class="odd">
-<td>Carnaby Street</td>
-<td>Macclesfield Street</td>
-<td>Soho Square</td>
-</tr>
-<tr class="even">
-<td>Castle Street East</td>
-<td>Macclesfield Street/Gerrard Street</td>
-<td>South Row</td>
-</tr>
-<tr class="odd">
-<td>Catherine Wheel Yard</td>
-<td>Maddox Street</td>
-<td>St Anns Court</td>
-</tr>
-<tr class="even">
-<td>Chapel Place</td>
-<td>Maidenhead Court</td>
-<td>St Anns Place</td>
-</tr>
-<tr class="odd">
-<td>Charles Street</td>
-<td><strong>Map Frame</strong></td>
-<td>St James Workhouse</td>
-</tr>
-<tr class="even">
-<td>Church Street</td>
-<td>Margaret Court</td>
-<td>Sutton Street</td>
-</tr>
-<tr class="odd">
-<td>Clifford Street</td>
-<td>Margaret Street</td>
-<td>Swallow Place</td>
-</tr>
-<tr class="even">
-<td>Coach &amp; Horses Yard</td>
-<td>Market Court</td>
-<td>Swallow Street</td>
-</tr>
-<tr class="odd">
-<td>Cock Court</td>
-<td>Market Place</td>
-<td>Tichborne Street</td>
-</tr>
-<tr class="even">
-<td>Conduit Street</td>
-<td>Market Row</td>
-<td>Titchfield Street</td>
-</tr>
-<tr class="odd">
-<td>Cork Mews</td>
-<td>Market Street</td>
-<td>Turks Head Yard</td>
-</tr>
-<tr class="even">
-<td>Cork Street</td>
-<td>Marlborough Court</td>
-<td>Tyler Court</td>
-</tr>
-<tr class="odd">
-<td>Coventry Street</td>
-<td>Marlborough Mews</td>
-<td>Tyler Street</td>
-</tr>
-<tr class="even">
-<td>Cross Street</td>
-<td>Marlborough Row</td>
-<td>Tylers Court</td>
-</tr>
-<tr class="odd">
-<td>Crown Court</td>
-<td>Marshall Street</td>
-<td>Unknown-A1</td>
-</tr>
-<tr class="even">
-<td>Dean Street</td>
-<td>Marylebone Street</td>
-<td>Unknown-A2</td>
-</tr>
-<tr class="odd">
-<td>Dover Street</td>
-<td>Masons Arms Yard</td>
-<td>Unknown-B</td>
-</tr>
-<tr class="even">
-<td>Duck Lane/Ham Square</td>
-<td>Meards Court/Street</td>
-<td>Unknown-C</td>
-</tr>
-<tr class="odd">
-<td>Dufours Place</td>
-<td>Mill Street</td>
-<td>Unknown-D</td>
-</tr>
-<tr class="even">
-<td>Edward Street</td>
-<td>Nags Head Yard</td>
-<td>Unknown-E</td>
-</tr>
-<tr class="odd">
-<td>Falconberg Court</td>
-<td>Naylors Yard</td>
-<td>Unknown-F</td>
-</tr>
-<tr class="even">
-<td>Falconberg Mews</td>
-<td>New Bond Street</td>
-<td>Upper James Street</td>
-</tr>
-<tr class="odd">
-<td>Fouberts Place</td>
-<td>New Burlington Mews</td>
-<td>Upper John Street</td>
-</tr>
-<tr class="even">
-<td>Francis Street</td>
-<td>New Burlington Street</td>
-<td>Upper Rupert Street</td>
-</tr>
-<tr class="odd">
-<td>Frith Street</td>
-<td>New Street</td>
-<td>Vigo Street</td>
-</tr>
-<tr class="even">
-<td>George Court (I)</td>
-<td>New Street/Husband Street</td>
-<td>Vine Street</td>
-</tr>
-<tr class="odd">
-<td>George Court (II)</td>
-<td>Newman Street</td>
-<td>Walkers Court</td>
-</tr>
-<tr class="even">
-<td>George Place</td>
-<td>Noel Street</td>
-<td>Wardour Mews</td>
-</tr>
-<tr class="odd">
-<td>George Street</td>
-<td>Norris’s Place</td>
-<td>Wardour Street</td>
-</tr>
-<tr class="even">
-<td>George Yard</td>
-<td>North Coventry Street</td>
-<td>Warwick Street</td>
-</tr>
-<tr class="odd">
-<td>Glasshouse Street</td>
-<td>Old Burlington Mews</td>
-<td>Wellington Mews</td>
-</tr>
-<tr class="even">
-<td>Golden Place</td>
-<td>Old Burlington Street</td>
-<td>Wells Street</td>
-</tr>
-<tr class="odd">
-<td>Golden Square</td>
-<td>Old Compton Street</td>
-<td>West Street</td>
-</tr>
-<tr class="even">
-<td>Grafton Street</td>
-<td>Orchard Place</td>
-<td>Whitcomb Court</td>
-</tr>
-<tr class="odd">
-<td>Great Castle Street</td>
-<td>Oxendon Street</td>
-<td>White Bear Yard</td>
-</tr>
-<tr class="even">
-<td>Great Chapel Street</td>
-<td>Oxford Street</td>
-<td>William and Mary Yard</td>
-</tr>
-<tr class="odd">
-<td>Great Crown Court</td>
-<td>Panton Street</td>
-<td>Winsley Street</td>
-</tr>
-<tr class="even">
-<td>Great Marlborough Street</td>
-<td>Perrys Place</td>
-<td></td>
-</tr>
-<tr class="odd">
-<td>Great Pulteney Street</td>
-<td>Peter Street</td>
-<td></td>
-</tr>
-<tr class="even">
-<td>Great Windmill Street</td>
-<td>Pews Place</td>
-<td></td>
-</tr>
-</tbody>
-</table>
+<pre><code>                                                                    
+1   Adam and Eve Court                 Maidenhead Court             
+2   Air Street                         Margaret Court               
+3   Albany Street                      Margaret Street              
+4   Albemarle Street                   Market Court                 
+5   Allens Court                       Market Place                 
+6   Angel Court                        Market Row                   
+7   Archer Street                      Market Street (I)            
+8   Argyll Place                       Market Street (II)           
+9   Argyll Street                      Marlborough Court            
+10  Arundel Place                      Marlborough Mews             
+11  Arundel Street                     Marlborough Row              
+12  Batemans Buildings                 Marshall Street              
+13  Beak Street                        Marylebone Street            
+14  Bentinck Street                    Masons Arms Yard             
+15  Berners Street                     Meards Court/Street          
+16  Berwick Street                     Mill Street                  
+17  Black Lion Court                   Nags Head Yard               
+18  Blenheim Mews                      Naylors Yard                 
+19  Blenheim Street                    New Bond Street              
+20  Boyle Street                       New Burlington Mews          
+21  Brewer Street                      New Burlington Street        
+22  Bridle Street                      New Street                   
+23  Broad Street                       New Street/Husband Street    
+24  Bruton Street                      Newman Street                
+25  Bull Yard                          Noel Street                  
+26  Burlington Arcade                  Norris's Place               
+27  Burlington Gardens                 North Coventry Street        
+28  Cambridge Street                   Old Burlington Mews          
+29  Carlisle Street                    Old Burlington Street        
+30  Carnaby Court                      Old Compton Street           
+31  Carnaby Street                     Orchard Place                
+32  Castle Street East                 Oxendon Street               
+33  Catherine Wheel Yard               Oxford Street                
+34  Chapel Place                       Panton Street                
+35  Charles Street                     Perrys Place                 
+36  Church Street                      Peter Street                 
+37  Clifford Street                    Pews Place                   
+38  Coach &amp; Horses Yard                Phoenix Yard                 
+39  Cock Court                         Picadilly                    
+40  Conduit Street                     Plough Yard                  
+41  Cork Mews                          Poland Street                
+42  Cork Street                        Pollen Street                
+43  Coventry Street                    Portland Mews                
+44  Cross Street                       Portland Street              
+45  Crown Court                        Princes Street (I)           
+46  Dean Street                        Princes Street (II)          
+47  Dover Street                       Princes Street (III)         
+48  Duck Lane/Ham Square               Princes Street/Hanover Square
+49  Dufours Place                      Pulteney Court (I)           
+50  Edward Street                      Pulteney Court (II)          
+51  Falconberg Court                   Queen Street (I)             
+52  Falconberg Mews                    Queen Street (II)            
+53  Fouberts Place                     Queen Street (III)           
+54  Francis Street                     Queens Head Court            
+55  Frith Street                       Rathbone Place               
+56  George Court (I)                   Regent Street                
+57  George Court (II)                  Regents Quadrant             
+58  George Place (?)                   Richmond Buildings/Mews      
+59  George Street                      Richmond Street              
+60  George Yard                        Rupert Street                
+61  Glasshouse Street                  Sackville Street             
+62  Golden Place                       Saville Row                  
+63  Golden Square                      Sherrard Street              
+64  Grafton Street                     Ship Yard                    
+65  Great Castle Street                Sidney Alley                 
+66  Great Chapel Street                Silver Street                
+67  Great Crown Court                  Smiths Court/Yard            
+68  Great Marlborough Street           Soho Square                  
+69  Great Pulteney Street              South Row                    
+70  Great Windmill Street              St Anns Court                
+71  Greek Street                       St Anns Place                
+72  Green Dragon Yard                  St James Workhouse           
+73  Greens Court                       St James's Market            
+74  Ham Yard                           Sutton Street                
+75  Hanover Street                     Swallow Place                
+76  Hanway Street                      Swallow Street               
+77  Haymarket                          Tent Court                   
+78  Heddon Court                       Tichborne Street             
+79  Heddon Street                      Titchfield Street            
+80  Hollen Street                      Turks Head Yard              
+81  Hopkins Street                     Tyler Court                  
+82  Jermyn Street                      Tyler Street                 
+83  John Street                        Tylers Court                 
+84  Kemps Court                        Unknown-A1                   
+85  King Street (I)                    Unknown-A2                   
+86  King Street (II)                   Unknown-B                    
+87  Kings Arms Yard                    Unknown-C                    
+88  Leicester Street (I)               Upper James Street           
+89  Leicester Street (II)              Upper John Street            
+90  Lisle Street                       Upper Rupert Street          
+91  Little Argyll Street               Vigo Street                  
+92  Little Chapel Street               Vine Street                  
+93  Little Crown Court                 Walkers Court                
+94  Little Dean Street                 Wardour Mews                 
+95  Little Marlborough Street          Wardour Street               
+96  Little Pulteney Street             Warwick Street               
+97  Little Windmill Street             Wellington Mews              
+98  Lower James Street                 Wells Street                 
+99  Lower John Street                  West Street                  
+100 Lowndes Court                      Whitcomb Court               
+101 Macclesfield Street                White Bear Yard              
+102 Macclesfield Street/Gerrard Street William and Mary Yard        
+103 Maddox Street                      Winsley Street               </code></pre>
 </div>
 <div id="coordinate-unit" class="section level2">
 <h2>Coordinate unit</h2>
 <p>The original map is 14.5 x 15.5 inches with a stated nominal scale of 30 inches per mile.</p>
-<p>Dodson and Tobler write that “The scale of the source map is approx. 1:2000. Coordinate units are meters.” By my calculation one unit on the map is approximately 177 feet or 54 meters per unit.<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a></p>
+<p>Dodson and Tobler write that “The scale of the source map is approx. 1:2000. Coordinate units are meters.” By my calculation one unit on the map is approximately 177 feet or 54 meters per unit.<a href="#fn2" class="footnoteRef" id="fnref2"><sup>2</sup></a></p>
 </div>
 <div id="notes" class="section level2">
 <h2>Notes</h2>
@@ -514,7 +257,8 @@ roads &lt;-<span class="st"> </span>roads[<span class="kw">order</span>(roads<sp
 <div class="footnotes">
 <hr />
 <ol>
-<li id="fn1"><p>According to Dodson and Tobler’s street data, the length of Carnaby Street from its intersection with Great Marlborough to its intersection with Silver Street is 2.61 units. According to Google Maps, the approximate analog of that segment is the distance along parts of Great Marlborough Street and Carnaby Street between 19-21 Great Marlborough Street and 43 Carnaby Street (at Ganton Street): 463 ft. This translates into approximately 177 feet/unit or 54 meters/unit.<a href="#fnref1">↩</a></p></li>
+<li id="fn1"><p>Multiple names was not unusual. See Judith Flanders. 2012. <em>The Victorian City: everyday life in Dickens’ London</em>. New York: St. Martin’s Press, 57-58.<a href="#fnref1">↩</a></p></li>
+<li id="fn2"><p>According to Dodson and Tobler’s street data, the length of Carnaby Street from its intersection with Great Marlborough to its intersection with Silver Street is 2.61 units. According to Google Maps, the approximate analog of that segment is the distance along parts of Great Marlborough Street and Carnaby Street between 19-21 Great Marlborough Street and 43 Carnaby Street (at Ganton Street): 463 ft. This translates into approximately 177 feet/unit or 54 meters/unit.<a href="#fnref2">↩</a></p></li>
 </ol>
 </div>
 

@@ -5,7 +5,7 @@
 \title{Compute the shortest walking distance between cases and/or pumps.}
 \usage{
 walkingDistance(origin, destination = NULL, type = "case-pump",
-  weighted = TRUE, vestry = FALSE, unit = NULL)
+  observed = TRUE, weighted = TRUE, vestry = FALSE, unit = NULL)
 }
 \arguments{
 \item{origin}{Numeric or Integer. Numeric ID of case or pump.}
@@ -13,6 +13,8 @@ walkingDistance(origin, destination = NULL, type = "case-pump",
 \item{destination}{Numeric or Integer. Numeric ID(s) of case(s) or pump(s). Exclusion is possible via negative selection (e.g., -7). Default is NULL: this returns closest pump or "anchor" case.}
 
 \item{type}{Character "case-pump", "cases" or "pumps".}
+
+\item{observed}{Logical. Use observed or "simulated" expected data.}
 
 \item{weighted}{Logical. TRUE computes shortest path in terms of road length. FALSE computes shortest path in terms of nodes.}
 
@@ -27,7 +29,9 @@ An R list.
 Compute the shortest walking distance between cases and/or pumps.
 }
 \note{
-The function uses a case's "address" or "anchor" case to compute distance. Because Adam and Eve Court is disconnected from the larger road network (an isolate), only cases on that road can reach pump 2. All others will return Inf.
+The function uses a case's "address" or "anchor" case to compute distance.
+
+Adam and Eve Court, and Falconberg Court and Falconberg Mews, are disconnected from the larger road network and form two isolated subgraphs. This has two consequences: first, only cases on Adam and Eve Court can reach pump 2 and those cases cannot reach any other pump; second, cases on Falconberg Court and Mews cannot reach any pump. Unreachable pumps will return distances of "Inf".
 }
 \examples{
 # path from case 1 to nearest pump.
@@ -49,7 +53,7 @@ The function uses a case's "address" or "anchor" case to compute distance. Becau
 # walkingDistance(1, 6, type = "pumps")
 
 # Plot result
-plot(walkingDistance(1, unit = "meter"))
+# plot(walkingDistance(1, unit = "meter"))
 }
 \seealso{
 \code{\link{fatalities}}, \code{vignette("pump.neighborhoods")}

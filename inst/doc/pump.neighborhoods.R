@@ -9,9 +9,6 @@ plot(neighborhoodVoronoi())
 neighborhoodVoronoi()
 
 ## ---- fig.width = 5, fig.height = 5, fig.align = "center", message = FALSE----
-plot(walkingDistance(150, unit = "meter"))
-
-## ---- fig.width = 5, fig.height = 5, fig.align = "center", message = FALSE----
 plot(neighborhoodWalking())
 
 ## ------------------------------------------------------------------------
@@ -22,11 +19,13 @@ neighborhoodWalking()
 plot(neighborhoodWalking(case.set = "expected"))
 
 ## ---- fig.width = 5, fig.height = 5, fig.align = "center", message = FALSE----
-plot(neighborhoodWalking(case.set = "expected"), area = TRUE)
+plot(neighborhoodWalking(case.set = "expected"), type = "area.points")
+
+## ---- fig.width = 5, fig.height = 5, fig.align = "center", message = FALSE----
+streetNameLocator("marshall street", zoom = TRUE, highlight = FALSE,
+  add.title = FALSE, radius = 0.5)
+addNeighborhood()
 
 ## ---- fig.width = 5, fig.height = 5, fig.align = "center", message = FALSE----
 plot(neighborhoodWalking(-6))
-
-## ---- fig.width = 5, fig.height = 5, fig.align = "center", message = FALSE----
-plot(neighborhoodWalking(-7))
 

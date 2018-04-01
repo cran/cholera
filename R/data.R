@@ -127,12 +127,13 @@
 
 #' Orthogonal projection of 13 original pumps.
 #'
-#' @format A data frame with 5 variables that records the position of the orthogonal projection of the 13 original pumps onto the network of roads.
+#' @format A data frame with 6 variables that records the position of the orthogonal projection of the 13 original pumps onto the network of roads.
 #'  \describe{
 #'     \item{\code{road.segment}}{"address" road segment}
 #'     \item{\code{x.proj}}{x-coordinate}
 #'     \item{\code{y.proj}}{y-coordinate}
 #'     \item{\code{ortho.dist}}{orthogonal distance to home road segment}
+#'     \item{\code{node}}{node ID}
 #'     \item{\code{pump.id}}{numeric ID}
 #'  }
 #' @section Notes: \code{\link{pumpData}} documents the code for these data.
@@ -141,12 +142,13 @@
 
 #' Orthogonal projection of the 14 pumps from the Vestry Report.
 #'
-#' @format A data frame with 5 variables that records the position of the orthogonal projection of the 14 pumps onto the network of roads.
+#' @format A data frame with 6 variables that records the position of the orthogonal projection of the 14 pumps onto the network of roads.
 #'  \describe{
 #'     \item{\code{road.segment}}{"address" road segment}
 #'     \item{\code{x.proj}}{x-coordinate}
 #'     \item{\code{y.proj}}{y-coordinate}
 #'     \item{\code{ortho.dist}}{orthogonal distance to home road segment}
+#'     \item{\code{node}}{node ID}
 #'     \item{\code{pump.id}}{numeric ID}
 #'  }
 #' @section Notes: \code{\link{pumpData}} documents the code for these data.
@@ -163,20 +165,6 @@
 #' }
 #' @docType data
 "plague.pit"
-
-#' List of the observed fatality "addresses" grouped by walking-distance pump neighborhood.
-#'
-#' @format A list 321 IDs spread over 13 vectors.
-#' \describe{
-#'  \item{\code{pump.case}}{numerical ID}
-#' }
-#' @section Notes: \code{\link{neighborhoodWalking}} documents the code for these data.
-#'
-#' For details, see \code{vignette}("pump.neighborhoods").
-#' @examples
-#' # pumpCase(neighborhoodWalking())
-#' @docType data
-"pump.case"
 
 #' List of "simulated" fatalities grouped by walking-distance pump neighborhood.
 #'

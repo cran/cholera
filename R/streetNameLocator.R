@@ -5,7 +5,11 @@
 #' @param zoom Logical.
 #' @param radius Numeric. Controls the degree of zoom.
 #' @param cases Character. Plot cases: NULL, "anchors" or "all".
-#' @param unit Character. Unit of measurement: "meter" or "yard". Default is NULL, which returns the map's native scale.
+#' @param add.title Logical. Include title.
+#' @param add.pump Logical. Include nearby pumps.
+#' @param vestry Logical. TRUE uses the 14 pumps from the Vestry Report. FALSE uses the 13 in the original map.
+#' @param highlight Logical. Highlight selected road.
+#' @param unit Character. Unit of measurement: "meter" or "yard". NULL returns the map's native scale.
 #' @return A base R graphics plot.
 #' @seealso \code{\link{roads}}, \code{\link{road.segments}}, \code{\link{streetNumberLocator}}, \code{vignette("road.names")}
 #' @import graphics
@@ -17,7 +21,8 @@
 #' streetNameLocator("Cambridge Street", zoom = TRUE, radius = 0)
 
 streetNameLocator <- function(road.name, zoom = FALSE, radius = 0.1,
-  cases = "anchors", unit = NULL) {
+  cases = "anchors", add.title = TRUE, add.pump = TRUE, vestry = FALSE,
+  highlight = TRUE, unit = "meter") {
 
   real.road.names <- unique(cholera::roads$name)
 
@@ -55,12 +60,24 @@ streetNameLocator <- function(road.name, zoom = FALSE, radius = 0.1,
       ylim = range(cholera::roads$y), pch = 15, cex = 0.5, col = "gray",
       asp = 1)
     invisible(lapply(roads.list, lines, col = "gray"))
-    points(cholera::pumps[, c("x", "y")], pch = 17, cex = 1, col = "blue")
-    text(cholera::pumps[, c("x", "y")], label = paste0("p", cholera::pumps$id),
-      col = "blue", pos = 1)
-    invisible(lapply(roads.list[paste(selected.road)], lines, col = "red",
-      lwd = 3))
 
+    if (add.pump) {
+      if (vestry) {
+        points(cholera::pumps.vestry[, c("x", "y")], pch = 17, cex = 1,
+          col = "blue")
+        text(cholera::pumps.vestry[, c("x", "y")],
+          label = paste0("p", cholera::pumps.vestry$id), pos = 1)
+      } else {
+        points(cholera::pumps[, c("x", "y")], pch = 17, cex = 1, col = "blue")
+        text(cholera::pumps[, c("x", "y")],
+          label = paste0("p", cholera::pumps$id), pos = 1)
+      }
+    }
+
+    if (highlight) {
+      invisible(lapply(roads.list[paste(selected.road)], lines, col = "red",
+        lwd = 3))
+    }
   } else {
     plot(cholera::fatalities[, c("x", "y")], xlim = x.rng, ylim = y.rng,
       pch = NA, asp = 1)
@@ -77,28 +94,51 @@ streetNameLocator <- function(road.name, zoom = FALSE, radius = 0.1,
         text(cholera::fatalities[!seg.cases, c("x", "y")],
           labels = cholera::fatalities$case[!seg.cases], cex = 0.5)
         if (any(seg.cases)) {
-          text(cholera::fatalities[seg.cases, c("x", "y")],
-            labels = cholera::fatalities$case[seg.cases], cex = 0.5,
-            col = "red")
+          if (highlight) {
+            text(cholera::fatalities[seg.cases, c("x", "y")],
+              labels = cholera::fatalities$case[seg.cases], cex = 0.5,
+              col = "red")
+          } else {
+            text(cholera::fatalities[seg.cases, c("x", "y")],
+              labels = cholera::fatalities$case[seg.cases], cex = 0.5)
+          }
+
         }
       } else if (cases == "anchors") {
         text(cholera::fatalities.address[!seg.anchors, c("x", "y")],
           labels = cholera::fatalities.address$anchor.case[!seg.anchors],
           cex = 0.5)
         if (any(seg.anchors)) {
-          text(cholera::fatalities.address[seg.anchors, c("x", "y")],
-            labels = cholera::fatalities.address$anchor.case[seg.anchors],
-            cex = 0.5, col = "red")
+          if (highlight) {
+            text(cholera::fatalities.address[seg.anchors, c("x", "y")],
+              labels = cholera::fatalities.address$anchor.case[seg.anchors],
+              cex = 0.5, col = "red")
+          } else {
+            text(cholera::fatalities.address[seg.anchors, c("x", "y")],
+              labels = cholera::fatalities.address$anchor.case[seg.anchors],
+              cex = 0.5)
+          }
         }
       }
     }
 
-    points(cholera::pumps[, c("x", "y")], pch = 17, cex = 1, col = "blue")
-    text(cholera::pumps[, c("x", "y")], label = paste0("p", cholera::pumps$id),
-      pos = 1)
-    selected.road <- cholera::roads[cholera::roads$name == name, "street"]
-    invisible(lapply(roads.list[paste(selected.road)], lines, col = "red",
-      lwd = 3))
+    if (add.pump) {
+      if (vestry) {
+        points(cholera::pumps.vestry[, c("x", "y")], pch = 17, cex = 1,
+          col = "blue")
+        text(cholera::pumps.vestry[, c("x", "y")],
+          label = paste0("p", cholera::pumps.vestry$id), pos = 1)
+      } else {
+        points(cholera::pumps[, c("x", "y")], pch = 17, cex = 1, col = "blue")
+        text(cholera::pumps[, c("x", "y")],
+          label = paste0("p", cholera::pumps$id), pos = 1)
+      }
+    }
+
+    if (highlight) {
+      invisible(lapply(roads.list[paste(selected.road)], lines, col = "red",
+        lwd = 3))
+    }
   }
 
   street.length <- cholera::streetLength(name, unit)
@@ -111,7 +151,7 @@ streetNameLocator <- function(road.name, zoom = FALSE, radius = 0.1,
     subtitle <- paste(round(street.length, 2), "yards")
   }
 
-  title(main = name, sub = subtitle)
+  if (add.title) title(main = name, sub = subtitle)
 }
 
 wordCase <- function(x) {

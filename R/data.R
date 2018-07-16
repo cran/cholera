@@ -7,7 +7,7 @@
 #'     \item{\code{case}}{numerical case ID}
 #'     \item{\code{anchor.case}}{numerical case ID of anchor.case}
 #' }
-#' @section Notes: \code{\link{unstackFatalities}} documents the code for these data.
+#' @note \code{\link{unstackFatalities}} documents the code for these data.
 #' @docType data
 "anchor.case"
 
@@ -39,9 +39,7 @@
 #'
 #' \code{\link{streetNumberLocator}}
 #'
-#' @section Notes: \code{\link{fixFatalities}} documents the code for these data.
-#'
-#' For details, see \code{vignette}("duplicate.missing.cases").
+#' @note \code{\link{fixFatalities}} documents the code for these data. For details, see \code{vignette}("duplicate.missing.cases").
 #' @seealso  \code{\link{caseLocator}}
 #'
 #' \code{\link{streetNameLocator}}
@@ -68,9 +66,7 @@
 #'
 #' \code{\link{streetNumberLocator}}
 #'
-#' @section Notes: \code{\link{unstackFatalities}} documents the code for these data.
-#'
-#' For details, see \code{vignette}("unstacking.fatalities").
+#' @note \code{\link{unstackFatalities}} documents the code for these data. For details, see \code{vignette}("unstacking.fatalities").
 #' @docType data
 "fatalities.address"
 
@@ -91,9 +87,7 @@
 #'
 #' \code{\link{streetNumberLocator}}
 #'
-#' @section Notes: \code{\link{unstackFatalities}} documents the code for these data.
-#'
-#' For details, see \code{vignette}("unstacking.fatalities").
+#' @note \code{\link{unstackFatalities}} documents the code for these data. For details, see \code{vignette}("unstacking.fatalities").
 #' @docType data
 "fatalities.unstacked"
 
@@ -107,21 +101,22 @@
 #'     \item{\code{ortho.dist}}{orthogonal distance to home road segment}
 #'     \item{\code{case}}{numeric case ID}
 #'  }
-#' @section Notes: \code{\link{unstackFatalities}} documents the code for these data.
+#' @note \code{\link{unstackFatalities}} documents the code for these data.
 #' @docType data
 "ortho.proj"
 
-#' Orthogonal projection of simulated "expected" cases onto road network.
+#' Road "address" of simulated (i.e., "expected") cases.
 #'
-#' @format A data frame with 5 variables that records the position of the orthogonal projection of the 4993 cases onto the network of roads. Excluding isolates (Pump 2 at  Adam and Eve Court; Falconberg Court and Falconberg Mews), there are 4972 cases.
+#' @format A data frame with 6 variables that records the "address" of 20007 simulate cases along the network of roads.
 #' \describe{
 #'     \item{\code{road.segment}}{"address" road segment}
 #'     \item{\code{x.proj}}{x-coordinate}
 #'     \item{\code{y.proj}}{y-coordinate}
-#'     \item{\code{ortho.dist}}{orthogonal distance to home road segment}
+#'     \item{\code{dist}}{Euclidean or orthogonal distance to home road segment}
+#'     \item{\code{type}}{type of projection: Euclidean ("eucl") or orthogonal ("ortho")}
 #'     \item{\code{case}}{numeric case ID}
 #'  }
-#' @section Notes: \code{\link{simulateFatalities}} documents the code for these data.
+#' @note \code{\link{simulateFatalities}} documents the code for these data.
 #' @docType data
 "sim.ortho.proj"
 
@@ -136,7 +131,7 @@
 #'     \item{\code{node}}{node ID}
 #'     \item{\code{pump.id}}{numeric ID}
 #'  }
-#' @section Notes: \code{\link{pumpData}} documents the code for these data.
+#' @note \code{\link{pumpData}} documents the code for these data.
 #' @docType data
 "ortho.proj.pump"
 
@@ -151,7 +146,7 @@
 #'     \item{\code{node}}{node ID}
 #'     \item{\code{pump.id}}{numeric ID}
 #'  }
-#' @section Notes: \code{\link{pumpData}} documents the code for these data.
+#' @note \code{\link{pumpData}} documents the code for these data.
 #' @docType data
 "ortho.proj.pump.vestry"
 
@@ -172,9 +167,7 @@
 #' \describe{
 #'  \item{\code{sim.pump.case}}{numerical ID}
 #' }
-#' @section Notes: \code{\link{neighborhoodWalking}} documents the code for these data.
-#'
-#' For details, see \code{vignette}("pump.neighborhoods").
+#' @note \code{\link{neighborhoodWalking}} documents the code for these data. For details, see \code{vignette}("pump.neighborhoods").
 #' @examples
 #' # pumpCase(neighborhoodWalking(case.set = "expected"))
 #' @docType data
@@ -192,7 +185,7 @@
 #'   \item{\code{y}}{y-coordinate}
 #' }
 #' @seealso \code{\link{pumpLocator}}
-#' @section Notes: \code{\link{pumpData}} documents the code for these data.
+#' @note \code{\link{pumpData}} documents the code for these data.
 #' @docType data
 "pumps"
 
@@ -208,20 +201,20 @@
 #'   \item{\code{y}}{y-coordinate}
 #' }
 #' @seealso \code{\link{pumpLocator}}
-#' @section Notes: \code{\link{pumpData}} documents the code for these data.
+#' @note \code{\link{pumpData}} documents the code for these data.
 #' @docType data
 "pumps.vestry"
 
 #' "Expected" cases.
 #'
-#' The result of using sp::spsample() and sp::Polygon() to generate 5000 regularly spaced simulated cases within the map's border.
+#' The result of using sp::spsample() and sp::Polygon() to generate 20007 regularly spaced simulated cases within the map's borders.
 #'
-#' @format A data frame with 2 variable that records the position of 4993 "expected" cases fitted by sp::spsample().
+#' @format A data frame with 2 variable that records the position of 20007 "expected" cases fitted by sp::spsample().
 #'  \describe{
 #'     \item{\code{x}}{x-coordinate}
 #'     \item{\code{y}}{y-coordinate}
 #'  }
-#' @section Notes: \code{\link{simulateFatalities}} documents the code for these data.
+#' @note \code{\link{simulateFatalities}} documents the code for these data.
 #' @docType data
 "regular.cases"
 
@@ -248,7 +241,7 @@
 #' \code{\link{streetNumberLocator}}
 #'
 #' \code{\link{segmentLocator}}
-#' @section Notes: \code{\link{roadSegments}} documents the code for these data.
+#' @note \code{\link{roadSegments}} documents the code for these data.
 #' @docType data
 "road.segments"
 

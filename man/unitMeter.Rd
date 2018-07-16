@@ -2,14 +2,18 @@
 % Please edit documentation in R/unitMeter.R
 \name{unitMeter}
 \alias{unitMeter}
-\title{Convert nominal map distance to yards or meters.}
+\title{Convert nominal map distance to meters or yards.}
 \usage{
-unitMeter(x, unit = NULL)
+unitMeter(x, unit = "meter", yard.unit = 177/3, meter.unit = 54)
 }
 \arguments{
 \item{x}{Numeric. Nominal map distance.}
 
-\item{unit}{Character. Unit of measurement: "meter" or "yard". Default is NULL, which returns the map's native scale. See \code{vignette("roads")} for information on conversion.}
+\item{unit}{Character. Unit of distance: "meter", "yard" or "native". "native" returns the map's native scale. See \code{vignette("roads")} for information on conversion.}
+
+\item{yard.unit}{Numeric. Estimate of yards per map unit: 177 / 3.}
+
+\item{meter.unit}{Numeric. Estimate of meters per map unit: 54.}
 }
 \description{
 A best guess estimate.

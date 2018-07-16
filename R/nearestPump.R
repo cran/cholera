@@ -1,18 +1,21 @@
 #' Compute shortest walking distances or paths.
 #'
-#' Compute the distance or path from observed or expected cases to nearest pump (or from among selected pumps).
 #' @param pump.select Numeric. Pump candidates to consider. Default is NULL: all pumps are used. Otherwise, selection by a vector of numeric IDs: 1 to 13 for \code{pumps}; 1 to 14 for \code{pumps.vestry}. Negative selection allowed.
 #' @param output Character. "distance" or "path".
 #' @param vestry Logical. TRUE uses the 14 pumps from the Vestry Report. FALSE uses the 13 in the original map.
 #' @param weighted Logical. TRUE computes shortest path in terms of road length. FALSE computes shortest path in terms of the number of nodes.
 #' @param case.set Character. "observed", "expected", or "snow".
 #' @param multi.core Logical or Numeric. TRUE uses parallel::detectCores(). FALSE uses one, single core. You can also specify the number logical cores. On Window, only "multi.core = FALSE" is available.
-#' @param unit Character. Unit of measurement: "meter" or "yard". Default is NULL, which returns the map's native scale. Meaningful only when "weighted" is TRUE and "output" is "distance". See \code{vignette("roads")} for information on unit distances.
+#' @param unit Character. Unit of distance: "meter", "yard" or "native". "native" returns the map's native scale. Meaningful only when "weighted" is TRUE and "output" is "distance". See \code{vignette("roads")} for information on unit distances.
+#' @param time.unit Character. "hour", "minute", or "second".
+#' @param walking.speed Numeric. Default walking speed is 5 km/hr.
+#' @note Time is computed using distanceTime().
 #' @export
 #' @return An R data frame or list of 'igraph' paths.
 
 nearestPump <- function(pump.select = NULL, output = "distance", vestry = FALSE,
-  weighted = TRUE, case.set = "observed", unit = NULL, multi.core = FALSE) {
+  weighted = TRUE, case.set = "observed", unit = "meter", multi.core = FALSE,
+  time.unit = "second", walking.speed = 5) {
 
   if (output %in% c("distance", "path") == FALSE) {
     stop('"output" must be "distance" or "path".')
@@ -22,9 +25,8 @@ nearestPump <- function(pump.select = NULL, output = "distance", vestry = FALSE,
     stop('"case.set" must be "observed", "expected" or "snow".')
   }
 
-  if (is.null(unit) == FALSE) {
-    if (unit %in% c("meter", "yard") == FALSE)
-      stop('If specified, "unit" must either be "meter" or "yard".')
+  if (unit %in% c("meter", "yard", "native") == FALSE) {
+    stop('"unit" must be "meter", "yard" or "native".')
   }
 
   cores <- multiCore(multi.core)
@@ -73,12 +75,15 @@ nearestPump <- function(pump.select = NULL, output = "distance", vestry = FALSE,
 
     out <- out[, c("case", "pump", "pump.name", "distance")]
 
-    if (!is.null(unit)) {
-      if (unit == "meter") {
-        out$distance <- cholera::unitMeter(out$distance, "meter")
-      } else if (unit == "yard") {
-        out$distance <- cholera::unitMeter(out$distance, "yard")
-      }
+    out$time <- cholera::distanceTime(out$distance, unit = time.unit,
+      speed = walking.speed)
+
+    if (unit == "meter") {
+      out$distance <- cholera::unitMeter(out$distance, "meter")
+    } else if (unit == "yard") {
+      out$distance <- cholera::unitMeter(out$distance, "yard")
+    } else if (unit == "native") {
+      out$distance <- cholera::unitMeter(out$distance, "native")
     }
 
     out
@@ -98,11 +103,6 @@ pathData <- function(dat, weighted, case.set, cores) {
   sel <- cholera::sim.ortho.proj$road.segment == adam.eve.ct &
          !is.na(cholera::sim.ortho.proj$road.segment)
   AE.cases <- cholera::sim.ortho.proj[sel, "case"]
-
-  # AE.nodes <- nodes[nodes$anchor %in% AE.cases, "node"]
-  # AE.pump.node <- nodes[nodes$pump == 2, "node"]
-
-  ## ##
 
   paths <- function(x) {
     parallel::mclapply(x, function(a) {

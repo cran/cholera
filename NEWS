@@ -1,3 +1,79 @@
+cholera 0.5.0
+==================
+
+# Data Changes #
+
+- regular.cases and sim.ortho.proj:
+  increase number of observations from 5K to 20K.
+
+# Function Changes #
+
+- "alpha.level" argument to control path transparency
+    addEuclideanPath() and addWalkingPath()
+
+- distance and time based "mileposts"
+    addEuclideanPath() and addWalkingPath().
+    plot.euclidean_path() and plot.walking_path().
+    addMilePosts().
+
+- "pump.subset" and "pump.select" arguments
+    addCases(), addKernelDensity(), addMilePosts(), addNeighborhood(),
+    neighborhoodEuclidean(), neighborhoodWalking()
+
+- "walking.speed" argument added to:
+    addMilePosts(), nearestPump(),
+    addEuclideanPath(), euclideanDistance(), euclideanPath(),
+    addWalkingPath(), walkingDistance(), walkingPath()
+
+- euclideanDistance() no longer S3.
+    generic S3 functionality moved to euclideanPath().
+
+- multiCore() moved to multiCore.R.
+
+- neighborhoodVoronoi()
+    plot.voronoi() adds "euclidean.paths" argument for star graph.
+
+- neighborhoodWalking()
+    "area.polygons" related functions for plot_walking() moved to pearlString.R.
+
+- simulateFatalities():
+  default is now 20K observations.
+  use proximate in addition to orthogonal distances to find "addresses".
+
+- snowMap() new arguments:
+  "add.cases", "add.pumps", "add.roads".
+
+- unitMeter() default unit of measurement is now "meter".
+
+- walkingAuxillaryFunctions.R:
+    location of walking related helper functions.
+
+- walkingDistance() no longer S3.
+    generic S3 functionality moved to  walkingPath().
+
+# New Functions #
+
+- addCases()
+- addEuclideanPath()
+- addMilePosts()
+- addNeighborhood()
+- addWalkingPath()()
+- distanceTime()
+
+# New S3 Functions #
+
+- euclideanPath()
+- walkingPath()
+- neighborhoodEuclidean().
+
+# Vignette Changes #
+
+- Lab Notes available online and on GitHub:
+  "duplicate.missing.cases.notes"
+  "pump.neighborhoods.notes"
+  "unstacking.bars.notes"
+
+
 cholera 0.4.0
 ==================
 

@@ -1,9 +1,7 @@
-#' Add landmarks.
+#' Add landmarks to plot.
 #'
-#' Adam and Eve Court (isolate), Golden Square, Lion Brewery, St James Workhouse, St Luke's Church (Henry Whitehead), Soho Square, Falconberg Court & Mews (isolate), 18 Sackville Street (John Snow residence) and 28 Dean Street (Karl Marx residence).
-#' @note 18 Sackville Street and 28 Dean Street are approximate. Falconberg Court & Mews form an isolate: they are not part of the network of roads and are technically unreachable. Adam and Eve Court and its pump also form an isolate.
-#' @return Add base R points and text to a graphics plot.
 #' @param text.size Numeric. cex for text labels.
+#' @note The location of 18 Sackville Street and 28 Dean Street are approximate. Falconberg Court & Mews form an isolate: they are not part of the network of roads and are technically unreachable. Adam and Eve Court and its pump also form an isolate.
 #' @seealso \code{\link{snowMap}},
 #' \code{\link{addIndexCase}},
 #' \code{\link{addKernelDensity}},
@@ -11,6 +9,7 @@
 #' \code{\link{addSnow}},
 #' \code{\link{addVoronoi}},
 #' \code{\link{addWhitehead}}
+#' @return Base R points and text.
 #' @import graphics
 #' @export
 #' @examples
@@ -30,7 +29,8 @@ addLandmarks <- function(text.size = 0.5) {
 
   # St. Luke's Church; Henry Whitehead Assistant Curate
   st.luke <- data.frame(x = 14.94156, y = 11.25313)
-  text(st.luke$x, st.luke$y, labels = "St. Luke's\nChurch", cex = text.size)
+  text(st.luke$x, st.luke$y, labels = "St. Luke's\nChurch", cex = text.size,
+    pos = 4, offset = 0.25)
   points(st.luke$x, st.luke$y, pch = 15, cex = 1/3)
 
   # Soho Square
@@ -81,40 +81,40 @@ addLandmarks <- function(text.size = 0.5) {
   nm <- c("x", "y")
 
   # Marlborough Mews: Earl of Aberdeen
-  NW <- stats::setNames(cholera::road.segments[cholera::road.segments$id ==
-    "116-2", c("x2", "y2")], nm)
-  NE <- stats::setNames(cholera::road.segments[cholera::road.segments$id ==
-    "144-1", c("x2", "y2")], nm)
-  SW <- stats::setNames(cholera::road.segments[cholera::road.segments$id ==
-    "161-1", c("x2", "y2")], nm)
-  SE <- stats::setNames(cholera::road.segments[cholera::road.segments$id ==
-    "161-1", c("x1", "y1")], nm)
-
-  aberdeen <- segmentIntersection(NW$x, NW$y, SE$x, SE$y,
-                                  NE$x, NE$y, SW$x, SW$y)
-
-  points(aberdeen$x, aberdeen$y, pch = 15, cex = 1/3)
-  text(aberdeen$x, aberdeen$y, labels = "Earl of\nAberdeen",
-    cex = text.size)
+  # NW <- stats::setNames(cholera::road.segments[cholera::road.segments$id ==
+  #   "116-2", c("x2", "y2")], nm)
+  # NE <- stats::setNames(cholera::road.segments[cholera::road.segments$id ==
+  #   "144-1", c("x2", "y2")], nm)
+  # SW <- stats::setNames(cholera::road.segments[cholera::road.segments$id ==
+  #   "161-1", c("x2", "y2")], nm)
+  # SE <- stats::setNames(cholera::road.segments[cholera::road.segments$id ==
+  #   "161-1", c("x1", "y1")], nm)
+  #
+  # aberdeen <- segmentIntersection(NW$x, NW$y, SE$x, SE$y,
+  #                                 NE$x, NE$y, SW$x, SW$y)
+  #
+  # points(aberdeen$x, aberdeen$y, pch = 15, cex = 1/3)
+  # text(aberdeen$x, aberdeen$y, labels = "Earl of\nAberdeen",
+    # cex = text.size)
 
   # 1) Marlborough Mews: Police Station
 
-  rd.data <- cholera::road.segments[cholera::road.segments$id == "161-1",
-    c("x1", "y1", "x2", "y2")]
-
-  dat <- data.frame(x = unlist(rd.data[, grep("x", names(rd.data))]),
-                    y = unlist(rd.data[, grep("y", names(rd.data))]),
-                    row.names = NULL)
-
-  ols <- stats::lm(y ~ x, dat)
-  segment.slope <- stats::coef(ols)[2]
-  new.int <- aberdeen$y - aberdeen$x * segment.slope
-  orthogonal.slope <- -1 / segment.slope
-  orthogonal.intercept <- SW$y - orthogonal.slope * SW$x
-  new.x <- (orthogonal.intercept - new.int) / (segment.slope - orthogonal.slope)
-  new.y <- new.x * orthogonal.slope + orthogonal.intercept
-  points(new.x, new.y, pch = 15, cex = 1/3)
-  text(new.x, new.y, labels = "Police\nStation", cex = text.size)
+  # rd.data <- cholera::road.segments[cholera::road.segments$id == "161-1",
+  #   c("x1", "y1", "x2", "y2")]
+  #
+  # dat <- data.frame(x = unlist(rd.data[, grep("x", names(rd.data))]),
+  #                   y = unlist(rd.data[, grep("y", names(rd.data))]),
+  #                   row.names = NULL)
+  #
+  # ols <- stats::lm(y ~ x, dat)
+  # segment.slope <- stats::coef(ols)[2]
+  # new.int <- aberdeen$y - aberdeen$x * segment.slope
+  # orthogonal.slope <- -1 / segment.slope
+  # orthogonal.intercept <- SW$y - orthogonal.slope * SW$x
+  # new.x <- (orthogonal.intercept - new.int) / (segment.slope - orthogonal.slope)
+  # new.y <- new.x * orthogonal.slope + orthogonal.intercept
+  # points(new.x, new.y, pch = 15, cex = 1/3)
+  # text(new.x, new.y, labels = "Police\nStation", cex = text.size)
 
   # 2) Regent (opposite) at intersection with Little Argyll Street: Chapel
 
@@ -125,20 +125,20 @@ addLandmarks <- function(text.size = 0.5) {
   # Distillery and St James Church
   # https://maps.nls.uk/os/london-1890s/index.html
 
-  NW <- stats::setNames(cholera::road.segments[cholera::road.segments$id ==
-    "257-1", c("x1", "y1")], nm)
-  NE <- stats::setNames(cholera::road.segments[cholera::road.segments$id ==
-    "305-1", c("x1", "y1")], nm)
-  SE <- stats::setNames(cholera::road.segments[cholera::road.segments$id ==
-    "306-1", c("x1", "y1")], nm)
-  SW <- stats::setNames(cholera::road.segments[cholera::road.segments$id ==
-    "306-1", c("x2", "y2")], nm)
-
-  st.james <- segmentIntersection(NW$x, NW$y, SE$x, SE$y,
-                                  NE$x, NE$y, SW$x, SW$y)
-
-  text(st.james$x, st.james$y, labels = "St James\nChurch",
-    cex = text.size)
+  # NW <- stats::setNames(cholera::road.segments[cholera::road.segments$id ==
+  #   "257-1", c("x1", "y1")], nm)
+  # NE <- stats::setNames(cholera::road.segments[cholera::road.segments$id ==
+  #   "305-1", c("x1", "y1")], nm)
+  # SE <- stats::setNames(cholera::road.segments[cholera::road.segments$id ==
+  #   "306-1", c("x1", "y1")], nm)
+  # SW <- stats::setNames(cholera::road.segments[cholera::road.segments$id ==
+  #   "306-1", c("x2", "y2")], nm)
+  #
+  # st.james <- segmentIntersection(NW$x, NW$y, SE$x, SE$y,
+  #                                 NE$x, NE$y, SW$x, SW$y)
+  #
+  # text(st.james$x, st.james$y, labels = "St James\nChurch",
+  #   cex = text.size)
 
   # 4) Oxford Street (opposite) at intersection with Winsley Street:
   # Pantheon Bazaar`
@@ -174,8 +174,11 @@ addLandmarks <- function(text.size = 0.5) {
   points(model.lodging$x, model.lodging$y, pch = 15, cex = 1/3)
   text(model.lodging$x, model.lodging$y, labels = "Model\nLodging",
     cex = text.size)
+  # text(model.lodging$x, model.lodging$y, labels = "Model Lodging",
+  #  cex = text.size)
 
-  # 7) Marshall Street Public Baths
+  # 7) Marshall Street Public Baths built 1851-2  (Marshall Street)
+  # http://www.british-history.ac.uk/survey-london/vols31-2/pt2/pp196-208
 
   intersectionPoint <- function(seg1, seg2, sel = 1) {
     s1 <- cholera::road.segments[cholera::road.segments$id == seg1, ]

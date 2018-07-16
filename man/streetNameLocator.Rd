@@ -6,7 +6,8 @@
 \usage{
 streetNameLocator(road.name, zoom = FALSE, radius = 0.1,
   cases = "anchors", add.title = TRUE, add.pump = TRUE, vestry = FALSE,
-  highlight = TRUE, unit = "meter")
+  highlight = TRUE, unit = "meter", time.unit = "minute",
+  walking.speed = 5)
 }
 \arguments{
 \item{road.name}{Character vector. Note that \code{streetNameLocator}() tries to correct for case and to remove extra spaces.}
@@ -25,7 +26,11 @@ streetNameLocator(road.name, zoom = FALSE, radius = 0.1,
 
 \item{highlight}{Logical. Highlight selected road.}
 
-\item{unit}{Character. Unit of measurement: "meter" or "yard". NULL returns the map's native scale.}
+\item{unit}{Character. Unit of distance: "meter", "yard" or "native". "native" returns the map's native scale. See \code{vignette("roads")} for information on conversion.}
+
+\item{time.unit}{Character. "hour", "minute", or "second".}
+
+\item{walking.speed}{Numeric. Walking speed in km/hr.}
 }
 \value{
 A base R graphics plot.
@@ -40,5 +45,5 @@ streetNameLocator("Cambridge Street", zoom = TRUE)
 streetNameLocator("Cambridge Street", zoom = TRUE, radius = 0)
 }
 \seealso{
-\code{\link{roads}}, \code{\link{road.segments}}, \code{\link{streetNumberLocator}}, \code{vignette("road.names")}
+\code{\link{roads}}, \code{\link{road.segments}}, \code{\link{streetNumberLocator}}, \code{vignette("roads")}
 }

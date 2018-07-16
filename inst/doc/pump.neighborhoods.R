@@ -4,6 +4,9 @@ library(cholera)
 ## ---- fig.width = 5, fig.height = 5, fig.align = "center", message = FALSE----
 plot(neighborhoodVoronoi())
 
+## ---- fig.width = 5, fig.height = 5, fig.align = "center", message = FALSE----
+plot(neighborhoodVoronoi(-7))
+
 ## ------------------------------------------------------------------------
 # print(neighborhoodVoronoi()) or
 neighborhoodVoronoi()

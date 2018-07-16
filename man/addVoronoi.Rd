@@ -19,7 +19,10 @@ addVoronoi(pump.select = NULL, vestry = FALSE, color = "black",
 \item{...}{Additional plotting parameters.}
 }
 \description{
-Uses deldir::deldir().
+Add Voronoi cells.
+}
+\note{
+This function uses deldir::deldir().
 }
 \examples{
 snowMap(add.landmarks = FALSE)

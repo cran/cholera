@@ -1,27 +1,26 @@
-#' Convert nominal map distance to yards or meters.
+#' Convert nominal map distance to meters or yards.
 #'
 #' A best guess estimate.
 #' @param x Numeric. Nominal map distance.
-#' @param unit Character. Unit of measurement: "meter" or "yard". Default is NULL, which returns the map's native scale. See \code{vignette("roads")} for information on conversion.
+#' @param unit Character. Unit of distance: "meter", "yard" or "native". "native" returns the map's native scale. See \code{vignette("roads")} for information on conversion.
+#' @param yard.unit Numeric. Estimate of yards per map unit: 177 / 3.
+#' @param meter.unit Numeric. Estimate of meters per map unit: 54.
 #' @export
 
-unitMeter <- function(x, unit = NULL) {
+unitMeter <- function(x, unit = "meter", yard.unit = 177 / 3, meter.unit = 54) {
   if (is.numeric(x) == FALSE) {
     stop('"x" must be numeric.')
   }
 
-  if (is.null(unit) == FALSE) {
-    if (unit %in% c("meter", "yard") == FALSE)
-      stop('If specified, "unit" must either be "meter" or "yard".')
+  if (unit %in% c("meter", "yard", "native") == FALSE) {
+    stop('"unit" must be "meter", "yard" or "native".')
   }
 
-  if (is.null(unit)) {
+  if (unit == "meter") {
+    x * meter.unit
+  } else if (unit == "yard") {
+    x * yard.unit
+  } else if (unit == "native") {
     x
-  } else {
-    if (unit == "yard") {
-      x * 177 / 3
-    } else if (unit == "meter") {
-      x * 54
-    }
   }
 }

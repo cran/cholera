@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 [![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/cholera)](https://cran.r-project.org/package=cholera)
-[![GitHub\_Status\_Badge](https://img.shields.io/badge/GitHub-0.4.0-red.svg)](https://github.com/lindbrook/cholera/blob/master/NEWS)
+[![GitHub\_Status\_Badge](https://img.shields.io/badge/GitHub-0.5.0-red.svg)](https://github.com/lindbrook/cholera/blob/master/NEWS)
 
 cholera: amend, augment and aid analysis of John Snow's 1854 cholera map
 ------------------------------------------------------------------------
@@ -9,12 +9,12 @@ cholera: amend, augment and aid analysis of John Snow's 1854 cholera map
 ### package features
 
 -   Fixes three apparent coding errors in Dodson and Tobler's 1992 digitization of Snow's map.
--   "Unstacks" the data in two ways to improve analysis and visualization.
--   Computes and visualizes "pump neighborhoods" based on Euclidean (Voronoi tessellation) and walking distance.
--   Ability to overlay graphical features like kernel density, Voronoi diagrams, Snow's Broad Street neighborhood, and notable landmarks (John Snow's residence, the Lion Brewery, etc.).
--   Includes a variety of functions to highlight specific cases, roads, pumps and walking paths.
+-   "Unstacks" the data in two ways to make analysis and visualization easier and more meaningful.
+-   Computes and visualizes "pump neighborhoods" based on Voronoi tessellation, Euclidean distance, and walking distance.
+-   Ability to overlay graphical elements and features like kernel density, Voronoi diagrams, Snow's Broad Street neighborhood, and notable landmarks (John Snow's residence, the Lion Brewery, etc.) via add\*() functions.
+-   Includes a variety of functions to highlight specific cases, roads, pumps and paths.
 -   Appends street names to the roads data set.
--   Includes the revised pump data used in the second version of Snow's map from the Vestry report. This includes the "correct" location of the Broad Street pump.
+-   Includes the revised pump data used in the second version of Snow's map from the Vestry report, which includes the "correct" location of the Broad Street pump.
 -   Adds two different aggregate time series fatalities data sets, taken from the Vestry report.
 
 ### background
@@ -66,18 +66,28 @@ plot(neighborhoodWalking(-7))
 You can also explore "expected" neighborhoods. Currently, you can do so in three ways. The first colors roads.
 
 ``` r
-plot(neighborhoodWalking(case.set = "expected", vestry = TRUE))
+plot(neighborhoodWalking(case.set = "expected"))
 ```
 
 ![](man/figures/README-expected-1.png)
 
-The second and third color each neighborhood's area by using either points or polygons. The polygon implementation is shown below. It's new, still under development and will for certain configurations throw an error. For exploration, type = "road" (the default shown above) or type = "area.points" is still preferable.
+The second and third color each neighborhood's area by using either points or polygons. The polygon implementation is shown below. For exploration, the other options faster.
 
 ``` r
-plot(neighborhoodWalking(case.set = "expected", vestry = TRUE), type = "area.polygons")
+plot(neighborhoodWalking(case.set = "expected"), type = "area.polygons")
 ```
 
 ![](man/figures/README-expected_area_polygons-1.png)
+
+The main virtue of the polygon approach is that it better lends itself to building graphs at different scales:
+
+``` r
+streetNameLocator("marshall street", zoom = TRUE, highlight = FALSE,
+  add.title = FALSE, radius = 0.5)
+addNeighborhood()
+```
+
+<img src="man/figures/README-unnamed-chunk-3-1.png" style="display: block; margin: auto;" />
 
 ### getting started
 
@@ -95,11 +105,20 @@ To install the development version of 'cholera' from GitHub:
 devtools::install_github("lindbrook/cholera", build_vignettes = TRUE)
 ```
 
-Read the package's vignettes. They include detailed discussions about the data, the functions and the methods used to "fix" the data and to compute walking distances and neighborhoods.
+Read the package vignettes (and the lab notes, if interested). They expand on the concept of a "pump neighborhood", and go into greater detail on how the data was "fixed" and on the methods used to compute walking distances and pump neighborhoods.
+
+They are also available online at the links below:
+
+[Pump Neighborhoods](https://github.com/lindbrook/cholera/blob/master/docs/pump.neighborhoods.md) [+ lab notes](https://github.com/lindbrook/cholera/blob/master/docs/pump.neighborhoods.notes.md)   
+[Duplicate and Missing Cases](https://github.com/lindbrook/cholera/blob/master/docs/duplicate.missing.cases.md) [+ lab notes](https://github.com/lindbrook/cholera/blob/master/docs/duplicate.missing.cases.notes.md)   
+["Unstacking" Bars](https://github.com/lindbrook/cholera/blob/master/docs/unstacking.bars.md) [+ lab notes](https://github.com/lindbrook/cholera/blob/master/docs/unstacking.bars.notes.md)   
+[Roads](https://github.com/lindbrook/cholera/blob/master/docs/roads.md)   
+[Time Series](https://github.com/lindbrook/cholera/blob/master/docs/time.series.md)   
+[Kernel Density Plot](https://github.com/lindbrook/cholera/blob/master/docs/kernel.density.md)
 
 ### note
 
-neighborhoodWalking() and addNeighborhood() are computationally intensive. On a single core of a 2.3 GHz Intel i7, plotting observed paths to PDF takes about 6 seconds while doing so for expected paths takes about 30 seconds. Using the parallel implementation on 4 physical (8 logical) cores, these times fall to about 4 and 12 seconds.
+neighborhoodWalking() and addNeighborhood() are computationally intensive. Using R version 3.5.1 on a single core of a 2.3 GHz Intel i7, plotting observed paths to PDF takes about 5 seconds; doing the same for expected paths takes about 28 seconds. Using the functions' parallel implementation on 4 physical (8 logical) cores, the times fall to about 4 and 11 seconds.
 
 Note that parallelization is currently only available on Linux and Mac.
 

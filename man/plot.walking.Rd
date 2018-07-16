@@ -19,10 +19,9 @@ A base R plot.
 \description{
 Plot method for neighborhoodWalking().
 }
-\section{Note}{
- "area.polygons" is under development and, for certain configurations, may return an error. For now, "area.points" is the more robust choice, especially for data exploration.
+\note{
+When plotting area graphs with simulated data (i.e., case.set = "expected"), there may be discrepancies between observed cases and expected neighborhoods, particularly between neighborhoods. The "area.points" plot takes about 28 seconds (11 using the parallel implementation). The "area.polygons" plot takes 49 seconds (17 using the parallel implementation).
 }
-
 \examples{
 # plot(neighborhoodWalking())
 # plot(neighborhoodWalking(case.set = "expected"))

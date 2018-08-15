@@ -1,14 +1,14 @@
 #' Compute path of the Euclidean distance between cases and/or pumps.
 #'
 #' @param origin Numeric or Integer. Numeric ID of case or pump.
-#' @param destination Numeric or Integer. Numeric ID(s) of case(s) or pump(s). Exclusion is possible via negative selection (e.g., -7). Default is NULL: this returns closest pump or "anchor" case.
+#' @param destination Numeric or Integer. Numeric ID(s) of case(s) or pump(s). Exclusion is possible via negative selection (e.g., -7). Default is \code{NULL}: this returns closest pump or "anchor" case.
 #' @param type Character "case-pump", "cases" or "pumps".
 #' @param observed Logical. Use observed or "simulated" expected data.
-#' @param vestry Logical. TRUE uses the 14 pumps from the Vestry Report. FALSE uses the 13 pumps from the original map.
+#' @param vestry Logical. \code{TRUE} uses the 14 pumps from the Vestry Report. \code{FALSE} uses the 13 pumps from the original map.
 #' @param unit Character. Unit of distance: "meter", "yard" or "native". "native" returns the map's native scale. See \code{vignette("roads")} for information on unit distances.
 #' @param time.unit Character. "hour", "minute", or "second".
 #' @param walking.speed Numeric. Default is 5 km/hr.
-#' @note The function uses a case's "address" (i.e., "anchor" case of a stack) to compute distance. Time is computed using distanceTime().
+#' @note The function uses a case's "address" (i.e., "anchor" case of a stack) to compute distance. Time is computed using \code{distanceTime()}.
 #' @return An R list with 3 data frames: x-y coordinates for the origin and destination, and a summary of results.
 #' @export
 #' @examples
@@ -35,119 +35,112 @@ euclideanPath <- function(origin, destination = NULL, type = "case-pump",
   walking.speed = 5) {
 
   if (unit %in% c("meter", "yard", "native") == FALSE) {
-    stop('"unit" must be "meter", "yard" or "native".')
+    stop('unit must be "meter", "yard" or "native".')
   }
 
   if (time.unit %in% c("hour", "minute", "second") == FALSE) {
-    stop('"time.unit" must be "hour", "minute" or "second".')
+    stop('time.unit must be "hour", "minute" or "second".')
   }
 
   if (type %in% c("case-pump", "cases", "pumps") == FALSE) {
-    stop('"type" must be "case-pump", "cases" or "pumps".')
+    stop('type must be "case-pump", "cases" or "pumps".')
   }
 
-  n.sim.obs <- nrow(cholera::regular.cases)
+  obs.ct <- nrow(cholera::fatalities)
+  exp.ct <- nrow(cholera::regular.cases)
+
+  if (observed) ct <- obs.ct else ct <- exp.ct
+
+  if (vestry) {
+    p.data <- cholera::ortho.proj.pump.vestry
+    p.data$street <- cholera::pumps.vestry$street
+  } else {
+    p.data <- cholera::ortho.proj.pump
+    p.data$street <- cholera::pumps$street
+  }
+
+  p.count <- nrow(p.data)
+  p.ID <- seq_len(p.count)
+
+  # ----- #
 
   if (type == "case-pump") {
-    if (observed) {
-      if (origin %in% 1:578 == FALSE) {
-        txt1 <- 'With type = "case-pump" and "observed" = TRUE,'
-        txt2 <- '"origin" must be between 1 and 578.'
-        stop(paste(txt1, txt2))
-      }
-    } else {
-      if (origin %in% 1:n.sim.obs == FALSE) {
-        txt1 <- 'With type = "case-pump" and "observed" = FALSE,'
-        txt2 <- '"origin" must be between 1 and'
-        stop(paste(txt1, txt2, n.sim.obs, "."))
-      }
+    if (origin %in% seq_len(ct) == FALSE) {
+      txt1 <- 'With type = "case-pump" and observed = '
+      txt2 <- 'origin must be between 1 and '
+      stop(txt1, observed, ", ", txt2, ct, ".")
     }
 
-    if (!is.null(destination)) {
-      if (vestry) {
-        if (any(abs(destination) %in% 1:14 == FALSE)) {
-          txt1 <- 'With type = "case-pump" and "vestry = TRUE",'
-          txt2 <- '1 >= |destination| <= 14.'
-          stop(paste(txt1, txt2))
-        } else {
-          alters <- cholera::pumps.vestry[destination, ]
-        }
-      } else {
-        if (any(abs(destination) %in% 1:13 == FALSE)) {
-          txt1 <- 'With type = "case-pump" and "vestry = FALSE",'
-          txt2 <- '1 >= |destination| <= 13.'
-          stop(paste(txt1, txt2))
-        } else {
-          alters <- cholera::pumps[destination, ]
-        }
-      }
+    if (is.null(destination)) {
+      alters <- p.data
     } else {
-      if (vestry) {
-        alters <- cholera::pumps.vestry
+      if (any(abs(destination) %in% p.ID == FALSE)) {
+        stop('With vestry = ', vestry, ', 1 >= |destination| <= ', p.count)
       } else {
-        alters <- cholera::pumps
+        if (vestry) {
+          alters <- p.data[destination, ]
+          alters$street <- cholera::pumps.vestry[destination, "street"]
+        } else {
+          alters <- p.data[destination, ]
+          alters$street <- cholera::pumps[destination, "street"]
+        }
       }
     }
 
     if (observed) {
       ego.id <- cholera::anchor.case[cholera::anchor.case$case == origin,
         "anchor.case"]
-      ego <- cholera::fatalities[cholera::fatalities$case == ego.id,
-        c("x", "y")]
+      ego <- cholera::ortho.proj[cholera::ortho.proj$case == ego.id,
+        c("x.proj", "y.proj")]
     } else {
-      ego <- cholera::regular.cases[origin, ]
-      ego.id <- as.numeric(row.names(ego))
+      ego.id <- cholera::sim.ortho.proj[cholera::sim.ortho.proj$case == origin,
+        "case"]
+      ego <- cholera::sim.ortho.proj[cholera::sim.ortho.proj$case == origin,
+        c("x.proj", "y.proj")]
     }
 
-    d <- vapply(alters$id, function(i) {
-      c(stats::dist(rbind(alters[alters$id == i, c("x", "y")], ego)))
+    d <- vapply(alters$pump.id, function(i) {
+      c(stats::dist(rbind(alters[alters$pump.id == i, c("x.proj", "y.proj")],
+        ego)))
     }, numeric(1L))
 
     sel <- which.min(d)
     out <- data.frame(case = origin,
                       anchor = ego.id,
-                      pump = alters[sel, "id"],
+                      pump = alters[sel, "pump.id"],
                       pump.name = alters[sel, "street"],
                       distance = d[sel],
                       stringsAsFactors = FALSE)
 
   } else if (type == "cases") {
-    if (observed) {
-      if (any(abs(c(origin, destination)) %in% 1:578 == FALSE)) {
-        txt1 <- 'With type = "cases", the absolute value of both "origin"'
-        txt2 <- 'and "destination" must be between 1 and 578.'
-        stop(paste(txt1, txt2))
-      }
-    } else {
-      if (any(abs(c(origin, destination)) %in% 1:n.sim.obs == FALSE)) {
-        txt1 <- 'With type = "cases", the absolute value of both "origin"'
-        txt2 <- 'and "destination" must be between 1 and'
-        stop(paste(txt1, txt2, n.sim.obs, "."))
-      }
+    if (any(abs(c(origin, destination)) %in% seq_len(ct) == FALSE)) {
+      txt1 <- 'With type = "cases" and observed = '
+      txt2 <- ', the absolute values of origin and of destination must be '
+      txt3 <- 'between 1 and '
+      stop(txt1, observed, txt2, txt3, ct, ".")
     }
 
     if (observed) {
       ego.id <- unique(cholera::anchor.case[cholera::anchor.case$case %in%
         origin, "anchor.case"])
-      ego <- cholera::fatalities[cholera::fatalities$case == ego.id, ]
-    } else {
-      ego <- cholera::regular.cases[origin, ]
-      ego.id <- as.numeric(row.names(ego))
-    }
+      ego <- cholera::ortho.proj[cholera::ortho.proj$case == ego.id, ]
 
-    if (observed) {
       if (is.null(destination)) {
         alters.id <- cholera::fatalities.address$anchor.case
       } else {
         if (all(destination > 0)) {
-          alters.id <- unique(cholera::anchor.case[cholera::anchor.case$case
-            %in% destination, "anchor.case"])
+          alters.id <- unique(cholera::ortho.proj[cholera::ortho.proj$case
+            %in% destination, "case"])
         } else if (all(destination < 0)) {
-          alters.id <- unique(cholera::anchor.case[cholera::anchor.case$case
-            %in% abs(destination) == FALSE, "anchor.case"])
+          alters.id <- unique(cholera::ortho.proj[cholera::ortho.proj$case
+            %in% abs(destination) == FALSE, "case"])
         }
       }
     } else {
+      ego.id <- cholera::sim.ortho.proj[cholera::sim.ortho.proj$case == origin,
+        "case"]
+      ego <- cholera::sim.ortho.proj[cholera::sim.ortho.proj$case == origin, ]
+
       if (is.null(destination)) {
         alters.id <- cholera::sim.ortho.proj$case
       } else {
@@ -169,86 +162,61 @@ euclideanPath <- function(origin, destination = NULL, type = "case-pump",
                         distance = 0,
                         stringsAsFactors = FALSE)
     } else {
-      alters <- cholera::fatalities[cholera::fatalities$case %in% alters.id, ]
+      vars <- c("x.proj", "y.proj")
+
+      alters <- cholera::sim.ortho.proj[cholera::sim.ortho.proj$case %in%
+        alters.id, ]
       alters <- alters[alters$case != ego.id, ]
 
       d <- vapply(alters$case, function(i) {
-        dat <- rbind(ego[, c("x", "y")], alters[alters$case == i, c("x", "y")])
+        dat <- rbind(ego[, vars], alters[alters$case == i, vars])
         c(stats::dist(dat))
       }, numeric(1L))
 
       sel <- which.min(d)
 
-      if (is.null(destination) | all(destination < 0)) {
-        out <- data.frame(caseA = origin,
-                          caseB = alters$case[sel],
-                          anchorA = ego$case,
-                          anchorB = alters$case[sel],
-                          distance = d[which.min(d)],
-                          stringsAsFactors = FALSE)
-      } else if (all(destination > 0)) {
-        if (length(destination) == 1) {
-          out <- data.frame(caseA = origin,
-                            caseB = destination,
-                            anchorA = ego$case,
-                            anchorB = alters$case[sel],
-                            distance = d[which.min(d)],
-                            stringsAsFactors = FALSE)
-        } else if (length(destination) > 1) {
-          out <- data.frame(caseA = origin,
-                            caseB = destination[sel],
-                            anchorA = ego$case,
-                            anchorB = alters$case[sel],
-                            distance = d[which.min(d)],
-                            stringsAsFactors = FALSE)
-        }
-      }
+      out <- data.frame(caseA = origin,
+                        caseB = alters$case[sel],
+                        anchorA = ego$case,
+                        anchorB = alters$case[sel],
+                        distance = d[sel],
+                        stringsAsFactors = FALSE)
     }
 
   } else if (type == "pumps") {
-    if (!is.null(destination)) {
-      if (vestry) {
-        if (any(abs(c(origin, destination)) %in% 1:14 == FALSE)) {
-          txt1 <- 'With type = "pumps" and "vestry = TRUE",'
-          txt2 <- 'origin and destination must be 1 >= |x| <= 14.'
-          stop(paste(txt1, txt2))
-        } else {
-          ego <- cholera::pumps.vestry[cholera::pumps.vestry$id == origin, ]
-          alters <- cholera::pumps.vestry[destination, ]
-          alters <- alters[alters$id != origin, ]
-        }
-      } else {
-        if (any(abs(c(origin, destination)) %in% 1:13 == FALSE)) {
-          txt1 <- 'With type = "pumps" and "vestry = FALSE",'
-          txt2 <- 'origin and destination must be 1 >= |x| <= 13.'
-          stop(paste(txt1, txt2))
-        } else {
-          ego <- cholera::pumps[cholera::pumps$id == origin, ]
-          alters  <- cholera::pumps[destination, ]
-          alters <- alters[alters$id != origin, ]
-        }
-      }
-    } else {
-      if (vestry) {
-        ego <- cholera::pumps.vestry[cholera::pumps.vestry$id == origin, ]
-        alters <- cholera::pumps.vestry[cholera::pumps.vestry$id != origin, ]
-      } else {
-        ego <- cholera::pumps[cholera::pumps$id == origin, ]
-        alters <- cholera::pumps[cholera::pumps$id != origin, ]
-      }
+    if (origin %in% p.ID == FALSE) {
+      stop('With vestry = ', vestry, ', 1 >= |origin| <= ', p.count, ".")
     }
 
-    d <- vapply(alters$id, function(i) {
-      dat <- rbind(ego[, c("x", "y")], alters[alters$id == i, c("x", "y")])
+    ego <- p.data[p.data$pump.id == origin, ]
+
+    if (!is.null(destination)) {
+      if (any(abs(destination) %in% p.ID == FALSE)) {
+        stop('With vestry = ', vestry, ', 1 >= |destination| <= ', p.count, ".")
+      } else {
+        if (all(destination > 0)) {
+          alters <- p.data[destination, ]
+        } else if (all(destination < 0)) {
+          alters <- p.data[p.data$pump.id %in% abs(destination) == FALSE, ]
+        }
+        alters <- alters[alters$pump.id != origin, ]
+      }
+    } else {
+      alters <- p.data[p.data$pump.id != origin, ]
+    }
+
+    d <- vapply(alters$pump.id, function(i) {
+      dat <- rbind(ego[, c("x.proj", "y.proj")], alters[alters$pump.id == i,
+        c("x.proj", "y.proj")])
       c(stats::dist(dat))
     }, numeric(1L))
 
     sel <- which.min(d)
-    out <- data.frame(pumpA = ego$id,
-                      pumpB = alters$id[sel],
+    out <- data.frame(pumpA = ego$pump.id,
+                      pumpB = alters$pump.id[sel],
                       pump.nameA = ego$street,
                       pump.nameB = alters$street[sel],
-                      distance = d[which.min(d)],
+                      distance = d[sel],
                       stringsAsFactors = FALSE)
   }
 
@@ -263,8 +231,8 @@ euclideanPath <- function(origin, destination = NULL, type = "case-pump",
     out$distance <- cholera::unitMeter(out$distance, "native")
   }
 
-  output <- list(ego = ego[, c("x", "y")],
-                 alter = alters[sel, c("x", "y")],
+  output <- list(ego = ego[, c("x.proj", "y.proj")],
+                 alter = alters[sel, c("x.proj", "y.proj")],
                  origin = origin,
                  destination = destination,
                  type = type,
@@ -285,7 +253,7 @@ euclideanPath <- function(origin, destination = NULL, type = "case-pump",
 
 #' Summary of euclideanPath().
 #'
-#' @param x An object of class "euclidean_path" created by euclideanPath().
+#' @param x An object of class "euclidean_path" created by \code{euclideanPath()}.
 #' @param ... Additional parameters.
 #' @return An R data frame.
 #' @export
@@ -295,7 +263,7 @@ euclideanPath <- function(origin, destination = NULL, type = "case-pump",
 
 print.euclidean_path <- function(x, ...) {
   if (class(x) != "euclidean_path") {
-    stop('"x"\'s class needs to be "euclidean_path".')
+    stop('"x"\'s class must be "euclidean_path".')
   }
 
   print(x[c("ego", "alter", "data")])
@@ -306,8 +274,8 @@ print.euclidean_path <- function(x, ...) {
 #' @param x An object of class "euclidean_path" created by euclideanPath().
 #' @param zoom Logical.
 #' @param radius Numeric. Controls the degree of zoom.
-#' @param unit.posts Character. "distance" for mileposts; "time" for timeposts; NULL for no posts.
-#' @param unit.interval Numeric. Set interval between posts. When "unit.posts" is "distance", "unit.interval" automatically defaults to 50 meters. When "unit.posts" is "time", "unit.interval" automatically defaults to 60 seconds.
+#' @param unit.posts Character. "distance" for mileposts; "time" for timeposts; \code{NULL} for no posts.
+#' @param unit.interval Numeric. Set interval between posts. When \code{unit.posts} is "distance", \code{unit.interval} automatically defaults to 50 meters. When \code{unit.posts} is "time", \code{unit.interval} automatically defaults to 60 seconds.
 #' @param ... Additional plotting parameters.
 #' @return A base R plot.
 #' @export
@@ -319,7 +287,7 @@ plot.euclidean_path <- function(x, zoom = TRUE, radius = 0.5,
   unit.posts = "distance", unit.interval = NULL, ...) {
 
   if (class(x) != "euclidean_path") {
-    stop('"x"\'s class needs to be "euclidean_path".')
+    stop('"x"\'s class must be "euclidean_path".')
   }
 
   rd <- cholera::roads[cholera::roads$street %in% cholera::border == FALSE, ]
@@ -329,48 +297,9 @@ plot.euclidean_path <- function(x, zoom = TRUE, radius = 0.5,
 
   colors <- cholera::snowColors(x$vestry)
 
-  if (x$vestry) {
-    pmp <- cholera::pumps.vestry
-  } else {
-    pmp <- cholera::pumps
-  }
-
-  end.sel <- x$sel
-
-  if (x$type == "case-pump" | x$type == "pumps") {
-    end.pump <- x$alters$id[end.sel]
-    alter.xy <- pmp[pmp$id == end.pump, c("x", "y")]
-  } else if (x$type == "cases") {
-    end.case <- x$alters$case[end.sel]
-
-    if (x$observed) {
-      alter.xy <- cholera::fatalities[cholera::fatalities$case == end.case,
-        c("x", "y")]
-    } else {
-      alter.xy <- cholera::regular.cases[end.case, c("x", "y")]
-    }
-  }
-
-  if (x$type == "case-pump" | x$type == "cases") {
-    if (x$observed) {
-      origin.xy <- cholera::fatalities[cholera::fatalities$case == x$origin,
-        c("x", "y")]
-      ego.id <- cholera::anchor.case[cholera::anchor.case$case == x$origin,
-        "anchor.case"]
-      addr <- cholera::fatalities.address
-      ego.xy <- addr[addr$anchor.case == ego.id,  c("x", "y")]
-    } else {
-      origin.xy <- cholera::regular.cases[x$origin, c("x", "y")]
-      ego.id <- x$origin
-      ego.xy <- origin.xy
-    }
-
-  } else if (x$type == "pumps") {
-    origin.xy <- pmp[pmp$id == x$origin, c("x", "y")]
-    ego.xy <- origin.xy
-  }
-
-  dat <- rbind(alter.xy, origin.xy)
+  origin.xy <- x$ego
+  alter.xy <- x$alter
+  dat <- stats::setNames(rbind(alter.xy, origin.xy), c("x", "y"))
 
   if (zoom) {
     x.rng <- c(min(dat$x) - radius, max(dat$x) + radius)
@@ -386,30 +315,24 @@ plot.euclidean_path <- function(x, zoom = TRUE, radius = 0.5,
   invisible(lapply(border.list, lines))
 
   if (x$type == "case-pump") {
-    case.color <- colors[end.pump]
+    destination.pump <- row.names(x$alter)
+    case.color <- colors[paste0("p", destination.pump)]
     points(origin.xy, col = "red")
-    title(main = paste("Case", x$origin, "to Pump", x$alters$id[end.sel]))
-  } else if (x$type == "cases") {
+    pumpToken(x, case.color, destination.pump)
+    title(main = paste("Case", x$origin, "to Pump", row.names(x$alter)))
+  } else if (x$type == "cases" | x$type == "pumps") {
     case.color <- "blue"
+    destination.case <- row.names(x$alter)
     points(origin.xy, col = case.color)
     points(alter.xy, col = case.color)
     text(origin.xy, labels = x$origin, pos = 1, col = case.color)
-    text(alter.xy, labels = end.case, pos = 1, col = case.color)
-    title(main = paste("Case", x$origin, "to Case", end.case))
-  } else if (x$type == "pumps") {
-    case.color <- "blue"
-    title(main = paste("Pump", x$origin, "to Pump", x$alters$id[end.sel]))
+    text(alter.xy, labels = destination.case, pos = 1, col = case.color)
   }
 
-  if (x$vestry) {
-    pump.names <- paste0("p", cholera::pumps.vestry$id)
-    points(cholera::pumps.vestry[, c("x", "y")], pch = 24, cex = 1,
-      col = colors)
-    text(cholera::pumps.vestry[, c("x", "y")], label = pump.names, pos = 1)
-  } else {
-    pump.names <- paste0("p", cholera::pumps$id)
-    points(cholera::pumps[, c("x", "y")], pch = 24, cex = 1, col = colors)
-    text(cholera::pumps[, c("x", "y")], label = pump.names, pos = 1)
+  if (x$type == "cases") {
+    title(main = paste("Case", x$origin, "to Case", destination.case))
+  } else if (x$type == "pumps") {
+    title(main = paste("Pump", x$origin, "to Pump", destination.case))
   }
 
   if (x$time.unit == "hour") {
@@ -431,13 +354,15 @@ plot.euclidean_path <- function(x, zoom = TRUE, radius = 0.5,
   # mileposts #
 
   if (is.null(unit.posts)) {
-    arrows(ego.xy$x, ego.xy$y, alter.xy$x, alter.xy$y, col = case.color,
-      lwd = 3, length = 0.075)
+    arrows(origin.xy$x.proj, origin.xy$y.proj,
+           alter.xy$x.proj, alter.xy$y.proj,
+           col = case.color, lwd = 3, length = 0.075)
+
     title(sub = paste(round(x$d, 1), d.unit, nominal.time, "@", x$speed,
       "km/hr"))
   } else {
     if (unit.posts %in% c("distance", "time") == FALSE) {
-      stop('If specified, "unit.posts" must be "distance" or "time".')
+      stop('If specified, unit.posts must be "distance" or "time".')
     } else {
       if (is.null(unit.interval)) {
         if (unit.posts == "distance")  {
@@ -447,7 +372,7 @@ plot.euclidean_path <- function(x, zoom = TRUE, radius = 0.5,
         }
       } else {
         if (!is.numeric(unit.interval)) {
-          stop('"unit.interval" must be numeric.')
+          stop('unit.interval must be numeric.')
         }
       }
 
@@ -460,17 +385,17 @@ plot.euclidean_path <- function(x, zoom = TRUE, radius = 0.5,
         h <- seq(0, tot, unit.interval) * 1000 * x$speed / 60^2 /
           cholera::unitMeter(1)
       } else {
-        stop('specify a "unit.posts"')
+        stop('Specify unit.posts.')
       }
 
       ols <- stats::lm(y ~ x, data = dat)
       edge.slope <- stats::coef(ols)[2]
       edge.intercept <- stats::coef(ols)[1]
-      theta <- atan(edge.slope)
+      theta <- ifelse(is.na(edge.slope), pi / 2, atan(edge.slope))
 
       p.coords <- quandrantCoordinates(dat, h, theta)
-      post.data <- data.frame(x = c(p.coords$x, ego.xy$x),
-                              y = c(p.coords$y, ego.xy$y))
+      post.data <- data.frame(x = c(p.coords$x, origin.xy$x.proj),
+                              y = c(p.coords$y, origin.xy$y.proj))
 
       a.data <- cbind(post.data[-nrow(post.data), ], post.data[-1, ])
       a.data <- stats::setNames(a.data, c("x1", "y1", "x2", "y2"))
@@ -483,6 +408,7 @@ plot.euclidean_path <- function(x, zoom = TRUE, radius = 0.5,
         zero.length.y <- round(abs(dataB[1, "y"] - dataB[2, "y"]), 2) == 0
 
         if (any(zero.length.x | zero.length.y)) {
+          drawPath(dat, case.color, compute.coords = FALSE)
           text(dataB[1, c("x", "y")], labels = ">", srt = theta * 180L / pi,
             col = case.color, cex = 1.5)
         } else {
@@ -502,4 +428,20 @@ plot.euclidean_path <- function(x, zoom = TRUE, radius = 0.5,
     title(sub = paste(round(x$d, 1), d.unit, nominal.time, "@", x$speed,
       "km/hr;", post.info))
   }
+}
+
+pumpToken <- function(x, case.color, destination.pump) {
+  if (x$vestry) {
+    obs.pump <- cholera::pumps.vestry
+    ortho.pump <- cholera::ortho.proj.pump.vestry
+  } else {
+    obs.pump <- cholera::pumps
+    ortho.pump <- cholera::ortho.proj.pump
+  }
+
+  obs.data <- obs.pump[obs.pump$id == as.numeric(destination.pump), ]
+  ortho.data <- ortho.pump[ortho.pump$pump.id == as.numeric(destination.pump), ]
+  points(obs.data[, c("x", "y")], pch = 24, cex = 1, col = case.color)
+  text(obs.data[, c("x", "y")], label = paste0("p", destination.pump), pos = 1)
+  points(ortho.data[, c("x.proj", "y.proj")], pch = 0, col = "red")
 }

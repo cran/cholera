@@ -7,7 +7,7 @@
 timeSeries(vestry = FALSE)
 }
 \arguments{
-\item{vestry}{Logical. TRUE returns the data from the Vestry committee (Appendix B, p. 175). FALSE (default) returns John Snow's contribution to the report (p.117).}
+\item{vestry}{Logical. \code{TRUE} returns the data from the Vestry committee (Appendix B, p. 175). \code{FALSE} returns John Snow's contribution to the report (p.117).}
 }
 \value{
 A R list with two objects: "data" and "source" ("snow" or "vestry").
@@ -25,7 +25,7 @@ Aggregate time series fatality data from the Vestry report.
 The "snow" data appears on p. 117 of the report; the "vestry" data appear in Appendix B on p.175.
 }
 \examples{
-timeSeries(vestr = TRUE)
+timeSeries(vestry = TRUE)
 plot(timeSeries())
 }
 \seealso{

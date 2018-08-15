@@ -4,17 +4,17 @@
 \alias{neighborhoodVoronoi}
 \title{Compute Voronoi pump neighborhoods.}
 \usage{
-neighborhoodVoronoi(pump.select = NULL, vestry = FALSE, statistic = NULL,
-  polygon.vertices = FALSE)
+neighborhoodVoronoi(pump.select = NULL, vestry = FALSE,
+  statistic = NULL, polygon.vertices = FALSE)
 }
 \arguments{
-\item{pump.select}{Numeric. Vector of numeric pump IDs to define pump neighborhoods (i.e., the "population"). Negative selection possible. NULL selects all pumps.}
+\item{pump.select}{Numeric. Vector of numeric pump IDs to define pump neighborhoods (i.e., the "population"). Negative selection possible. \code{NULL} selects all pumps.}
 
-\item{vestry}{Logical. TRUE uses the 14 pumps from the Vestry Report. FALSE uses the 13 in the original map.}
+\item{vestry}{Logical. \code{TRUE} uses the 14 pumps from the Vestry report. \code{FALSE} uses the 13 in the original map.}
 
-\item{statistic}{NULL or Character. NULL, the default, makes no summary computation. "address" computes the number of addresses in each selected pump neighborhood. "fatality" computes the number of fatalities in pump neighborhoods.}
+\item{statistic}{NULL or Character. \code{NULL}, the default, makes no summary computation. "address" computes the number of addresses in each selected pump neighborhood. "fatality" computes the number of fatalities in pump neighborhoods.}
 
-\item{polygon.vertices}{Logical. TRUE returns a list of x-y coordinates of the vertices of Voronoi cells. Useful for sp::point.in.polygon() as used in print.voronoi() method.}
+\item{polygon.vertices}{Logical. \code{TRUE} returns a list of x-y coordinates of the vertices of Voronoi cells. Useful for \code{sp::point.in.polygon()} as used in \code{print.voronoi()} method.}
 }
 \value{
 An R list with 12 objects.
@@ -43,7 +43,7 @@ neighborhoodVoronoi(pump.select = 6:7)
 neighborhoodVoronoi(pump.select = -6)
 neighborhoodVoronoi(pump.select = -6, polygon.vertices = TRUE)
 
-# coordinates for vertices also available in returned object.
+# coordinates for vertices also available in the returned object.
 dat <- neighborhoodVoronoi(pump.select = -6)
 dat$coordinates
 }

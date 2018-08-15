@@ -5,25 +5,25 @@
 \title{Compute the Euclidean distance between cases and/or pumps.}
 \usage{
 euclideanDistance(origin, destination = NULL, type = "case-pump",
-  observed = TRUE, vestry = FALSE, unit = "meter", time.unit = "second",
-  walking.speed = 5)
+  observed = TRUE, vestry = FALSE, unit = "meter",
+  time.unit = "second", walking.speed = 5)
 }
 \arguments{
 \item{origin}{Numeric or Integer. Numeric ID of case or pump.}
 
-\item{destination}{Numeric or Integer. Numeric ID(s) of case(s) or pump(s). Exclusion is possible via negative selection (e.g., -7). Default is NULL: this returns closest pump or "anchor" case.}
+\item{destination}{Numeric or Integer. Numeric ID(s) of case(s) or pump(s). Exclusion is possible via negative selection (e.g., -7). Default is \code{NULL}: this returns closest pump or "anchor" case.}
 
 \item{type}{Character "case-pump", "cases" or "pumps".}
 
 \item{observed}{Logical. Use observed or "simulated" expected data.}
 
-\item{vestry}{Logical. TRUE uses the 14 pumps from the Vestry Report. FALSE uses the 13 pumps from the original map.}
+\item{vestry}{Logical. \code{TRUE} uses the 14 pumps from the Vestry Report. \code{FALSE} uses the 13 pumps from the original map.}
 
 \item{unit}{Character. Unit of distance: "meter", "yard" or "native". "native" returns the map's native scale. See \code{vignette("roads")} for information on unit distances.}
 
 \item{time.unit}{Character. "hour", "minute", or "second".}
 
-\item{walking.speed}{Numeric. Default is 5 km/hr.}
+\item{walking.speed}{Numeric. Walking speed in km/hr.}
 }
 \value{
 An R data frame.
@@ -32,7 +32,7 @@ An R data frame.
 Compute the Euclidean distance between cases and/or pumps.
 }
 \note{
-The function uses a case's "address" (i.e., "anchor" case of a stack) to compute distance. Time is computed using distanceTime().
+The function uses a case's "address" (i.e., "anchor" case of a stack) to compute distance. Time is computed using \code{distanceTime()}.
 }
 \examples{
 # path from case 1 to nearest pump.

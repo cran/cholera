@@ -4,26 +4,27 @@
 \alias{addNeighborhood}
 \title{Add expected walking neighborhoods.}
 \usage{
-addNeighborhood(pump.subset = NULL, pump.select = NULL, vestry = FALSE,
-  weighted = TRUE, multi.core = FALSE, area = TRUE, path = NULL,
-  path.color = NULL, path.width = 3, alpha.level = 0.25, ...)
+addNeighborhood(pump.subset = NULL, pump.select = NULL,
+  vestry = FALSE, weighted = TRUE, multi.core = FALSE, area = TRUE,
+  path = NULL, path.color = NULL, path.width = 3,
+  alpha.level = 0.25, ...)
 }
 \arguments{
-\item{pump.subset}{Numeric. Vector of numeric pump IDs to select (subset) from the neighborhoods defined by "pump.select". Negative selection possible. NULL selects all pumps in "pump.select".}
+\item{pump.subset}{Numeric. Vector of numeric pump IDs to subset from the neighborhoods defined by \code{pump.select}. Negative selection possible. \code{NULL} uses all pumps in \code{pump.select}.}
 
-\item{pump.select}{Numeric. Numeric vector of pumps to define pump neighborhoods (i.e. the "population"). Negative selection possible. NULL selects all pumps.}
+\item{pump.select}{Numeric. Numeric vector of pump IDs that define which pump neighborhoods to consider (i.e., specify the "population"). Negative selection possible. \code{NULL} selects all pumps.}
 
-\item{vestry}{Logical. TRUE uses the 14 pumps from the Vestry Report. FALSE uses the 13 in the original map.}
+\item{vestry}{Logical. \code{TRUE} uses the 14 pumps from the Vestry Report. \code{FALSE} uses the 13 in the original map.}
 
-\item{weighted}{Logical. TRUE computes shortest path weighted by road length. FALSE computes shortest path in terms of the number of nodes.}
+\item{weighted}{Logical. \code{TRUE} computes shortest path weighted by road length. \code{FALSE} computes shortest path in terms of the number of nodes.}
 
-\item{multi.core}{Logical or Numeric. TRUE uses parallel::detectCores(). FALSE uses one, single core. You can also specify the number logical cores. On Window, only "multi.core = FALSE" is available.}
+\item{multi.core}{Logical or Numeric. \code{TRUE} uses \code{parallel::detectCores()}. \code{FALSE} uses one, single core. You can also specify the number logical cores. On Windows, only \code{multi.core = FALSE} is available.}
 
 \item{area}{Logical. Area polygons.}
 
 \item{path}{Character. "expected" or "observed".}
 
-\item{path.color}{Character. Use a single color for all paths. NULL uses neighborhood colors defined by snowColors().}
+\item{path.color}{Character. Use a single color for all paths. \code{NULL} uses neighborhood colors defined by \code{snowColors()}.}
 
 \item{path.width}{Numeric. Set width of paths.}
 
@@ -35,13 +36,15 @@ addNeighborhood(pump.subset = NULL, pump.select = NULL, vestry = FALSE,
 Add expected walking neighborhoods.
 }
 \note{
-This function is computationally intensive. On a single core of a 2.3 GHz Intel i7, plotting observed paths to PDF takes about 5 seconds while doing so for expected paths takes about 28 seconds. Using the parallel implementation on 4 physical (8 logical) cores, these times fall to about 4 and 11 seconds. Note that parallelization is currently only available on Linux and Mac, and that although some precautions are taken in R.app on macOS, the developers of the 'parallel' package, which neighborhoodWalking() uses, strongly discourage against using parallelization within a GUI or embedded environment. See vignette("parallel") for details.
+This function is computationally intensive. On a single core of a 2.3 GHz Intel i7, plotting observed paths to PDF takes about 5 seconds while doing so for expected paths takes about 28 seconds. Using the parallel implementation on 4 physical (8 logical) cores, these times fall to about 4 and 11 seconds. Note that parallelization is currently only available on Linux and Mac, and that although some precautions are taken in R.app on macOS, the developers of the 'parallel' package, which \code{neighborhoodWalking()} uses, strongly discourage against using parallelization within a GUI or embedded environment. See \code{vignette("parallel")} for details.
 }
 \examples{
 \dontrun{
+
 streetNameLocator("marshall street", zoom = TRUE, highlight = FALSE,
   unit = "meter", cases = NULL)
 addNeighborhood(6:7)
+
 }
 }
 \seealso{

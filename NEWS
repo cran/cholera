@@ -1,3 +1,25 @@
+cholera 0.5.1
+==================
+
+# Fixes #
+
+- backward compatibility (R 3.4.4) related to base::isFALSE() & bug fix.
+- fix for multiple results in walkingDistance() and walkingPath().
+
+# Function Changes #
+
+- enable ellipses (...) in plot.time_series() (#1).
+- enable ellipses and negative selection in addPump().
+- consolidate addEuclideanPath(), euclideanDistance(), euclideanPath(),
+  walkingDistance() and walkingPath()
+
+# New Functions #
+
+- addBorder()
+- addRoads()
+- mapRange()
+
+
 cholera 0.5.0
 ==================
 
@@ -64,7 +86,7 @@ cholera 0.5.0
 
 - euclideanPath()
 - walkingPath()
-- neighborhoodEuclidean().
+- neighborhoodEuclidean()
 
 # Vignette Changes #
 

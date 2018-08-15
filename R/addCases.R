@@ -1,36 +1,37 @@
 #' Add observed cases by walking neighborhood.
 #'
 #' Add cases, as "address" or "fatalities" as points or IDs, to a plot.
-#' @param pump.subset Numeric. Vector of numeric pump IDs to select (subset) from the neighborhoods defined by "pump.select". Negative selection possible. NULL selects all pumps in "pump.select".
-#' @param pump.select Numeric. Vector of numeric pump IDs to define pump neighborhoods (i.e., the "population"). Negative selection possible. NULL selects all pumps.
+#' @param pump.subset Numeric. Vector of numeric pump IDs to subset from the neighborhoods defined by \code{pump.select}. Negative selection possible. \code{NULL} uses all pumps in \code{pump.select}.
+#' @param pump.select Numeric. Numeric vector of pump IDs that define which pump neighborhoods to consider (i.e., specify the "population"). Negative selection possible. \code{NULL} selects all pumps.
 #' @param type Character. Type of case: "address" (base of stack) or "fatalities" (entire stack).
 #' @param token Character. Type of token to plot: "point" or "id".
 #' @param text.size Numeric. Size of case ID text.
-#' @param vestry Logical. TRUE uses the 14 pumps from the Vestry Report. FALSE uses the 13 in the original map.
-#' @param weighted Logical. TRUE computes shortest path weighted by road length. FALSE computes shortest path in terms of the number of nodes.
-#' @param color Character. Use a single color for all paths. NULL uses neighborhood colors defined by snowColors().
-#' @param multi.core Logical or Numeric. TRUE uses parallel::detectCores(). FALSE uses one, single core. You can also specify the number logical cores. On Window, only "multi.core = FALSE" is available.
+#' @param vestry Logical. \code{TRUE} uses the 14 pumps from the Vestry Report. \code{FALSE} uses the 13 in the original map.
+#' @param weighted Logical. \code{TRUE} computes shortest path weighted by road length. \code{FALSE} computes shortest path in terms of the number of nodes.
+#' @param color Character. Use a single color for all paths. \code{NULL} uses neighborhood colors defined by \code{snowColors().}
+#' @param multi.core Logical or Numeric. \code{TRUE} uses \code{parallel::detectCores()}. \code{FALSE} uses one, single core. You can also specify the number logical cores. On Windows, only \code{multi.core = FALSE} is available.
 #' @param ... Additional plotting parameters.
 #' @export
 #' @examples
 #' \dontrun{
-#' snowMap()
-#' addCases(pump.susbet = c(6, 10))
 #'
-#' snowMap()
+#' snowMap(add.cases = FALSE)
+#' addCases(pump.subset = c(6, 10))
+#'
+#' snowMap(add.cases = FALSE)
 #' addCases(pump.select = c(6, 10))
 #' }
 
 addCases <- function(pump.subset = NULL, pump.select = NULL, type = "address",
-  token = "id", text.size = 0.5, vestry = FALSE, weighted = TRUE, color = NULL,
-  multi.core = FALSE, ...) {
+  token = "point", text.size = 0.5, vestry = FALSE, weighted = TRUE,
+  color = NULL, multi.core = FALSE, ...) {
 
   if (type %in% c("address", "fatalities") == FALSE) {
-    stop('"type" must be "address" or "fatalities".')
+    stop('type must be "address" or "fatalities".')
   }
 
   if (token %in% c("id", "point") == FALSE) {
-    stop('"id" must be "id" or "point".')
+    stop('token must be "id" or "point".')
   }
 
   cores <- multiCore(multi.core)
@@ -70,14 +71,14 @@ addCases <- function(pump.subset = NULL, pump.select = NULL, type = "address",
   if (is.null(pump.subset) == FALSE) {
     if (all(pump.subset > 0)) {
       if (all(pump.subset %in% selected.pumps) == FALSE) {
-        stop('"pump.subset" must be a subset of "selected.pumps".')
+        stop("pump.subset must be a subset of selected.pumps.")
       }
     } else if (all(pump.subset < 0)) {
       if (all(abs(pump.subset) %in% selected.pumps) == FALSE) {
-        stop('"|pump.subset|" must be a subset of "selected.pumps".')
+        stop("|pump.subset| must be a subset of selected.pumps.")
       }
     } else {
-      stop('Use all positive or all negative "pump.subset"!')
+      stop("Use all positive or all negative numbers for pump.subset.")
     }
   }
 
@@ -102,7 +103,7 @@ addCases <- function(pump.subset = NULL, pump.select = NULL, type = "address",
       } else if (all(pump.subset < 0)) {
         select <- selected.pumps[selected.pumps %in% abs(pump.subset) == FALSE]
       } else {
-        stop('Use all positive or all negative "pump.subset"!')
+        stop("Use all positive or all negative numbers for pump.subset.")
       }
 
       if (token == "point") {
@@ -139,7 +140,7 @@ addCases <- function(pump.subset = NULL, pump.select = NULL, type = "address",
       } else if (all(pump.subset < 0)) {
         select <- selected.pumps[selected.pumps %in% abs(pump.subset) == FALSE]
       } else {
-        stop('Use all positive or all negative "pump.subset"!')
+        stop("Use all positive or all negative numbers for pump.subset.")
       }
 
       invisible(lapply(select, function(x) {

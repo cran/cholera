@@ -5,9 +5,9 @@
 \title{Locate road by name.}
 \usage{
 streetNameLocator(road.name, zoom = FALSE, radius = 0.1,
-  cases = "anchors", add.title = TRUE, add.pump = TRUE, vestry = FALSE,
-  highlight = TRUE, unit = "meter", time.unit = "minute",
-  walking.speed = 5)
+  cases = "anchors", add.title = TRUE, add.pump = TRUE,
+  vestry = FALSE, highlight = TRUE, unit = "meter",
+  time.unit = "minute", walking.speed = 5)
 }
 \arguments{
 \item{road.name}{Character vector. Note that \code{streetNameLocator}() tries to correct for case and to remove extra spaces.}
@@ -16,13 +16,13 @@ streetNameLocator(road.name, zoom = FALSE, radius = 0.1,
 
 \item{radius}{Numeric. Controls the degree of zoom.}
 
-\item{cases}{Character. Plot cases: NULL, "anchors" or "all".}
+\item{cases}{Character. Plot cases: \code{NULL}, "anchors" or "all".}
 
 \item{add.title}{Logical. Include title.}
 
 \item{add.pump}{Logical. Include nearby pumps.}
 
-\item{vestry}{Logical. TRUE uses the 14 pumps from the Vestry Report. FALSE uses the 13 in the original map.}
+\item{vestry}{Logical. \code{TRUE} uses the 14 pumps from the Vestry report. \code{FALSE} uses the 13 in the original map.}
 
 \item{highlight}{Logical. Highlight selected road.}
 

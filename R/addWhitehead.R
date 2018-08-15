@@ -1,13 +1,13 @@
 #' Add Rev. Henry Whitehead's Broad Street pump neighborhood.
 #'
 #' A circle (polygon), centered around a desired pump with a radius of 210 yards. The Broad Street pump is the default.
-#' @param radius Numeric. Distance from a pump in yards.
 #' @param pump Character or Numeric. Name (road name) or numerical ID of selected pump. See \code{pumps} or \code{pumps.vestry}.
+#' @param radius Numeric. Distance from a pump in yards.
 #' @param color Character. Color of circle.
 #' @param line.type Character. Circle line type.
-#' @param vestry Logical. TRUE uses the 14 pumps and locations from Vestry report. FALSE uses original 13 pumps.
+#' @param vestry Logical. \code{TRUE} uses the 14 pumps and locations from Vestry report. \code{FALSE} uses original 13 pumps.
 #' @param subtitle Logical. Add subtitle with estimated "walking" time in seconds.
-#' @param walking.speed Numeric. km/hr.
+#' @param walking.speed Numeric. Walking speed in km/hr.
 #' @param ... Additional plotting parameters.
 #' @seealso \code{\link{snowMap}},
 #' \code{\link{addIndexCase}},
@@ -24,7 +24,7 @@
 #' snowMap(add.landmarks = FALSE)
 #' addWhitehead()
 
-addWhitehead <- function(radius = 210, pump = "Broad Street", color = "black",
+addWhitehead <- function(pump = "Broad Street", radius = 210, color = "black",
   line.type = "solid", vestry = FALSE, subtitle = FALSE, walking.speed = 5,
   ...) {
 
@@ -36,7 +36,7 @@ addWhitehead <- function(radius = 210, pump = "Broad Street", color = "black",
     if (is.character(pump)) {
       if (pump %in% cholera::pumps.vestry$street == FALSE) {
         text.a <- "Invalid Vestry pump name."
-        text.b <- "Check spelling or see pumps.vestry$street."
+        text.b <- "Check spelling or see cholera::pumps.vestry$street."
         stop(paste(text.a, text.b))
       } else {
         circumference.x <- cholera::pumps.vestry[cholera::pumps.vestry$street ==
@@ -58,7 +58,7 @@ addWhitehead <- function(radius = 210, pump = "Broad Street", color = "black",
     if (is.character(pump)) {
       if (pump %in% cholera::pumps$street == FALSE) {
         text.a <- "Invalid Snow pump name."
-        text.b <- "Check spelling or see pumps$street."
+        text.b <- "Check spelling or see cholera::pumps$street."
         stop(paste(text.a, text.b))
       } else {
         circumference.x <- cholera::pumps[cholera::pumps$street == pump, "x"] +

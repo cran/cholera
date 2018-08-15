@@ -5,17 +5,18 @@
 \title{Add 2D kernel density contours.}
 \usage{
 addKernelDensity(pump.subset = "pooled", pump.select = NULL,
-  neighborhood.type = "walking", obs.unit = "unstacked", bandwidth = 0.5,
-  color = "black", line.type = "solid", multi.core = FALSE, ...)
+  neighborhood.type = "walking", obs.unit = "unstacked",
+  bandwidth = 0.5, color = "black", line.type = "solid",
+  multi.core = FALSE, ...)
 }
 \arguments{
-\item{pump.subset}{Character or Numeric: "pooled", "individual", or numeric vector. "pooled" treats all observations as a single set. "individual" is a shortcut for all individual pump neighborhoods. Use of vector of numeric pump IDs to select (subset) from the neighborhoods defined by "pump.select". Negative selection possible. NULL selects all pumps in "pump.select".}
+\item{pump.subset}{Character or Numeric: "pooled", "individual", or numeric vector. "pooled" treats all observations as a single set. "individual" is a shortcut for all individual pump neighborhoods. Use of vector of numeric pump IDs to subset from the neighborhoods defined by \code{pump.select}. Negative selection possible. \code{NULL} selects all pumps in \code{pump.select}.}
 
-\item{pump.select}{Numeric. Vector of numeric pump IDs to define pump neighborhoods (i.e., the "population"). Negative selection possible. NULL selects all pumps.}
+\item{pump.select}{Numeric. Vector of numeric pump IDs to define pump neighborhoods (i.e., the "population"). Negative selection possible. \code{NULL} selects all pumps.}
 
 \item{neighborhood.type}{Character. "voronoi" or "walking"}
 
-\item{obs.unit}{Character. Unit of observation. "unstacked" uses \code{fatalities.unstacked}. "address" uses \code{fatalities.address}. "fatality" uses \code{fatalities}.}
+\item{obs.unit}{Character. Unit of observation: "unstacked" uses \code{fatalities.unstacked}; "address" uses \code{fatalities.address}; "fatality" uses \code{fatalities}.}
 
 \item{bandwidth}{Numeric. Bandwidth for kernel density estimation.}
 
@@ -23,7 +24,7 @@ addKernelDensity(pump.subset = "pooled", pump.select = NULL,
 
 \item{line.type}{Character. Line type for contour lines.}
 
-\item{multi.core}{Logical or Numeric. TRUE uses parallel::detectCores(). FALSE uses one, single core. You can also specify the number logical cores. On Window, only "multi.core = FALSE" is available.}
+\item{multi.core}{Logical or Numeric. \code{TRUE} uses \code{parallel::detectCores()}. \code{FALSE} uses one, single core. You can also specify the number logical cores. On Windows, only \code{multi.core = FALSE} is available.}
 
 \item{...}{Additional plotting parameters.}
 }
@@ -37,17 +38,20 @@ Add 2D kernel density contours based on selected sets of observations.
 This function uses KernSmooth::bkde2D().
 }
 \examples{
-# snowMap()
-# addKernelDensity()
+\dontrun{
 
-# snowMap()
-# addKernelDensity("individual")
+snowMap()
+addKernelDensity()
 
-# snowMap()
-# addKernelDensity(c(6, 8))
+snowMap()
+addKernelDensity("individual")
 
-# snowMap()
-# addKernelDensity(pump.select = c(6, 8))
+snowMap()
+addKernelDensity(c(6, 8))
+
+snowMap()
+addKernelDensity(pump.select = c(6, 8))
+}
 }
 \seealso{
 \code{\link{snowMap}},

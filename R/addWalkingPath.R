@@ -1,20 +1,20 @@
 #' Add the shortest walking path between a selected cases or pumps.
 #'
 #' @param origin Numeric or Integer. Numeric ID of case or pump.
-#' @param destination Numeric or Integer. Numeric ID(s) of case(s) or pump(s). Exclusion is possible via negative selection (e.g., -7). Default is NULL: this returns closest pump or "anchor" case.
+#' @param destination Numeric or Integer. Numeric ID(s) of case(s) or pump(s). Exclusion is possible via negative selection (e.g., -7). Default is \code{NULL}: this returns closest pump or "anchor" case.
 #' @param type Character "case-pump", "cases" or "pumps".
 #' @param observed Logical. Use observed or "simulated" expected data.
-#' @param weighted Logical. TRUE computes shortest path in terms of road length. FALSE computes shortest path in terms of nodes.
-#' @param vestry Logical. TRUE uses the 14 pumps from the Vestry Report. FALSE uses the 13 in the original map.
-#' @param unit Character. Unit of distance: "meter", "yard" or "native". "native" returns the map's native scale. "unit" is meaningful only when "weighted" is TRUE. See \code{vignette("roads")} for information on unit distances.
+#' @param weighted Logical. \code{TRUE} computes shortest path in terms of road length. \code{FALSE} computes shortest path in terms of nodes.
+#' @param vestry Logical. \code{TRUE} uses the 14 pumps from the Vestry Report. \code{FALSE} uses the 13 in the original map.
+#' @param unit Character. Unit of distance: "meter", "yard" or "native". "native" returns the map's native scale. \code{unit} is meaningful only when "weighted" is \code{TRUE}. See \code{vignette("roads")} for information on unit distances.
 #' @param time.unit Character. "hour", "minute", or "second".
-#' @param walking.speed Numeric. Default walking speed is 5 km/hr.
+#' @param walking.speed Numeric. Walking speed in km/hr.
 #' @param zoom Logical.
 #' @param radius Numeric. Controls the degree of zoom.
 #' @param unit.posts Character. "distance" for mileposts; "time" for timeposts.
 #' @param unit.interval Numeric. Sets interval between posts: for "distance", the default is 50 meters; for "time", the default is 60 seconds.
 #' @param alpha.level Numeric. Alpha level transparency for path: a value in [0, 1].
-#' @note The function uses a case's "address" (i.e., a stack's "anchor" case) to compute distance. Time is computed using cholera::distanceTime(). Adam and Eve Court, and Falconberg Court and Falconberg Mews, are disconnected from the larger road network; they form two isolated subgraphs. This has two consequences: first, only cases on Adam and Eve Court can reach pump 2 and those cases cannot reach any other pump; second, cases on Falconberg Court and Mews cannot reach any pump. Unreachable pumps will return distances of "Inf". Arrow points represent mileposts or timeposts to the destination.
+#' @note The function uses a case's "address" (i.e., a stack's "anchor" case) to compute distance. Time is computed using cholera::distanceTime(). Adam and Eve Court, and Falconberg Court and Falconberg Mews, are disconnected from the larger road network; they form two isolated subgraphs. This has two consequences: first, only cases on Adam and Eve Court can reach pump 2 and those cases cannot reach any other pump; second, cases on Falconberg Court and Mews cannot reach any pump. Unreachable pumps will return distances of \code{Inf}. Arrow points represent mileposts or timeposts to the destination.
 #' @return An R list with two elements: a character vector of path nodes and a data frame summary.
 #' @seealso \code{\link{fatalities}}, \code{vignette("pump.neighborhoods")}
 #' @export
@@ -24,37 +24,69 @@ addWalkingPath <- function(origin, destination = NULL, type = "case-pump",
   time.unit = "second", walking.speed = 5, zoom = TRUE, radius = 0.5,
   unit.posts = "distance", unit.interval = NULL, alpha.level = 1) {
 
-  n.sim.obs <- nrow(cholera::regular.cases)
+  if (is.numeric(origin) == FALSE) {
+    stop('origin must be numeric.')
+  }
 
-  if (type == "case-pump") {
-    if (observed) {
-      if (origin %in% 1:578 == FALSE) {
-        txt1 <- 'With type = "case-pump" and "observed" = TRUE,'
-        txt2 <- '"origin" must be between 1 and 578.'
-        stop(paste(txt1, txt2))
-      }
-    } else {
-      if (origin %in% 1:n.sim.obs == FALSE) {
-        txt1 <- 'With type = "case-pump" and "observed" = FALSE,'
-        txt2 <- paste('"origin" must be between 1 and', paste0(n.sim.obs, "."))
-        stop(paste(txt1, txt2))
-      }
+  if (is.null(destination) == FALSE) {
+    if (is.numeric(destination) == FALSE) {
+      stop('destination must be numeric.')
     }
   }
 
-  if (!is.null(destination)) {
-    if (vestry) {
-      if (any(abs(destination) %in% 1:14 == FALSE)) {
-        txt1 <- 'With type = "case-pump" and "vestry = TRUE",'
-        txt2 <- '1 >= |destination| <= 14.'
-        stop(paste(txt1, txt2))
+  if (unit %in% c("meter", "yard", "native") == FALSE) {
+    stop('unit must be "meter", "yard" or "native".')
+  }
+
+  if (time.unit %in% c("hour", "minute", "second") == FALSE) {
+    stop('time.unit must be "hour", "minute" or "second".')
+  }
+
+  if (type %in% c("case-pump", "cases", "pumps") == FALSE) {
+    stop('type must be "case-pump", "cases" or "pumps".')
+  }
+
+  obs.ct <- nrow(cholera::fatalities)
+  exp.ct <- nrow(cholera::regular.cases)
+
+  if (observed) ct <- obs.ct else ct <- exp.ct
+
+  if (vestry) {
+    p.data <- cholera::pumps.vestry
+  } else {
+    p.data <- cholera::pumps
+  }
+
+  p.count <- nrow(p.data)
+  p.ID <- seq_len(p.count)
+
+  if (type == "case-pump") {
+    if (origin %in% seq_len(ct) == FALSE) {
+      txt1 <- 'With type = "'
+      txt2 <- '" and observed = '
+      txt3 <- ", 'origin' must be between 1 and "
+      stop(txt1, type, txt2, observed, txt3, ct, ".")
+    }
+
+    if (is.null(destination) == FALSE) {
+      if (any(abs(destination) %in% p.ID == FALSE)) {
+        stop('With vestry = ', vestry, ", 1 >= |destination| <= ", p.count, ".")
       }
-    } else {
-      if (any(abs(destination) %in% 1:13 == FALSE)) {
-        txt1 <- 'With type = "case-pump" and "vestry = FALSE",'
-        txt2 <- '1 >= |destination| <= 13.'
-        stop(paste(txt1, txt2))
-      }
+    }
+  } else if (type == "cases") {
+    if (any(abs(c(origin, destination)) %in% seq_len(ct) == FALSE)) {
+      txt1 <- 'With type = '
+      txt2 <- ' and observed = '
+      txt3 <- ", the absolute value of 'origin' and 'destination' must fall "
+      txt4 <- 'between 1 and '
+      stop(txt1, type, txt2, observed, txt3, txt4, ct, ".")
+    }
+  } else if (type == "pumps") {
+    if (any(abs(c(origin, destination)) %in% p.ID == FALSE)) {
+      txt1 <- 'With type = "'
+      txt2 <- '" and vestry = '
+      txt3 <- ", 'origin' and 'destination' must whole numbers 1 >= |x| <= "
+      stop(txt1, type, txt2, vestry, txt3, p.count, ".")
     }
   }
 
@@ -72,12 +104,12 @@ addWalkingPath <- function(origin, destination = NULL, type = "case-pump",
 
   if (is.na(x$alter.node)) {
     txt1 <- paste("Case", x$origin, "is part of an isolated subgraph.")
-    txt2 <- "It (technically) has no neareast pump."
-    stop(paste(txt1, txt2))
+    txt2 <- "It (technically) has no nearest pump."
+    stop(txt1, txt2)
   }
 
-  if (isFALSE(alpha.level > 0 | alpha.level <= 1)) {
-    stop('"alpha.level" must be > 0 and <= 1')
+  if ((alpha.level > 0 & alpha.level <= 1) == FALSE) {
+    stop('alpha.level must be > 0 and <= 1')
   }
 
   colors <- cholera::snowColors(x$vestry)
@@ -117,7 +149,7 @@ addWalkingPath <- function(origin, destination = NULL, type = "case-pump",
         destination.obs <- cholera::fatalities[cholera::fatalities$case ==
           alter, c("x", "y")]
       } else {
-        destination.obs <-  cholera::regular.cases[alter, ]
+        destination.obs <- cholera::regular.cases[alter, ]
       }
     } else {
       id <- x$destination[x$sel]
@@ -191,7 +223,7 @@ addWalkingPath <- function(origin, destination = NULL, type = "case-pump",
   # mileposts #
 
   if (unit.posts %in% c("distance", "time") == FALSE) {
-    stop('If specified, "unit.posts" must be "distance" or "time".')
+    stop('If specified, unit.posts must be "distance" or "time".')
   } else {
     if (is.null(unit.interval)) {
       if (unit.posts == "distance")  {
@@ -201,7 +233,7 @@ addWalkingPath <- function(origin, destination = NULL, type = "case-pump",
       }
     } else {
       if (!is.numeric(unit.interval)) {
-        stop('"unit.interval" must be numeric.')
+        stop('unit.interval must be numeric.')
       }
     }
 

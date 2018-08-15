@@ -12,7 +12,7 @@
 
 <meta name="author" content="lindbrook" />
 
-<meta name="date" content="2018-07-16" />
+<meta name="date" content="2018-08-15" />
 
 <title>Roads</title>
 
@@ -70,17 +70,17 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">Roads</h1>
 <h4 class="author"><em>lindbrook</em></h4>
-<h4 class="date"><em>2018-07-16</em></h4>
+<h4 class="date"><em>2018-08-15</em></h4>
 
 
 
 <div id="overview" class="section level2">
 <h2>Overview</h2>
-<p>In 1992, Rusty Dodson and Waldo Tobler digitized John Snow’s cholera map. Unfortunately, Dodson and Tobler did not include the names of roads (e.g., Broad Street) in their data set. While not strictly necessary for analysis or visualization, having the names will be useful to some. To that end, I append the actual street names, taken from the map itself, to the data. This appended data set is called <em>roads</em>.</p>
+<p>In 1992, Rusty Dodson and Waldo Tobler digitized John Snow’s cholera map. Unfortunately, they did not include the names of roads (e.g., Broad Street) in their data set. While not strictly necessary for analysis or visualization, having the names will be useful to some. To that end, I append the actual street names, taken from the map itself, to the data. This appended data set is called <code>roads</code>.</p>
 </div>
 <div id="roads-data" class="section level2">
 <h2>Roads data</h2>
-<p>Before discussing names, some discussion of the structure of <em>roads</em> is warranted. The data contain 1241 pairs of x-y coordinates. These coordinates define the endpoints of the straight line segments used to describe 528 numerically identified “streets”.</p>
+<p>Before discussing names, some discussion of the structure of <code>roads</code> is warranted. The data contain 1241 pairs of x-y coordinates. These coordinates define the endpoints of the straight line segments used to describe 528 numerically identified “streets”.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">head</span>(roads)
   street n        x        y id      name
 <span class="dv">1</span>      <span class="dv">1</span> <span class="dv">2</span> <span class="fl">16.73800</span> <span class="fl">18.69600</span>  <span class="dv">1</span> Map Frame
@@ -108,7 +108,7 @@ border &lt;-<span class="st"> </span><span class="kw">sort</span>(<span class="k
 <div id="road-names" class="section level2">
 <h2>Road names</h2>
 <p>The primary source for road names is Snow’s map. A high resolution version is available <a href="http://www.ph.ucla.edu/epi/snow/highressnowmap.html">here</a>. While great effort was made to correctly record and cross-reference names, there may still be errors. Error reports and suggestions for amendments are welcome.</p>
-<p>Some roads on the map do not have a name. In those cases, I attached unique labels like “Unknown-C”.</p>
+<p>Some roads on the map do not have a name. In those cases, I attach unique labels like “Unknown-C”.</p>
 <p>Some names appear multiple times even though they lie at different locations. For these, I use Roman numerals to distinguish them (e.g., “King Street (I)” and “King Street (II)”).<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a></p>
 </div>
 <div id="queen-street-i-and-marlborough-mews" class="section level2">
@@ -134,9 +134,9 @@ roads &lt;-<span class="st"> </span>roads[<span class="kw">order</span>(roads<sp
 </div>
 <div id="finding-roads-by-name-street-number-or-segment-id." class="section level2">
 <h2>Finding roads by name, “street” number, or segment ID.</h2>
-<p>To help locate and visualize streets and road segments (including map frame segments), you can use the <em>streetNameLocator</em>(), <em>streetNumberLocator</em>(), or <em>segmentLocator</em>().</p>
-<p>Note that <em>streetNameLocator</em>() uses the names in the <em>roads</em> data set. However, the function tries to corrects for case and removes extraneous spaces: streetNameLocator(“Oxford Street”) and streetNameLocator(“oxford street”).</p>
-<p><em>segmentLocator</em>() is for those interested in more granular analysis. It uses individual road segments as the unit of observation.</p>
+<p>To help locate and visualize streets and road segments (including map frame segments), you can use the <code>streetNameLocator()</code>, <code>streetNumberLocator()</code>, or <code>segmentLocator()</code>.</p>
+<p>Note that <code>streetNameLocator()</code> uses the names in the <code>roads</code> data set. However, the function tries to corrects for case and removes extraneous spaces: <code>streetNameLocator(&quot;Oxford Street&quot;)</code> and <code>streetNameLocator(&quot;oxford street&quot;)</code>.</p>
+<p><code>segmentLocator()</code> is for those interested in more granular analysis. It uses individual road segments as the unit of observation.</p>
 </div>
 <div id="list-of-road-names" class="section level2">
 <h2>List of road names</h2>

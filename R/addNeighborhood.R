@@ -1,13 +1,13 @@
 #' Add expected walking neighborhoods.
 #'
-#' @param pump.subset Numeric. Vector of numeric pump IDs to select (subset) from the neighborhoods defined by "pump.select". Negative selection possible. NULL selects all pumps in "pump.select".
-#' @param pump.select Numeric. Numeric vector of pumps to define pump neighborhoods (i.e. the "population"). Negative selection possible. NULL selects all pumps.
-#' @param vestry Logical. TRUE uses the 14 pumps from the Vestry Report. FALSE uses the 13 in the original map.
-#' @param weighted Logical. TRUE computes shortest path weighted by road length. FALSE computes shortest path in terms of the number of nodes.
-#' @param multi.core Logical or Numeric. TRUE uses parallel::detectCores(). FALSE uses one, single core. You can also specify the number logical cores. On Window, only "multi.core = FALSE" is available.
+#' @param pump.subset Numeric. Vector of numeric pump IDs to subset from the neighborhoods defined by \code{pump.select}. Negative selection possible. \code{NULL} uses all pumps in \code{pump.select}.
+#' @param pump.select Numeric. Numeric vector of pump IDs that define which pump neighborhoods to consider (i.e., specify the "population"). Negative selection possible. \code{NULL} selects all pumps.
+#' @param vestry Logical. \code{TRUE} uses the 14 pumps from the Vestry Report. \code{FALSE} uses the 13 in the original map.
+#' @param weighted Logical. \code{TRUE} computes shortest path weighted by road length. \code{FALSE} computes shortest path in terms of the number of nodes.
+#' @param multi.core Logical or Numeric. \code{TRUE} uses \code{parallel::detectCores()}. \code{FALSE} uses one, single core. You can also specify the number logical cores. On Windows, only \code{multi.core = FALSE} is available.
 #' @param area Logical. Area polygons.
 #' @param path Character. "expected" or "observed".
-#' @param path.color Character. Use a single color for all paths. NULL uses neighborhood colors defined by snowColors().
+#' @param path.color Character. Use a single color for all paths. \code{NULL} uses neighborhood colors defined by \code{snowColors()}.
 #' @param path.width Numeric. Set width of paths.
 #' @param alpha.level Numeric. Alpha level transparency for area plot: a value in [0, 1].
 #' @param ... Additional plotting parameters.
@@ -19,13 +19,15 @@
 #' \code{\link{addVoronoi}},
 #' \code{\link{addWhitehead}}
 #' @import graphics
-#' @note This function is computationally intensive. On a single core of a 2.3 GHz Intel i7, plotting observed paths to PDF takes about 5 seconds while doing so for expected paths takes about 28 seconds. Using the parallel implementation on 4 physical (8 logical) cores, these times fall to about 4 and 11 seconds. Note that parallelization is currently only available on Linux and Mac, and that although some precautions are taken in R.app on macOS, the developers of the 'parallel' package, which neighborhoodWalking() uses, strongly discourage against using parallelization within a GUI or embedded environment. See vignette("parallel") for details.
+#' @note This function is computationally intensive. On a single core of a 2.3 GHz Intel i7, plotting observed paths to PDF takes about 5 seconds while doing so for expected paths takes about 28 seconds. Using the parallel implementation on 4 physical (8 logical) cores, these times fall to about 4 and 11 seconds. Note that parallelization is currently only available on Linux and Mac, and that although some precautions are taken in R.app on macOS, the developers of the 'parallel' package, which \code{neighborhoodWalking()} uses, strongly discourage against using parallelization within a GUI or embedded environment. See \code{vignette("parallel")} for details.
 #' @export
 #' @examples
 #' \dontrun{
+#'
 #' streetNameLocator("marshall street", zoom = TRUE, highlight = FALSE,
 #'   unit = "meter", cases = NULL)
 #' addNeighborhood(6:7)
+#'
 #' }
 
 addNeighborhood <- function(pump.subset = NULL, pump.select = NULL,
@@ -34,7 +36,41 @@ addNeighborhood <- function(pump.subset = NULL, pump.select = NULL,
 
   if (is.null(path) == FALSE) {
     if (path %in% c("expected", "observed") == FALSE) {
-      stop('If specified, "path" must be "expected" or "observed".')
+      stop('If specified, path must be "expected" or "observed".')
+    }
+  }
+
+  if (vestry) {
+    p.count <- nrow(cholera::pumps.vestry)
+  } else {
+    p.count <- nrow(cholera::pumps)
+  }
+
+  p.ID <- seq_len(p.count)
+
+  if (is.null(pump.select) == FALSE) {
+    if (any(pump.select %in% p.ID == FALSE)) {
+      stop('If specified, 1 >= |pump.select| <= ', p.count, " when vestry = ",
+        vestry, ".")
+    }
+  }
+
+  if (is.null(pump.select) & is.null(pump.subset) == FALSE) {
+    if (any(abs(pump.subset) %in% p.ID == FALSE)) {
+      stop('If specified, 1 >= |pump.subset| <= ', p.count, " when vestry = ",
+        vestry, ".")
+    }
+  }
+
+  if (is.null(pump.subset) == FALSE & is.null(pump.select) == FALSE) {
+    if (all(pump.select > 0)) {
+      if (any(pump.subset %in% pump.select == FALSE)) {
+        stop('pump.subset should be a subset of pump.select.')
+      }
+    } else if (all(pump.select < 0)) {
+      if (any(pump.subset %in% p.ID[pump.select])) {
+        stop('pump.subset should be a subset of pump.select.')
+      }
     }
   }
 
@@ -201,21 +237,13 @@ addNeighborhood <- function(pump.subset = NULL, pump.select = NULL,
 
   ## ------------ Data Assembly ------------ ##
 
-  if (x$vestry) {
-    wholes <- lapply(1:14, function(nm) {
-      c(obs.whole[[paste(nm)]],
-        unobs.whole[[paste(nm)]],
-        obs.partial.whole[[paste(nm)]])
-    })
-    names(wholes) <- 1:14
-  } else {
-    wholes <- lapply(1:13, function(nm) {
-      c(obs.whole[[paste(nm)]],
-        unobs.whole[[paste(nm)]],
-        obs.partial.whole[[paste(nm)]])
-    })
-    names(wholes) <- 1:13
-  }
+  wholes <- lapply(paste(p.ID), function(nm) {
+    c(obs.whole[[nm]],
+      unobs.whole[[nm]],
+      obs.partial.whole[[nm]])
+  })
+
+  names(wholes) <- p.ID
 
   # split segments #
   split.test1 <- length(obs.partial.segments)
@@ -375,9 +403,7 @@ addNeighborhood <- function(pump.subset = NULL, pump.select = NULL,
           }
 
         } else if (all(pump.subset < 0)) {
-          if (x$vestry) selected.pumps <- 1:14 else selected.pumps <- 1:13
-          select <- selected.pumps[selected.pumps %in%
-                    abs(pump.subset) == FALSE]
+          select <- p.ID[p.ID %in% abs(pump.subset) == FALSE]
 
           invisible(lapply(paste(select), function(nm) {
             n.edges <- edges[edges$id %in% wholes[[nm]], ]
@@ -426,7 +452,7 @@ addNeighborhood <- function(pump.subset = NULL, pump.select = NULL,
             }))
           }
         } else {
-          stop('Use all positive or all negative "pump.subset"!')
+          stop("Use all positive or all negative numbers for pump.subset.")
         }
       }
 
@@ -444,7 +470,7 @@ addNeighborhood <- function(pump.subset = NULL, pump.select = NULL,
         } else if (all(pump.subset < 0)) {
           sel <- names(n.path.edges) %in% abs(pump.subset) == FALSE
         } else {
-          stop('Use all positive or all negative "pump.subset"!')
+          stop("Use all positive or all negative numbers for pump.subset.")
         }
 
         edge.data <- lapply(n.path.edges[sel], function(x) unique(unlist(x)))

@@ -2,17 +2,17 @@
 % Please edit documentation in R/addPump.R
 \name{addPump}
 \alias{addPump}
-\title{Add pump to plot.}
+\title{Add selected pump(s) to plot.}
 \usage{
-addPump(id = NULL, vestry = FALSE, col = NULL, pch = 24, label = TRUE,
-  pos = 1, ...)
+addPump(pump.select = NULL, vestry = FALSE, col = NULL, pch = 24,
+  label = TRUE, pos = 1, ...)
 }
 \arguments{
-\item{id}{Numeric or Integer. Water pump's numerical ID. With "vestry = TRUE", a whole number between 1 and 14. With "vestry = FALSE", a whole number between 1 and 13. See cholera::pumps.vestry and cholera::pumps for IDs and details about specific pumps. NULL plots all pumps.}
+\item{pump.select}{Numeric or Integer. Vector of water pump numerical ID(s). With \code{vestry = TRUE}, whole number(s) between 1 and 14. With \code{vestry = FALSE}, whole number(s) between 1 and 13. See \code{pumps.vestry} and \code{pumps} for IDs and details about specific pumps. \code{NULL} plots all pumps. Negative selection allowed.}
 
-\item{vestry}{Logical. TRUE for the 14 pumps from Vestry Report. FALSE for the original 13 pumps.}
+\item{vestry}{Logical. \code{TRUE} for the 14 pumps from Vestry Report. \code{FALSE} for the original 13 pumps.}
 
-\item{col}{Character. Color of point.}
+\item{col}{Character. Color of pump points.}
 
 \item{pch}{Numeric. Shape of point character.}
 
@@ -23,5 +23,5 @@ addPump(id = NULL, vestry = FALSE, col = NULL, pch = 24, label = TRUE,
 \item{...}{Additional plotting parameters.}
 }
 \description{
-Add pump to plot.
+Add selected pump(s) to plot.
 }

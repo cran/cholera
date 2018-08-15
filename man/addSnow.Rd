@@ -14,7 +14,7 @@ addSnow(type = "area", color = "dodgerblue", alpha.level = 0.25,
 
 \item{alpha.level}{Numeric. Alpha level transparency: a value in [0, 1].}
 
-\item{line.width}{Numeric. Line width for "street" and "boundary".}
+\item{line.width}{Numeric. Line width for \code{type = "street"} and \code{type = "boundary"}.}
 
 \item{...}{Additional plotting parameters.}
 }
@@ -22,8 +22,11 @@ addSnow(type = "area", color = "dodgerblue", alpha.level = 0.25,
 Adds Snow's graphical annotation of the Broad Street pump walking neighborhood.
 }
 \examples{
-# plot(neighborhoodVoronoi())
-# addSnow()
+\dontrun{
+
+plot(neighborhoodVoronoi())
+addSnow()
+}
 }
 \seealso{
 \code{\link{snowMap}},

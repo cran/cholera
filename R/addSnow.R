@@ -3,7 +3,7 @@
 #' @param type Character. Type of annotation plot: "area", "boundary" or "street".
 #' @param color Character. Neighborhood color.
 #' @param alpha.level Numeric. Alpha level transparency: a value in [0, 1].
-#' @param line.width Numeric. Line width for "street" and "boundary".
+#' @param line.width Numeric. Line width for \code{type = "street"} and \code{type = "boundary"}.
 #' @param ... Additional plotting parameters.
 #' @seealso \code{\link{snowMap}},
 #' \code{\link{addIndexCase}},
@@ -15,14 +15,17 @@
 #' @import graphics
 #' @export
 #' @examples
-#' # plot(neighborhoodVoronoi())
-#' # addSnow()
+#' \dontrun{
+#'
+#' plot(neighborhoodVoronoi())
+#' addSnow()
+#' }
 
 addSnow <- function(type = "area", color = "dodgerblue", alpha.level = 0.25,
   line.width = 2, ...) {
 
   if (type %in% c("area", "boundary", "street") == FALSE) {
-    stop('"type" must be "area", "boundary" or "street".')
+    stop('type must be "area", "boundary" or "street".')
   }
 
   edges <- cholera::neighborhoodData(case.set = "snow")$edges

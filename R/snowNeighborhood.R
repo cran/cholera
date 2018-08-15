@@ -1,7 +1,7 @@
 #' Plotting data for Snow's graphical annotation of the Broad Street pump neighborhood.
 #'
 #' Computes "missing" and split road segments data, and area plot data.
-#' @return An R list of edge IDs and simulated case IDs (sim.ortho.proj).
+#' @return An R list of edge IDs and simulated case IDs.
 #' @export
 
 snowNeighborhood <- function() {
@@ -9,19 +9,8 @@ snowNeighborhood <- function() {
   dat <- cholera::neighborhoodData(vestry = snow$vestry)
   edges <- dat$edges
 
-  # Check if walking paths traverse both endpoints of a road segment.
-  edgeAudit <- function(x) {
-    vapply(seq_along(x[-1]), function(i) {
-      ab <- edges$node1 %in% x[i] &
-            edges$node2 %in% x[i + 1]
-      ba <- edges$node2 %in% x[i] &
-            edges$node1 %in% x[i + 1]
-      which(ab | ba)
-    }, numeric(1L))
-  }
-
   n.paths <- lapply(snow$paths, function(neighborhood) {
-    dat <- lapply(neighborhood, edgeAudit)
+    dat <- lapply(neighborhood, auditEdge, edges)
   })
 
   edge.data <- unname(unlist(lapply(n.paths, function(x) unique(unlist(x)))))
@@ -128,11 +117,7 @@ snowNeighborhood <- function() {
   sim.case.partial <- lapply(seq_along(partial.candidates), classifyCase)
   sim.case.partial <- unlist(sim.case.partial)
 
-  # regular.case 3173 is adjacent to Richmond Mews but othogonal to Wardour
-  # Street (188-1); dropped as outlier to Snow neighborhood.
-  partial.id <- sim.case.partial[sim.case.partial != 3173]
-
   list(obs.edges = edge.data,
        other.edges = other.edges,
-       sim.cases = c(whole.id, partial.id))
+       sim.cases = c(whole.id, sim.case.partial))
 }

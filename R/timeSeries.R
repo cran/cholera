@@ -1,6 +1,6 @@
 #' Aggregate time series fatality data from the Vestry report.
 #'
-#' @param vestry Logical. TRUE returns the data from the Vestry committee (Appendix B, p. 175). FALSE (default) returns John Snow's contribution to the report (p.117).
+#' @param vestry Logical. \code{TRUE} returns the data from the Vestry committee (Appendix B, p. 175). \code{FALSE} returns John Snow's contribution to the report (p.117).
 #' @return A R list with two objects: "data" and "source" ("snow" or "vestry").
 #' \itemize{
 #'   \item{\code{date}: Calendar date.}
@@ -12,7 +12,7 @@
 #' @seealso \code{\link{plot.time_series}}, \code{\link{print.time_series}}, \code{vignette("time.series")}
 #' @export
 #' @examples
-#' timeSeries(vestr = TRUE)
+#' timeSeries(vestry = TRUE)
 #' plot(timeSeries())
 
 timeSeries <- function(vestry = FALSE) {
@@ -65,30 +65,36 @@ timeSeries <- function(vestry = FALSE) {
 #'
 #' Plot aggregate fatality data and indicates the date of the removal of the handle of the Broad Street pump.
 #' @param x An object of class "time_series" from timeSeries().
-#' @param statistic Character. Fatality measure: either "fatal.attacks", which is the default, or "deaths".
+#' @param statistic Character. Fatality measure: either "fatal.attacks" or "deaths".
 #' @param pump.handle Logical. Indicate date of removal of Broad Street pump handle.
+#' @param main Character. Title of graph.
+#' @param type Character. R plot type.
+#' @param xlab Character. x-axis label.
+#' @param ylab Character. y-axis label.
 #' @param ... Additional plotting parameters.
 #' @seealso \code{\link{timeSeries}}
 #' @export
 #' @examples
 #' plot(timeSeries())
 #' plot(timeSeries(), statistic = "deaths")
+#' plot(timeSeries(), bty = "n", type = "h", lwd = 4)
 
 plot.time_series <- function(x, statistic = "fatal.attacks",
-  pump.handle = TRUE, ...) {
+  pump.handle = TRUE, main = "Removal of the Broad Street Pump Handle",
+  type = "o", xlab = "Date", ylab = "Fatalities", ...) {
 
   if (class(x) != "time_series") {
-    stop('Input object\'s class needs to be "time_series".')
+    stop('x\'s class needs to be "time_series".')
   }
 
   if (all(statistic %in% c("deaths", "fatal.attacks")) == FALSE) {
-    stop('"statistic" must either be "deaths" or "fatal.attacks".')
+    stop('statistic must either be "deaths" or "fatal.attacks".')
   }
 
   dat <- x$data
 
-  plot(dat$date, dat[, statistic], type = "o", xlab = "Date", ylab = statistic)
-
+  plot(dat$date, dat[, statistic], type = type, xlab = xlab, ylab = ylab, ...)
+  title(main = main, ...)
   if (pump.handle) pumpHandle()
 }
 
@@ -105,9 +111,8 @@ plot.time_series <- function(x, statistic = "fatal.attacks",
 
 print.time_series <- function(x, ...) {
   if (class(x) != "time_series") {
-    stop('"x"\'s class needs to be "time_series".')
+    stop('x\'s class needs to be "time_series".')
   }
-
   print(x$data)
 }
 
@@ -115,5 +120,4 @@ pumpHandle <- function() {
   abline(v = as.Date("1854-09-08"), col = "red", lty = "dotted")
   axis(3, at = as.Date("1854-09-08"), labels = "Sep 08", cex.axis = 0.8,
     line = -0.5, col.axis = "red", col.ticks = "red")
-  title(main = "Removal of the Broad Street Pump Handle")
 }

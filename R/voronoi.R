@@ -1,10 +1,10 @@
 #' Compute Voronoi pump neighborhoods.
 #'
 #' Group cases into neighborhoods using Voronoi tessellation.
-#' @param pump.select Numeric. Vector of numeric pump IDs to define pump neighborhoods (i.e., the "population"). Negative selection possible. NULL selects all pumps.
-#' @param vestry Logical. TRUE uses the 14 pumps from the Vestry Report. FALSE uses the 13 in the original map.
-#' @param statistic NULL or Character. NULL, the default, makes no summary computation. "address" computes the number of addresses in each selected pump neighborhood. "fatality" computes the number of fatalities in pump neighborhoods.
-#' @param polygon.vertices Logical. TRUE returns a list of x-y coordinates of the vertices of Voronoi cells. Useful for sp::point.in.polygon() as used in print.voronoi() method.
+#' @param pump.select Numeric. Vector of numeric pump IDs to define pump neighborhoods (i.e., the "population"). Negative selection possible. \code{NULL} selects all pumps.
+#' @param vestry Logical. \code{TRUE} uses the 14 pumps from the Vestry report. \code{FALSE} uses the 13 in the original map.
+#' @param statistic NULL or Character. \code{NULL}, the default, makes no summary computation. "address" computes the number of addresses in each selected pump neighborhood. "fatality" computes the number of fatalities in pump neighborhoods.
+#' @param polygon.vertices Logical. \code{TRUE} returns a list of x-y coordinates of the vertices of Voronoi cells. Useful for \code{sp::point.in.polygon()} as used in \code{print.voronoi()} method.
 #' @return An R list with 12 objects.
 #' \itemize{
 #'   \item{\code{pump.id}: vector of selected pumps}
@@ -29,35 +29,12 @@
 #' neighborhoodVoronoi(pump.select = -6)
 #' neighborhoodVoronoi(pump.select = -6, polygon.vertices = TRUE)
 #'
-#' # coordinates for vertices also available in returned object.
+#' # coordinates for vertices also available in the returned object.
 #' dat <- neighborhoodVoronoi(pump.select = -6)
 #' dat$coordinates
 
 neighborhoodVoronoi <- function(pump.select = NULL, vestry = FALSE,
   statistic = NULL, polygon.vertices = FALSE) {
-
-  if (is.null(pump.select) == FALSE) {
-    msg1 <- 'If specified,'
-    msg2 <- '"pump.select" must include at least 2 different pumps.'
-    msg <- paste(msg1, msg2)
-
-    if (vestry) {
-      if (length(unique((1:14)[pump.select])) < 2) {
-        stop(msg)
-      }
-      if (any(abs(pump.select) %in% 1:14 == FALSE)) {
-        stop('With "vestry = TRUE", 1 >= |"pump.select"| <= 14')
-      }
-
-    } else {
-      if (length(unique((1:13)[pump.select])) < 2) {
-        stop(msg)
-      }
-      if (any(abs(pump.select) %in% 1:13 == FALSE)) {
-        stop('With "vestry = FALSE", 1 >= |"pump.select"| <= 13')
-      }
-    }
-  }
 
   if (vestry) {
     pump.data <- cholera::pumps.vestry
@@ -65,10 +42,23 @@ neighborhoodVoronoi <- function(pump.select = NULL, vestry = FALSE,
     pump.data <- cholera::pumps
   }
 
+  if (is.null(pump.select) == FALSE) {
+    if (is.numeric(pump.select) == FALSE) stop("pump.select must be numeric.")
+    p.count <- nrow(pump.data)
+    p.ID <- seq_len(p.count)
+
+    if (any(abs(pump.select) %in% p.ID == FALSE)) {
+      stop('With vestry = ', vestry, ', 1 >= |pump.select| <= ', p.count)
+    }
+
+    msg1 <- 'If specified,'
+    msg2 <- 'pump.select must include at least 2 different pumps.'
+    if (length(unique(p.ID[pump.select])) < 2) stop(msg1, msg2)
+  }
+
   if (is.null(statistic) == FALSE) {
     if (all(statistic %in% c("address", "fatality")) == FALSE) {
-      msg <- 'If specified, "statistic" must either be "address" or "fatality".'
-      stop(msg)
+      stop('If specified, statistic must either be "address" or "fatality".')
     }
   }
 
@@ -143,9 +133,9 @@ neighborhoodVoronoi <- function(pump.select = NULL, vestry = FALSE,
 
 #' Plot Voronoi neighborhoods.
 #'
-#' @param x An object of class "voronoi" created by neighborhoodVoronoi().
+#' @param x An object of class "voronoi" created by \code{neighborhoodVoronoi()}.
 #' @param voronoi.cells Logical. Plot Voronoi tessellation cells.
-#' @param euclidean.paths Logical. Plot all Eucldian paths (star graph).
+#' @param euclidean.paths Logical. Plot all Euclidean paths (star graph).
 #' @param ... Additional plotting parameters.
 #' @return A base R graph.
 #' @seealso
@@ -263,7 +253,7 @@ plot.voronoi <- function(x, voronoi.cells = TRUE,
 #' Print method for neighborhoodVoronoi().
 #'
 #' Return summary statistics for Voronoi neighborhoods.
-#' @param x An object of class "voronoi" created by neighborhoodVoronoi().
+#' @param x An object of class "voronoi" created by \code{neighborhoodVoronoi()}.
 #' @param ... Additional arguments.
 #' @return A data frame with observed and expected counts, observed percentage, and the Pearson residual, (observed - expected) / sqrt(expected).
 #' @seealso \code{addVoronoi()}

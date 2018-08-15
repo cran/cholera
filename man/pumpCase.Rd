@@ -4,10 +4,10 @@
 \alias{pumpCase}
 \title{Extract numeric case IDs by pump neighborhood.}
 \usage{
-pumpCase(obj)
+pumpCase(x)
 }
 \arguments{
-\item{obj}{An object created by neighborhoodEuclidean(), neighborhoodVoronoi() or neighborhoodWalking().}
+\item{x}{An object created by \code{neighborhoodEuclidean()}, \code{neighborhoodVoronoi()} or \code{neighborhoodWalking()}.}
 }
 \value{
 An R list of numeric ID of cases by pump neighborhoods.
@@ -16,9 +16,12 @@ An R list of numeric ID of cases by pump neighborhoods.
 Extract numeric case IDs by pump neighborhood.
 }
 \examples{
-# pumpCase(neighborhoodEuclidean())
-# pumpCase(neighborhoodVoronoi())
-# pumpCase(neighborhoodWalking())
+\dontrun{
+
+pumpCase(neighborhoodEuclidean())
+pumpCase(neighborhoodVoronoi())
+pumpCase(neighborhoodWalking())
+}
 }
 \seealso{
 \code{\link{neighborhoodVoronoi}}, \code{\link{neighborhoodVoronoi}}, \code{\link{neighborhoodEuclidean}},

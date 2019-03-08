@@ -7,19 +7,11 @@
 #' @param bandwidth Numeric. Bandwidth for kernel density estimation.
 #' @param color Character. Color of contour lines.
 #' @param line.type Character. Line type for contour lines.
-#' @param obs.unit Character. Unit of observation: "unstacked" uses \code{fatalities.unstacked}; "address" uses \code{fatalities.address}; "fatality" uses \code{fatalities}.
+#' @param cases Character. Unit of observation: "unstacked" uses \code{fatalities.unstacked}; "address" uses \code{fatalities.address}; "fatality" uses \code{fatalities}.
 #' @param multi.core Logical or Numeric. \code{TRUE} uses \code{parallel::detectCores()}. \code{FALSE} uses one, single core. You can also specify the number logical cores. On Windows, only \code{multi.core = FALSE} is available.
-#' @param ... Additional plotting parameters.
 #' @return Add contours to a graphics plot.
-#' @seealso \code{\link{snowMap}},
-#' \code{\link{addIndexCase}},
-#' \code{\link{addLandmarks}},
-#' \code{\link{addPlaguePit}},
-#' \code{\link{addSnow}},
-#' \code{\link{addVoronoi}},
-#' \code{\link{addWhitehead}}
 #' @import graphics
-#' @note This function uses KernSmooth::bkde2D().
+#' @note This function uses \code{KernSmooth::bkde2D()}.
 #' @export
 #' @examples
 #' \dontrun{
@@ -38,76 +30,79 @@
 #' }
 
 addKernelDensity <- function(pump.subset = "pooled", pump.select = NULL,
-  neighborhood.type = "walking", obs.unit = "unstacked", bandwidth = 0.5,
-  color = "black", line.type = "solid", multi.core = FALSE, ...) {
+  neighborhood.type = "walking", cases = "unstacked", bandwidth = 0.5,
+  color = "black", line.type = "solid", multi.core = FALSE) {
 
-  if (!is.null(obs.unit) & !all(obs.unit %in%
+  if (!is.null(cases) & !all(cases %in%
       c("unstacked", "address", "fatality"))) {
-    stop('obs.unit must be "unstacked", "address" or "fatality".')
+    stop('cases must be "unstacked", "address" or "fatality".')
   }
 
   if (!all(neighborhood.type %in% c("voronoi", "walking"))) {
     stop('neighborhood.type must either be "voronoi" or "walking".')
   }
 
-  cores <- multiCore(multi.core)
+  if (is.character(pump.subset)) {
+    if (pump.subset %in% c("individual", "pooled") == FALSE) {
+      stop("If not numeric, pump.subset must either be 'individual' or 'pooled'.")
+    }
+  }
 
+  cores <- multiCore(multi.core)
+  vars <- c("x", "y")
   bw <- rep(bandwidth, 2)
 
   if (is.null(pump.select)) {
     if (all(is.character(pump.subset))) {
       if (pump.subset == "pooled") {
-        if (obs.unit == "unstacked") {
-          kde <- KernSmooth::bkde2D(cholera::fatalities.unstacked[,
-            c("x", "y")], bandwidth = bw)
-
-        } else if (obs.unit == "address") {
-          kde <- KernSmooth::bkde2D(cholera::fatalities.address[, c("x", "y")],
-            bandwidth = bw)
-
-        } else if (obs.unit == "fatality") {
-          kde <- KernSmooth::bkde2D(cholera::fatalities[, c("x", "y")],
-            bandwidth = bw)
+        if (cases == "unstacked") {
+          dat <- cholera::fatalities.unstacked[, vars]
+        } else if (cases == "address") {
+          dat <- cholera::fatalities.address[, vars]
+        } else if (cases == "fatality") {
+          dat <- cholera::fatalities[, vars]
         }
 
-        contour(x = kde$x1, y = kde$x2, z = kde$fhat, col = color,
+        kde <- KernSmooth::bkde2D(dat, bandwidth = bw)
+
+        graphics::contour(x = kde$x1, y = kde$x2, z = kde$fhat, col = color,
           lty = line.type, add = TRUE)
 
       } else if (pump.subset == "individual") {
         if (neighborhood.type == "walking") {
-          n.data <- cholera::neighborhoodWalking(multi.core = cores)
-          cases <- cholera::pumpCase(n.data)
+          n.data <- neighborhoodWalking(multi.core = cores)
+          cases <- pumpCase(n.data)
 
         } else if (neighborhood.type == "voronoi") {
-          n.data <- cholera::neighborhoodVoronoi()
-          cases <- cholera::pumpCase(n.data)
+          n.data <- neighborhoodVoronoi()
+          cases <- pumpCase(n.data)
           empty.cell <- vapply(cases, length, numeric(1L))
           cases <- cases[empty.cell != 0]
         }
 
         kde <- lapply(cases, function(id) {
-          sel <- cholera::fatalities.address$anchor.case %in% id
-          dat <- cholera::fatalities.address[sel, c("x", "y")]
+          sel <- cholera::fatalities.address$anchor %in% id
+          dat <- cholera::fatalities.address[sel, vars]
           KernSmooth::bkde2D(dat, bandwidth = bw)
         })
 
         invisible(lapply(names(kde), function(nm) {
           dat <- kde[[nm]]
-          contour(x = dat$x1, y = dat$x2, z = dat$fhat, col = snowColors()[nm],
-            lty = line.type, add = TRUE)
+          graphics::contour(x = dat$x1, y = dat$x2, z = dat$fhat,
+            col = snowColors()[nm], lty = line.type, add = TRUE)
         }))
       }
 
     } else if (all(is.numeric(pump.subset))) {
       if (neighborhood.type == "walking") {
-        n.data <- cholera::neighborhoodWalking(multi.core = cores)
+        n.data <- neighborhoodWalking(multi.core = cores)
         obs.neighborhood <- as.numeric(names(n.data$paths))
 
         if (any(abs(pump.subset) %in% obs.neighborhood == FALSE)) {
           stop('For walking neighborhoods, only 3 through 12 are valid.')
         }
 
-        cases.list <- cholera::pumpCase(n.data)
+        cases.list <- pumpCase(n.data)
 
         if (all(pump.subset > 0)) {
           cases <- cases.list[paste0("p", pump.subset)]
@@ -119,15 +114,15 @@ addKernelDensity <- function(pump.subset = "pooled", pump.select = NULL,
         }
 
       } else if (neighborhood.type == "voronoi") {
-        n.data <- cholera::neighborhoodVoronoi()
-        cases <- cholera::pumpCase(n.data)
+        n.data <- neighborhoodVoronoi()
+        cases <- pumpCase(n.data)
         empty.cell <- vapply(cases, length, numeric(1L))
         cases <- cases[empty.cell != 0]
       }
 
       kde <- lapply(cases, function(id) {
-        sel <- cholera::fatalities.address$anchor.case %in% id
-        dat <- cholera::fatalities.address[sel, c("x", "y")]
+        sel <- cholera::fatalities.address$anchor %in% id
+        dat <- cholera::fatalities.address[sel, vars]
         KernSmooth::bkde2D(dat, bandwidth = bw)
       })
 
@@ -139,19 +134,19 @@ addKernelDensity <- function(pump.subset = "pooled", pump.select = NULL,
     }
 
   } else {
-    n.data <- cholera::neighborhoodWalking(pump.select, multi.core = cores)
-    cases <- cholera::pumpCase(n.data)
+    n.data <- neighborhoodWalking(pump.select, multi.core = cores)
+    cases <- pumpCase(n.data)
 
     kde <- lapply(cases, function(id) {
-      sel <- cholera::fatalities.address$anchor.case %in% id
-      dat <- cholera::fatalities.address[sel, c("x", "y")]
+      sel <- cholera::fatalities.address$anchor %in% id
+      dat <- cholera::fatalities.address[sel, vars]
       KernSmooth::bkde2D(dat, bandwidth = bw)
     })
 
     invisible(lapply(names(kde), function(nm) {
       dat <- kde[[nm]]
-      contour(x = dat$x1, y = dat$x2, z = dat$fhat, col = snowColors()[nm],
-        lty = line.type, add = TRUE)
+      graphics::contour(x = dat$x1, y = dat$x2, z = dat$fhat,
+        col = snowColors()[nm], lty = line.type, add = TRUE)
     }))
   }
 }

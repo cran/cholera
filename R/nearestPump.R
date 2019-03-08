@@ -6,7 +6,7 @@
 #' @param weighted Logical. \code{TRUE} computes shortest path in terms of road length. \code{FALSE} computes shortest path in terms of the number of nodes.
 #' @param case.set Character. "observed", "expected", or "snow".
 #' @param multi.core Logical or Numeric. \code{TRUE} uses \code{parallel::detectCores()}. \code{FALSE} uses one, single core. You can also specify the number logical cores. On Windows, only \code{multi.core = FALSE} is available.
-#' @param unit Character. Unit of distance: "meter", "yard" or "native". "native" returns the map's native scale. Meaningful only when "weighted" is \code{TRUE} and "output" is "distance". See \code{vignette("roads")} for information on unit distances.
+#' @param distance.unit Character. Unit of distance: "meter", "yard" or "native". "native" returns the map's native scale. Meaningful only when "weighted" is \code{TRUE} and "output" is "distance". See \code{vignette("roads")} for information on unit distances.
 #' @param time.unit Character. "hour", "minute", or "second".
 #' @param walking.speed Numeric. Walking speed in km/hr.
 #' @note Time is computed using \code{distanceTime()}.
@@ -14,8 +14,8 @@
 #' @return An R data frame or list of 'igraph' paths.
 
 nearestPump <- function(pump.select = NULL, output = "distance", vestry = FALSE,
-  weighted = TRUE, case.set = "observed", unit = "meter", multi.core = FALSE,
-  time.unit = "second", walking.speed = 5) {
+  weighted = TRUE, case.set = "observed", distance.unit = "meter",
+  multi.core = FALSE, time.unit = "second", walking.speed = 5) {
 
   if (output %in% c("distance", "path") == FALSE) {
     stop('output must be "distance" or "path".')
@@ -25,12 +25,12 @@ nearestPump <- function(pump.select = NULL, output = "distance", vestry = FALSE,
     stop('case.set must be "observed", "expected" or "snow".')
   }
 
-  if (unit %in% c("meter", "yard", "native") == FALSE) {
-    stop('unit must be "meter", "yard" or "native".')
+  if (distance.unit %in% c("meter", "yard", "native") == FALSE) {
+    stop('distance.unit must be "meter", "yard" or "native".')
   }
 
   cores <- multiCore(multi.core)
-  dat <- cholera::neighborhoodData(vestry, case.set)
+  dat <- neighborhoodData(vestry, case.set)
   path.data <- pathData(dat, weighted, case.set, cores)
   distances <- path.data$distances
   paths <- path.data$paths
@@ -75,15 +75,15 @@ nearestPump <- function(pump.select = NULL, output = "distance", vestry = FALSE,
 
     out <- out[, c("case", "pump", "pump.name", "distance")]
 
-    out$time <- cholera::distanceTime(out$distance, unit = time.unit,
-      speed = walking.speed)
+    out$time <- distanceTime(out$distance, time.unit = time.unit,
+      walking.speed = walking.speed)
 
-    if (unit == "meter") {
-      out$distance <- cholera::unitMeter(out$distance, "meter")
-    } else if (unit == "yard") {
-      out$distance <- cholera::unitMeter(out$distance, "yard")
-    } else if (unit == "native") {
-      out$distance <- cholera::unitMeter(out$distance, "native")
+    if (distance.unit == "meter") {
+      out$distance <- unitMeter(out$distance, "meter")
+    } else if (distance.unit == "yard") {
+      out$distance <- unitMeter(out$distance, "yard")
+    } else if (distance.unit == "native") {
+      out$distance <- unitMeter(out$distance, "native")
     }
 
     out
@@ -173,12 +173,12 @@ pathData <- function(dat, weighted, case.set, cores) {
   }
 
   if (case.set == "observed") {
-    anchor <- cholera::fatalities.address$anchor.case
+    anchor <- cholera::fatalities.address$anchor
     list(case = anchor, distances = distances(anchor), paths = paths(anchor))
 
   } else if (case.set == "snow") {
     snow <- unique(cholera::anchor.case[cholera::anchor.case$case %in%
-      cholera::snow.neighborhood, "anchor.case"])
+      cholera::snow.neighborhood, "anchor"])
 
     paths.snow <- parallel::mclapply(snow, function(x) {
       case.node <- nodes[nodes$anchor == x, "node"]

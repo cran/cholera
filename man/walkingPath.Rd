@@ -4,14 +4,14 @@
 \alias{walkingPath}
 \title{Compute the shortest walking path between cases and/or pumps.}
 \usage{
-walkingPath(origin, destination = NULL, type = "case-pump",
-  observed = TRUE, weighted = TRUE, vestry = FALSE, unit = "meter",
-  time.unit = "second", walking.speed = 5)
+walkingPath(origin = 1, destination = NULL, type = "case-pump",
+  observed = TRUE, weighted = TRUE, vestry = FALSE,
+  distance.unit = "meter", time.unit = "second", walking.speed = 5)
 }
 \arguments{
-\item{origin}{Numeric or Integer. Numeric ID of case or pump.}
+\item{origin}{Numeric or Character. Numeric ID of case or pump. Character landmark name.}
 
-\item{destination}{Numeric or Integer. Numeric ID(s) of case(s) or pump(s). Exclusion is possible via negative selection (e.g., -7). Default is \code{NULL}: this returns closest pump or "anchor" case.}
+\item{destination}{Numeric or Character. Numeric ID(s) of case(s) or pump(s). Exclusion is possible via negative selection (e.g., -7). Default is \code{NULL}: this returns closest pump or "anchor" case. Character landmark name (case insensitive).}
 
 \item{type}{Character "case-pump", "cases" or "pumps".}
 
@@ -21,7 +21,7 @@ walkingPath(origin, destination = NULL, type = "case-pump",
 
 \item{vestry}{Logical. \code{TRUE} uses the 14 pumps from the Vestry report. \code{FALSE} uses the 13 in the original map.}
 
-\item{unit}{Character. Unit of distance: "meter", "yard" or "native". "native" returns the map's native scale. "unit" is meaningful only when "weighted" is TRUE. See \code{vignette("roads")} for information on unit distances.}
+\item{distance.unit}{Character. Unit of distance: "meter", "yard" or "native". "native" returns the map's native scale. "unit" is meaningful only when "weighted" is TRUE. See \code{vignette("roads")} for information on unit distances.}
 
 \item{time.unit}{Character. "hour", "minute", or "second".}
 
@@ -42,6 +42,9 @@ The function uses a case's "address" (i.e., a stack's "anchor" case) to compute 
 # path from case 1 to nearest pump.
 walkingPath(1)
 
+# path from pump 1 to nearest case.
+walkingPath(NULL, 1)
+
 # path from case 1 to pump 6.
 walkingPath(1, 6)
 
@@ -54,10 +57,13 @@ walkingPath(1, 6, type = "cases")
 # path from pump 1 to pump 6.
 walkingPath(1, 6, type = "pumps")
 
+# for multiple cases.
+lapply(1:3, walkingPath)
+
 # path from case 1 to nearest pump.
 plot(walkingPath(1))
+
+# path from John Snow's residence to Broad Street pump.
+plot(walkingPath("John Snow", 7))
 }
-}
-\seealso{
-\code{\link{fatalities}}, \code{vignette("pump.neighborhoods")}
 }

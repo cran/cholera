@@ -5,7 +5,7 @@
 #' @format
 #'  \describe{
 #'     \item{\code{case}}{numerical case ID}
-#'     \item{\code{anchor.case}}{numerical case ID of anchor.case}
+#'     \item{\code{anchor}}{numerical case ID of anchor.case}
 #' }
 #' @note \code{\link{unstackFatalities}} documents the code for these data.
 #' @docType data
@@ -50,11 +50,11 @@
 
 #' "Unstacked" amended cholera data with address as unit of observation.
 #'
-#' An "unstacked" version of the \code{fatalities} dataset. It changes the unit of observation from the case (bar) to the "address", the x-y coordinate of the case at the base of a stack, and makes the number of fatalities an attribute of the "address".
+#' An "unstacked" version of the \code{fatalities} dataset. It changes the unit of observation from the case (bar) to the "address", the x-y coordinates of the case at the base of a stack, and makes the number of fatalities an attribute of the "address".
 #'
 #' @format A data frame with 4 variables for 321 addresses
 #'  \describe{
-#'     \item{\code{anchor.case}}{numerical case ID of address}
+#'     \item{\code{anchor}}{numerical case ID of address}
 #'     \item{\code{x}}{x-coordinate}
 #'     \item{\code{y}}{y-coordinate}
 #'     \item{\code{case.count}}{number of fatalities at address}
@@ -72,7 +72,7 @@
 
 #' "Unstacked" amended cholera fatalities data with fatality as unit of observation.
 #'
-#' An "unstacked" version of the \code{fatalities} dataset. It changes the unit of observation from the case (bar) to the "address", the x-y coordinate of the case at the base of a stack, and assigns the base case's coordinates to all cases in the stack.
+#' An "unstacked" version of the \code{fatalities} dataset. It changes the unit of observation from the case (bar) to the "address", the x-y coordinates of the case at the base of a stack, and assigns the base case's coordinates to all cases in the stack.
 #'
 #' @format A data frame with 3 variable that records the position of the 578 bars on Snow's map.
 #'
@@ -91,6 +91,35 @@
 #' @docType data
 "fatalities.unstacked"
 
+#' Orthogonal projection of landmarks onto road network.
+#'
+#' @format A data frame with 6 variables that records the position of the orthogonal projection of landmarks onto the network of roads.
+#'  \describe{
+#'     \item{\code{road.segment}}{"address" road segment}
+#'     \item{\code{x.proj}}{orthogonal x-coordinate}
+#'     \item{\code{y.proj}}{orthogonal y-coordinate}
+#'     \item{\code{ortho.dist}}{orthogonal distance to home road segment}
+#'      \item{\code{x}}{nominal x-coordinate}
+#'     \item{\code{y}}{nominal y-coordinate}
+#'     \item{\code{name}}{landmark name}
+#'     \item{\code{case}}{numeric case ID}
+#'  }
+#' @note \code{\link{landmarkData}} documents the code for these data.
+#' @docType data
+"landmarks"
+
+#' Centers of city squares.
+#'
+#' @format A data frame with 6 variables that records the position of the orthogonal projection of landmarks onto the network of roads.
+#'  \describe{
+#'     \item{\code{name}}{square name}
+#'     \item{\code{x}}{x-coordinate}
+#'     \item{\code{y}}{y-coordinate}
+#'     \item{\code{case}}{numeric case ID}
+#'  }
+#' @docType data
+"landmark.squares"
+
 #' Orthogonal projection of observed cases onto road network.
 #'
 #' @format A data frame with 5 variables that records the position of the orthogonal projection of the 578 cases onto the network of roads.
@@ -107,7 +136,7 @@
 
 #' Road "address" of simulated (i.e., "expected") cases.
 #'
-#' @format A data frame with 6 variables that records the "address" of 20007 simulate cases along the network of roads.
+#' @format A data frame with 6 variables that records the "address" of 19,993 simulate cases along the network of roads.
 #' \describe{
 #'     \item{\code{road.segment}}{"address" road segment}
 #'     \item{\code{x.proj}}{x-coordinate}
@@ -210,9 +239,9 @@
 
 #' "Expected" cases.
 #'
-#' The result of using sp::spsample() and sp::Polygon() to generate 20007 regularly spaced simulated cases within the map's borders.
+#' The result of using sp::spsample() and sp::Polygon() to generate 19,993 regularly spaced simulated cases within the map's borders.
 #'
-#' @format A data frame with 2 variable that records the position of 20007 "expected" cases fitted by sp::spsample().
+#' @format A data frame with 2 variable that records the position of 19,993 "expected" cases fitted by sp::spsample().
 #'  \describe{
 #'     \item{\code{x}}{x-coordinate}
 #'     \item{\code{y}}{y-coordinate}

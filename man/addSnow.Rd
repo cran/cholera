@@ -5,18 +5,16 @@
 \title{Adds Snow's graphical annotation of the Broad Street pump walking neighborhood.}
 \usage{
 addSnow(type = "area", color = "dodgerblue", alpha.level = 0.25,
-  line.width = 2, ...)
+  line.width = 2)
 }
 \arguments{
-\item{type}{Character. Type of annotation plot: "area", "boundary" or "street".}
+\item{type}{Character. Type of annotation plot: "area", "perimeter" or "street".}
 
 \item{color}{Character. Neighborhood color.}
 
 \item{alpha.level}{Numeric. Alpha level transparency: a value in [0, 1].}
 
-\item{line.width}{Numeric. Line width for \code{type = "street"} and \code{type = "boundary"}.}
-
-\item{...}{Additional plotting parameters.}
+\item{line.width}{Numeric. Line width for \code{type = "street"} and \code{type = "perimeter"}.}
 }
 \description{
 Adds Snow's graphical annotation of the Broad Street pump walking neighborhood.
@@ -27,13 +25,4 @@ Adds Snow's graphical annotation of the Broad Street pump walking neighborhood.
 plot(neighborhoodVoronoi())
 addSnow()
 }
-}
-\seealso{
-\code{\link{snowMap}},
-\code{\link{addIndexCase}},
-\code{\link{addKernelDensity}},
-\code{\link{addLandmarks}},
-\code{\link{addPlaguePit}},
-\code{\link{addVoronoi}},
-\code{\link{addWhitehead}}
 }

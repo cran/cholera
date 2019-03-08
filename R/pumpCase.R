@@ -1,7 +1,6 @@
 #'  Extract numeric case IDs by pump neighborhood.
 #'
 #' @param x An object created by \code{neighborhoodEuclidean()}, \code{neighborhoodVoronoi()} or \code{neighborhoodWalking()}.
-#' @seealso \code{\link{neighborhoodVoronoi}}, \code{\link{neighborhoodVoronoi}}, \code{\link{neighborhoodEuclidean}},
 #' @return An R list of numeric ID of cases by pump neighborhoods.
 #' @export
 #' @examples
@@ -29,9 +28,7 @@ pumpCase.euclidean <- function(x) {
 #' @export
 pumpCase.voronoi <- function(x) {
   output <- x$statistic.data
-  out <- lapply(output, function(x) {
-    cholera::fatalities.address$anchor.case[x == 1]
-  })
+  out <- lapply(output, function(x) cholera::fatalities.address$anchor[x == 1])
 
   if (is.null(x$pump.select)) {
     if (x$vestry == TRUE) {

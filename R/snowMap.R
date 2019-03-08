@@ -6,26 +6,24 @@
 #' @param add.landmarks Logical. Add landmarks.
 #' @param add.pumps Logical. Add pumps.
 #' @param add.roads Logical. Add roads.
-#' @param add.title Logical. Add title.
+#' @param add.frame Logical. Add map frame.
+#' @param main Character. Title of graph.
+#' @param case.col Character. Color of fatalities.
+#' @param case.pch Character. Color of fatalities.
 #' @param ... Additional plotting parameters.
 #' @note Uses amended version of Dodson and Tobler's data included in this package.
 #' @return A base R graphics plot.
-#' @seealso \code{\link{addLandmarks}},
-#' \code{\link{addKernelDensity}},
-#' \code{\link{addLandmarks}},
-#' \code{\link{addPlaguePit}},
-#' \code{\link{addVoronoi}}.
-#' \code{\link{addWhitehead}}
 #' @export
 #' @examples
 #' snowMap()
 #' snowMap(vestry = TRUE, stacked = FALSE)
 
 snowMap <- function(vestry = FALSE, stacked = TRUE, add.cases = TRUE,
-  add.landmarks = FALSE, add.pumps = TRUE, add.roads = TRUE, add.title = TRUE,
-  ...) {
+  add.landmarks = FALSE, add.pumps = TRUE, add.roads = TRUE, add.frame = TRUE,
+  main = NA, case.col = "gray", case.pch = 15, ...) {
 
   rng <- mapRange()
+  vars <- c("x", "y")
 
   if (stacked) {
     cases <- cholera::fatalities
@@ -33,25 +31,25 @@ snowMap <- function(vestry = FALSE, stacked = TRUE, add.cases = TRUE,
     cases <- cholera::fatalities.address
   }
 
-  plot(cases[, c("x", "y")], xlim = rng$x, ylim = rng$y, pch = NA, asp = 1)
+  plot(cases[, vars], xlim = rng$x, ylim = rng$y, pch = NA, asp = 1,
+    main = main, ...)
   if (add.roads) addRoads()
-  if (add.cases) points(cases[, c("x", "y")], pch = 15, col = "gray", cex = 0.5)
+  if (add.cases) points(cases[, vars], pch = case.pch, col = case.col,
+    cex = 0.5)
   if (add.pumps) addPump(vestry = vestry, col = "blue", pch = 2)
-  if (add.title) title(main = "Snow's Cholera Map")
   if (add.landmarks) addLandmarks()
-  addBorder()
+  if (add.frame) addFrame()
 }
 
-#' Add roads to plot.
+#' Add all streets and roads to plot.
 #'
 #' @param col Character. Color
-#' @param ... Additional plotting parameters.
 #' @export
 
-addRoads <- function(col = "gray", ...) {
+addRoads <- function(col = "gray") {
   rd <- cholera::roads[cholera::roads$name != "Map Frame", ]
   roads.list <- split(rd[, c("x", "y")], rd$street)
-  invisible(lapply(roads.list, lines, col = "gray", ...))
+  invisible(lapply(roads.list, lines, col = "gray"))
 }
 
 #' Add map border to plot.
@@ -59,7 +57,7 @@ addRoads <- function(col = "gray", ...) {
 #' @param ... Additional plotting parameters.
 #' @export
 
-addBorder <- function(...) {
+addFrame <- function(...) {
   borders <- cholera::roads[cholera::roads$name == "Map Frame", ]
   border.list <- split(borders[, c("x", "y")], borders$street)
   invisible(lapply(border.list, lines, ...))

@@ -4,29 +4,32 @@
 \alias{streetNameLocator}
 \title{Locate road by name.}
 \usage{
-streetNameLocator(road.name, zoom = FALSE, radius = 0.1,
-  cases = "anchors", add.title = TRUE, add.pump = TRUE,
-  vestry = FALSE, highlight = TRUE, unit = "meter",
-  time.unit = "minute", walking.speed = 5)
+streetNameLocator(road.name = "Broad Street", zoom = FALSE,
+  cases = "address", token = "id", add.title = TRUE,
+  add.subtitle = TRUE, add.pump = TRUE, vestry = FALSE,
+  highlight = TRUE, distance.unit = "meter", time.unit = "minute",
+  walking.speed = 5)
 }
 \arguments{
 \item{road.name}{Character vector. Note that \code{streetNameLocator}() tries to correct for case and to remove extra spaces.}
 
-\item{zoom}{Logical.}
+\item{zoom}{Logical or Numeric. A numeric value >= 0 controls the degree of zoom. The default is FALSE, which is equivalent to zero.}
 
-\item{radius}{Numeric. Controls the degree of zoom.}
+\item{cases}{Character. Plot cases: \code{NULL}, "address" or "fatality".}
 
-\item{cases}{Character. Plot cases: \code{NULL}, "anchors" or "all".}
+\item{token}{Character. "id" or "point".}
 
 \item{add.title}{Logical. Include title.}
+
+\item{add.subtitle}{Logical. Include subtitle with road information.}
 
 \item{add.pump}{Logical. Include nearby pumps.}
 
 \item{vestry}{Logical. \code{TRUE} uses the 14 pumps from the Vestry report. \code{FALSE} uses the 13 in the original map.}
 
-\item{highlight}{Logical. Highlight selected road.}
+\item{highlight}{Logical. Highlight selected road and its cases.}
 
-\item{unit}{Character. Unit of distance: "meter", "yard" or "native". "native" returns the map's native scale. See \code{vignette("roads")} for information on conversion.}
+\item{distance.unit}{Character. Unit of distance: "meter", "yard" or "native". "native" returns the map's native scale. See \code{vignette("roads")} for information on conversion.}
 
 \item{time.unit}{Character. "hour", "minute", or "second".}
 
@@ -42,8 +45,5 @@ Highlight a road and its cases. See the list of road names in \code{vignette}("r
 streetNameLocator("Oxford Street")
 streetNameLocator("oxford street")
 streetNameLocator("Cambridge Street", zoom = TRUE)
-streetNameLocator("Cambridge Street", zoom = TRUE, radius = 0)
-}
-\seealso{
-\code{\link{roads}}, \code{\link{road.segments}}, \code{\link{streetNumberLocator}}, \code{vignette("roads")}
+streetNameLocator("Cambridge Street", zoom = 0.5)
 }

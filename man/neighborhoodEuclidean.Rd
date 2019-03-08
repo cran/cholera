@@ -2,27 +2,31 @@
 % Please edit documentation in R/euclidean.R
 \name{neighborhoodEuclidean}
 \alias{neighborhoodEuclidean}
-\title{Plot Euclidean path pump neighborhoods.}
+\title{Compute Euclidean path pump neighborhoods.}
 \usage{
-neighborhoodEuclidean(pump.subset = NULL, pump.select = NULL,
-  vestry = FALSE, case.set = "observed", multi.core = FALSE)
+neighborhoodEuclidean(pump.select = NULL, vestry = FALSE,
+  case.location = "nominal", case.set = "observed",
+  multi.core = FALSE)
 }
 \arguments{
-\item{pump.subset}{Numeric. Vector of numeric pump IDs to subset from the neighborhoods defined by \code{pump.select}. Negative selection possible. \code{NULL} selects all pumps in \code{pump.select}.}
-
 \item{pump.select}{Numeric. Vector of numeric pump IDs to define pump neighborhoods (i.e., the "population"). Negative selection possible. \code{NULL} selects all pumps.}
 
 \item{vestry}{Logical. \code{TRUE} uses the 14 pumps from the Vestry Report. \code{FALSE} uses the 13 in the original map.}
+
+\item{case.location}{Character. "address" or "nominal". For \code{observed = TRUE}: "address" uses \code{ortho.proj} and "nominal" uses \code{fatalities}. For \code{observed = TRUE}: "address" uses \code{sim.ortho.proj} and "nominal" uses \code{regular.cases}.}
 
 \item{case.set}{Character. "observed" or "expected".}
 
 \item{multi.core}{Logical or Numeric. \code{TRUE} uses \code{parallel::detectCores()}. \code{FALSE} uses one, single core. You can also specify the number logical cores. On Windows, only \code{multi.core = FALSE} is available.}
 }
 \value{
-A base R graph.
+An R vector.
 }
 \description{
 Plots star graph from pump to its cases.
+}
+\note{
+This function is computationally intensive when \code{case.set = "expected"}.
 }
 \examples{
 \dontrun{

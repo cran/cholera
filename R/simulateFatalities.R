@@ -1,11 +1,11 @@
-#' Generate simulated fatalities and their orthogonal projection on road network.
+#' Generate simulated fatalities.
 #'
-#' Places regularly spaced "simulated" or "expected" cases across the face of the map. The function finds the "addresses" of cases on the road network via orthogonal projection (or simple proximity). These data are used to generate "expected" pump neighborhoods. The function relies on \code{sp::spsample()} and \code{sp::Polygon()}.
+#' Places regularly spaced "simulated" or "expected" cases across the face of the map. The function finds the "addresses" of cases via orthogonal projection or simple proximity. These data are used to generate "expected" pump neighborhoods. The function relies on \code{sp::spsample()} and \code{sp::Polygon()}.
 #' @param compute Logical. \code{TRUE} computes data. \code{FALSE} uses pre-computed data. For replication of data used in the package,
 #' @param multi.core Logical or Numeric. \code{TRUE} uses \code{parallel::detectCores()}. \code{FALSE} uses one, single core. With Numeric, you specify the number logical cores (rounds with \code{as.integer()}). On Windows, only \code{multi.core = FALSE} is available.
 #' @param simulated.obs Numeric. Number of sample cases.
 #' @return An R list with two elements: \code{\link{sim.ortho.proj}} and \code{\link{regular.cases}}
-#' @note This function is computationally intensive. With "simulated.obs" set to 20,000 simulated cases (actually generating 19,993 cases), the function takes about 94 minutes to run on a single core of a 2.3 GHz Intel Core i7 with R version 3.5.1 and 22 minutes to run on eight logical (four physical) cores. This function documents the code that generates \code{\link{sim.ortho.proj}} and \code{\link{regular.cases}}. The distance between of these simulated cases is approximately 4.2 meters.
+#' @note This function is computationally intensive. With "simulated.obs" set to 20,000 simulated cases (actually generating 19,993 cases), the function takes about 105 minutes to run on a single core of a 2.3 GHz Intel Core i7 with R version 3.5.2 and 25 minutes to run on eight logical (four physical) cores. This function documents the code that generates \code{\link{sim.ortho.proj}} and \code{\link{regular.cases}}. In real world terms, the distance between of these simulated cases is approximately 6 meters.
 #' @export
 
 simulateFatalities <- function(compute = FALSE, multi.core = FALSE,
@@ -22,18 +22,6 @@ simulateFatalities <- function(compute = FALSE, multi.core = FALSE,
     map.frame <- cholera::roads[cholera::roads$street %in% cholera::border, ]
     roads.list <- split(rd[, c("x", "y")], rd$street)
     border.list <- split(map.frame[, c("x", "y")], map.frame$street)
-
-    road.segments <- parallel::mclapply(unique(rd$street), function(i) {
-      dat <- rd[rd$street == i, ]
-      names(dat)[names(dat) %in% c("x", "y")] <- c("x1", "y1")
-      seg.data <- dat[-1, c("x1", "y1")]
-      names(seg.data) <- c("x2", "y2")
-      dat <- cbind(dat[-nrow(dat), ], seg.data)
-      dat$id <- paste0(dat$street, "-", seq_len(nrow(dat)))
-      dat
-    }, mc.cores = cores)
-
-    road.segments <- do.call(rbind, road.segments)
 
     ## order vertices for polygon functions ##
 
@@ -52,32 +40,26 @@ simulateFatalities <- function(compute = FALSE, multi.core = FALSE,
     regular.cases <- split(regular.cases, rownames(regular.cases))
 
     orthogonal.projection <- parallel::mclapply(regular.cases, function(case) {
-      within.radius <- lapply(road.segments$id, function(x) {
-        dat <- road.segments[road.segments$id == x, ]
-        test1 <- withinRadius(case, dat[, c("x1", "y1")]) # in unstack.R
+      within.radius <- lapply(cholera::road.segments$id, function(x) {
+        dat <- cholera::road.segments[cholera::road.segments$id == x, ]
+        test1 <- withinRadius(case, dat[, c("x1", "y1")])
         test2 <- withinRadius(case, dat[, c("x2", "y2")])
         if (any(test1, test2)) unique(dat$id)
       })
 
       within.radius <- unlist(within.radius)
 
-      ortho.proj.test <- lapply(within.radius, function(x) {
-        seg.data <- road.segments[road.segments$id == x,
+      ortho.proj.test <- lapply(within.radius, function(seg.id) {
+        ortho.data <- orthogonalProjection(as.numeric(row.names(case)), seg.id,
+          observed = FALSE, case.data = case)
+        x.proj <- ortho.data$x.proj
+        y.proj <- ortho.data$y.proj
+
+        seg.data <- cholera::road.segments[cholera::road.segments$id == seg.id,
           c("x1", "y1", "x2", "y2")]
 
         seg.df <- data.frame(x = c(seg.data$x1, seg.data$x2),
                              y = c(seg.data$y1, seg.data$y2))
-
-        ols <- stats::lm(y ~ x, data = seg.df)
-        segment.slope <- stats::coef(ols)[2]
-        segment.intercept <- stats::coef(ols)[1]
-        orthogonal.slope <- -1 / segment.slope
-        orthogonal.intercept <- case$y - orthogonal.slope * case$x
-
-        x.proj <- (orthogonal.intercept - segment.intercept) /
-                  (segment.slope - orthogonal.slope)
-
-        y.proj <- segment.slope * x.proj + segment.intercept
 
         ## segment bisection/intersection test ##
 
@@ -90,7 +72,7 @@ simulateFatalities <- function(compute = FALSE, multi.core = FALSE,
           ortho.dist <- c(stats::dist(rbind(c(case$x, case$y),
             c(x.proj, y.proj))))
           ortho.pts <- data.frame(x.proj, y.proj)
-          data.frame(road.segment = x, ortho.pts, ortho.dist,
+          data.frame(road.segment = seg.id, ortho.pts, ortho.dist,
             stringsAsFactors = FALSE)
         } else {
           null.out <- data.frame(matrix(NA, ncol = 4))
@@ -112,7 +94,8 @@ simulateFatalities <- function(compute = FALSE, multi.core = FALSE,
       }
 
       # nearest road segment endpoint
-      candidates <- road.segments[road.segments$id %in% within.radius, ]
+      candidates <- cholera::road.segments[cholera::road.segments$id %in%
+        within.radius, ]
       no.bisect1 <- stats::setNames(candidates[, c("x1", "y1")], c("x", "y"))
       no.bisect2 <- stats::setNames(candidates[, c("x2", "y2")], c("x", "y"))
       no.bisect <- rbind(no.bisect1, no.bisect2)
@@ -135,6 +118,7 @@ simulateFatalities <- function(compute = FALSE, multi.core = FALSE,
       prox.location <- stats::setNames(c.data, names(ortho.location))
 
       nearest <- which.min(c(ortho.location$dist, prox.location$dist))
+
       if (nearest == 1) {
         out <- ortho.location
       } else if (nearest == 2) {
@@ -156,7 +140,6 @@ simulateFatalities <- function(compute = FALSE, multi.core = FALSE,
 
     rc <- do.call(rbind, regular.cases)
     rc <- rc[order(as.numeric(row.names(rc))), ]
-
     list(sim.ortho.proj = sim.ortho.proj, regular.cases = rc)
   }
 }

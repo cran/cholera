@@ -4,29 +4,32 @@
 \alias{streetNumberLocator}
 \title{Locate road by numerical ID.}
 \usage{
-streetNumberLocator(road.number, zoom = FALSE, radius = 1,
-  cases = "anchors", add.title = TRUE, add.pump = TRUE,
-  vestry = FALSE, highlight = TRUE, unit = "meter",
-  time.unit = "second", walking.speed = 5)
+streetNumberLocator(road.number = 216, zoom = FALSE,
+  cases = "address", token = "id", add.title = TRUE,
+  add.subtitle = TRUE, add.pump = TRUE, vestry = FALSE,
+  highlight = TRUE, distance.unit = "meter", time.unit = "second",
+  walking.speed = 5)
 }
 \arguments{
 \item{road.number}{Numeric or integer. A whole number between 1 and 528.}
 
-\item{zoom}{Logical.}
+\item{zoom}{Logical or Numeric. A numeric value >= 0 controls the degree of zoom. The default is FALSE, which is equivalent to zero.}
 
-\item{radius}{Numeric. Controls the degree of zoom.}
+\item{cases}{Character. Plot cases: \code{NULL}, "address" or "fatality".}
 
-\item{cases}{Character. Plot cases: \code{NULL}, "anchors" or "all".}
+\item{token}{Character. "id" or "point".}
 
 \item{add.title}{Logical. Include title.}
+
+\item{add.subtitle}{Logical. Include subtitle with road information.}
 
 \item{add.pump}{Logical. Include nearby pumps.}
 
 \item{vestry}{Logical. \code{TRUE} uses the 14 pumps from the Vestry report. \code{FALSE} uses the 13 in the original map.}
 
-\item{highlight}{Logical. Highlight selected road.}
+\item{highlight}{Logical. Highlight selected road and its cases.}
 
-\item{unit}{Character. Unit of measurement: "meter" or "yard". Default is \code{NULL}, which returns the map's native scale.}
+\item{distance.unit}{Character. Unit of measurement: "meter" or "yard". Default is \code{NULL}, which returns the map's native scale.}
 
 \item{time.unit}{Character. "hour", "minute", or "second".}
 
@@ -41,8 +44,5 @@ Highlight a road and its cases. See \code{cholera::roads} for numerical IDs and 
 \examples{
 streetNumberLocator(243)
 streetNumberLocator(243, zoom = TRUE)
-streetNumberLocator(243, zoom = TRUE, radius = 0)
-}
-\seealso{
-\code{\link{roads}}, \code{\link{road.segments}}, \code{\link{streetNameLocator}}, \code{vignette("roads")}
+streetNumberLocator(243, zoom = 0.5)
 }

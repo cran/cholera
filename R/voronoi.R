@@ -3,7 +3,8 @@
 #' Group cases into neighborhoods using Voronoi tessellation.
 #' @param pump.select Numeric. Vector of numeric pump IDs to define pump neighborhoods (i.e., the "population"). Negative selection possible. \code{NULL} selects all pumps.
 #' @param vestry Logical. \code{TRUE} uses the 14 pumps from the Vestry report. \code{FALSE} uses the 13 in the original map.
-#' @param statistic NULL or Character. \code{NULL}, the default, makes no summary computation. "address" computes the number of addresses in each selected pump neighborhood. "fatality" computes the number of fatalities in pump neighborhoods.
+#' @param case.location Character. For \code{observed = FALSE}: "address" or "nominal". "address" uses the x-y coordinates of \code{ortho.proj}. "nominal" uses the x-y coordinates of \code{fatalities}.
+#' @param statistic Character. \code{NULL}, the default, makes no summary computation. "address" computes the number of addresses in each selected pump neighborhood. "fatality" computes the number of fatalities in pump neighborhoods.
 #' @param polygon.vertices Logical. \code{TRUE} returns a list of x-y coordinates of the vertices of Voronoi cells. Useful for \code{sp::point.in.polygon()} as used in \code{print.voronoi()} method.
 #' @return An R list with 12 objects.
 #' \itemize{
@@ -20,7 +21,6 @@
 #'   \item{\code{statistic}: "statistic" from neighborhoodVoronoi().}
 #'   \item{\code{vestry}: "vestry" from neighborhoodVoronoi().}
 #' }
-#' @seealso \code{\link{addVoronoi}}, \code{\link{plot.voronoi}}, \code{\link{print.voronoi}}, \code{vignette("pump.neighborhoods")}
 #' @export
 #' @examples
 #' neighborhoodVoronoi()
@@ -34,12 +34,30 @@
 #' dat$coordinates
 
 neighborhoodVoronoi <- function(pump.select = NULL, vestry = FALSE,
-  statistic = NULL, polygon.vertices = FALSE) {
+  case.location = "nominal", statistic = NULL, polygon.vertices = FALSE) {
 
-  if (vestry) {
-    pump.data <- cholera::pumps.vestry
-  } else {
-    pump.data <- cholera::pumps
+  if (case.location %in% c("address", "nominal") == FALSE) {
+    stop('case.location must be "address" or "nominal".')
+  }
+
+  if (case.location == "address") {
+    if (vestry) {
+      pump.data <- cholera::ortho.proj.pump.vestry
+      pump.data$street <- cholera::pumps.vestry$street
+      names(pump.data)[names(pump.data) %in%
+        c("x.proj", "y.proj", "pump.id")] <- c("x", "y", "id")
+    } else {
+      pump.data <- cholera::ortho.proj.pump
+      pump.data$street <- cholera::pumps$street
+      names(pump.data)[names(pump.data) %in%
+        c("x.proj", "y.proj", "pump.id")] <- c("x", "y", "id")
+    }
+  } else if (case.location == "nominal") {
+    if (vestry) {
+      pump.data <- cholera::pumps.vestry
+    } else {
+      pump.data <- cholera::pumps
+    }
   }
 
   if (is.null(pump.select) == FALSE) {
@@ -65,35 +83,39 @@ neighborhoodVoronoi <- function(pump.select = NULL, vestry = FALSE,
   x.rng <- range(cholera::roads$x)
   y.rng <- range(cholera::roads$y)
 
+  snow.colors <- snowColors(vestry = vestry)
+
   if (is.null(pump.select)) {
     pump.id <- pump.data$id
     voronoi <- deldir::deldir(pump.data[, c("x", "y")], rw = c(x.rng, y.rng),
       suppressMsge = TRUE)
-    snow.colors <- cholera::snowColors(vestry = TRUE)
     select.string <- NULL
   } else {
     pump.id <- pump.data$id[pump.select]
     voronoi <- deldir::deldir(pump.data[pump.select, c("x", "y")],
       rw = c(x.rng, y.rng), suppressMsge = TRUE)
-    snow.colors <- cholera::snowColors(vestry = TRUE)[pump.select]
+    snow.colors <- snow.colors[pump.select]
     select.string <- paste(sort(pump.select), collapse = ", ")
   }
 
-  cell.data <- voronoi$dirsgs
   voronoi.order <- as.numeric(rownames(voronoi$summary))
-
   pump.sel <- pump.data$id
 
   if (is.null(pump.select)) {
-    expected.data <- data.frame(pump = pump.sel[voronoi.order],
-                                area = voronoi$summary$dir.area)
+    pump.number <- pump.sel[voronoi.order]
   } else {
-    expected.data <- data.frame(pump = pump.sel[pump.select][voronoi.order],
-                                area = voronoi$summary$dir.area)
+    pump.number <- pump.sel[pump.select][voronoi.order]
   }
 
-  expected.data$pct <- expected.data$area / sum(expected.data$area)
-  coordinates <- polygonCoordinates(pump.id, cell.data, vestry)
+  expected.data <- data.frame(pump = pump.number,
+                              area = voronoi$summary$dir.area,
+                              pct = voronoi$summary$dir.wts)
+
+  if (is.null(pump.select)) {
+    coordinates <- deldirVertices(pump.data, cholera::roads)
+  } else {
+    coordinates <- deldirVertices(pump.data[pump.select,], cholera::roads)
+  }
 
   if (is.null(statistic)) {
     statistic.data <- lapply(coordinates, function(cell) {
@@ -106,21 +128,30 @@ neighborhoodVoronoi <- function(pump.select = NULL, vestry = FALSE,
         sp::point.in.polygon(cholera::fatalities.address$x,
           cholera::fatalities.address$y, cell$x, cell$y)
       })
-    }
 
-    if (statistic == "fatality") {
+    } else if (statistic == "fatality") {
       statistic.data <- lapply(coordinates, function(cell) {
         sp::point.in.polygon(cholera::fatalities.unstacked$x,
           cholera::fatalities.unstacked$y, cell$x, cell$y)
       })
-    }
+
+    } else (stop('If specified, statistic must either be "address" or
+                 "fatality".'))
   }
 
-  output <- list(pump.id = pump.id, voronoi = voronoi,
-    snow.colors = snow.colors, x.rng = x.rng, y.rng = y.rng,
-    select.string = select.string, expected.data = expected.data,
-    coordinates = coordinates, statistic.data = statistic.data,
-    pump.select = pump.select, vestry = vestry, statistic = statistic)
+  output <- list(pump.id = pump.id,
+                 voronoi = voronoi,
+                 case.location = case.location,
+                 snow.colors = snow.colors,
+                 x.rng = x.rng,
+                 y.rng = y.rng,
+                 select.string = select.string,
+                 expected.data = expected.data,
+                 coordinates = coordinates,
+                 statistic.data = statistic.data,
+                 pump.select = pump.select,
+                 vestry = vestry,
+                 statistic = statistic)
 
   class(output) <- "voronoi"
 
@@ -135,12 +166,13 @@ neighborhoodVoronoi <- function(pump.select = NULL, vestry = FALSE,
 #'
 #' @param x An object of class "voronoi" created by \code{neighborhoodVoronoi()}.
 #' @param voronoi.cells Logical. Plot Voronoi tessellation cells.
+#' @param delauny.triangles Logical. Plot Delauny triangles.
 #' @param euclidean.paths Logical. Plot all Euclidean paths (star graph).
 #' @param ... Additional plotting parameters.
 #' @return A base R graph.
 #' @seealso
 #'
-#' \code{neighborhoodVornoi()}
+#' \code{neighborhoodVoronoi()}
 #'
 #' \code{addVoronoi()}
 #'
@@ -148,7 +180,7 @@ neighborhoodVoronoi <- function(pump.select = NULL, vestry = FALSE,
 #' @examples
 #' plot(neighborhoodVoronoi())
 
-plot.voronoi <- function(x, voronoi.cells = TRUE,
+plot.voronoi <- function(x, voronoi.cells = TRUE, delauny.triangles = FALSE,
   euclidean.paths = FALSE, ...) {
 
   if (class(x) != "voronoi") {
@@ -175,14 +207,25 @@ plot.voronoi <- function(x, voronoi.cells = TRUE,
     if (is.null(x$pump.select)) {
       points(pump.data[, c("x", "y")], pch = 2, col = x$snow.colors)
       text(pump.data[, c("x", "y")], pos = 1, label = paste0("p", x$pump.id))
-      title(main = "Pump Neighborhoods: Voronoi (address)")
+
+      if (x$case.location == "address") {
+        title(main = "Pump Neighborhoods: Voronoi (address)")
+      } else if (x$case.location == "nominal") {
+        title(main = "Pump Neighborhoods: Voronoi (nominal)")
+      }
     } else {
       points(pump.data[x$pump.select, c("x", "y")], pch = 2,
         col = x$snow.colors)
       text(pump.data[x$pump.select, c("x", "y")],
         label = paste0("p", x$pump.id), pos = 1)
-      title(main = paste0("Pump Neighborhoods: Voronoi (address)", "\n",
-        "Pumps ", paste(sort(x$pump.select), collapse = ", ")))
+
+      if (x$case.location == "address") {
+        title(main = paste0("Pump Neighborhoods: Voronoi (address)", "\n",
+          "Pumps ", paste(sort(x$pump.select), collapse = ", ")))
+      } else if (x$case.location == "nominal") {
+        title(main = paste0("Pump Neighborhoods: Voronoi (nominal)", "\n",
+          "Pumps ", paste(sort(x$pump.select), collapse = ", ")))
+      }
     }
 
     if (voronoi.cells) {
@@ -190,9 +233,13 @@ plot.voronoi <- function(x, voronoi.cells = TRUE,
         lty = "solid")
     }
 
-    voronoi.case.id <- cholera::pumpCase(x)
+    if (delauny.triangles) {
+      plot(x$voronoi, add = TRUE, wline = "triang", wpoints = "none")
+    }
+
+    voronoi.case.id <- pumpCase(x)
     voronoi.colors <- vector(length = length(unlist(voronoi.case.id)))
-    names(voronoi.colors) <- cholera::fatalities.address$anchor.case
+    names(voronoi.colors) <- cholera::fatalities.address$anchor
 
     for (i in seq_along(voronoi.case.id)) {
       id <- voronoi.case.id[[i]]
@@ -202,12 +249,11 @@ plot.voronoi <- function(x, voronoi.cells = TRUE,
     if (euclidean.paths) {
       invisible(lapply(names(voronoi.case.id), function(nm) {
         p.data <- pump.data[paste0("p", pump.data$id) == nm, ]
-        sel <- cholera::fatalities.address$anchor.case %in%
-          voronoi.case.id[[nm]]
+        sel <- cholera::fatalities.address$anchor %in% voronoi.case.id[[nm]]
         n.data <- cholera::fatalities.address[sel, ]
         n.color <- x$snow.colors[nm]
-        lapply(n.data$anchor.case, function(case) {
-          c.data <- n.data[n.data$anchor.case == case, ]
+        lapply(n.data$anchor, function(case) {
+          c.data <- n.data[n.data$anchor == case, ]
           segments(c.data$x, c.data$y, p.data$x, p.data$y, col = n.color,
             lwd = 0.5)
         })
@@ -252,10 +298,10 @@ plot.voronoi <- function(x, voronoi.cells = TRUE,
 
 #' Print method for neighborhoodVoronoi().
 #'
-#' Return summary statistics for Voronoi neighborhoods.
+#' Return observed counts for Voronoi neighborhoods.
 #' @param x An object of class "voronoi" created by \code{neighborhoodVoronoi()}.
 #' @param ... Additional arguments.
-#' @return A data frame with observed and expected counts, observed percentage, and the Pearson residual, (observed - expected) / sqrt(expected).
+#' @return A vector with observed counts.
 #' @seealso \code{addVoronoi()}
 #' \code{plot.voronoi()}
 #' @export
@@ -264,108 +310,8 @@ plot.voronoi <- function(x, voronoi.cells = TRUE,
 #' print(neighborhoodVoronoi())
 
 print.voronoi <- function(x, ...) {
-  if (class(x) != "voronoi") {
-    stop('x\'s class needs to be "voronoi".')
-  }
-
-  output <- summary(x)
-  print(output)
-}
-
-summary.voronoi <- function(x, ...) {
-  if (class(x) != "voronoi") {
-    stop('x\'s class needs to be "voronoi".')
-  }
-
   census <- x$statistic.data
-  count <- vapply(census, sum, numeric(1L))
-
-  output <- data.frame(pump.id = as.numeric(names(count)),
-                       Count = count,
-                       Percent = round(100 * count / sum(count), 2))
-
-  output <- merge(output, x$expected.data[, c("pump", "pct")],
-    by.x = "pump.id", by.y = "pump")
-
-  output$Expected <- output$pct * sum(output$Count)
-  output$pct <- NULL
-  output$Pearson <- (output$Count - output$Expected) / sqrt(output$Expected)
-  output
-}
-
-fourCorners <- function() {
-  nw <- cholera::roads[cholera::roads$id == 69, c("x", "y")]
-  ne <- cholera::roads[cholera::roads$id == 28, c("x", "y")]
-  se <- cholera::roads[cholera::roads$id == 1137, c("x", "y")]
-  sw <- cholera::roads[cholera::roads$id == 1211, c("x", "y")]
-  list(northwest = nw, northeast = ne, southeast = se, southwest = sw)
-}
-
-# coordinates of Voronoi cell polygons for sp::point.in.polygon()
-polygonCoordinates <- function(pump.id, cell.data, vestry,
-  four.corners = fourCorners()) {
-
-  coordinates <- lapply(pump.id, function(i) {
-    if (vestry) {
-      pump <- cholera::pumps.vestry[cholera::pumps.vestry$id == i, c("x", "y")]
-    } else {
-      pump <- cholera::pumps[cholera::pumps$id == i, c("x", "y")]
-    }
-
-    dat <- cell.data[cell.data$ind1 == which(pump.id == i) |
-                     cell.data$ind2 == which(pump.id == i), ]
-
-    a <- dat[, c("x1", "y1")]
-    b <- dat[, c("x2", "y2")]
-    names(a) <- c("x", "y")
-    names(b) <- c("x", "y")
-
-    coords <- unique(rbind(a, b))
-
-    # "open" polygon tests
-    test1 <- any(dat$thirdv1 < 0 | dat$thirdv2 < 0)
-    test2 <- unlist(dat[, c("thirdv1", "thirdv2")])
-    test2 <- length(unique(test2[test2 < 0])) != 1
-
-    # close "open" polygons at corners of deldir::deldir()'s rectangular window
-    if (test1 & test2) {
-      # test by negation:
-      # does segment from pump to corner intersect any of the polygon's sides?
-      corners <- lapply(seq_len(nrow(dat)), function(j) {
-        intersection.points <- lapply(four.corners, function(corner) {
-          segmentIntersection(pump$x, pump$y, corner$x, corner$y,
-            dat[j, "x1"], dat[j, "y1"], dat[j, "x2"], dat[j, "y2"])
-        })
-
-        vapply(intersection.points, function(x) all(is.na(x)) == FALSE,
-               logical(1L))
-      })
-
-      # If a "corner" returns FALSE, include that corner as a vertex
-      corner.id <- which(colSums(do.call(rbind, corners)) == 0)
-      corner.solution <- four.corners[corner.id]
-
-      if (length(corner.solution) > 1) {
-        coords <- rbind(coords, do.call(rbind, corner.solution))
-      } else {
-        coords <- rbind(coords, unlist(corner.solution))
-      }
-    }
-
-    # center vertices relative to pump's coordinates
-    coords.centered <- data.frame(x = coords$x - pump$x, y = coords$y - pump$y)
-
-    # transform coordinates from cartesian to polar
-    # sort vertices by phi (angle); returns vertices in counter-clockwise order
-    idx <- order(apply(coords.centered, 1, pracma::cart2pol)[1, ])
-    coords <- coords[idx, ]
-
-    # adds first vertex to last to close polygon
-    rbind(coords, coords[1, ])
-  })
-
-  names(coordinates) <- pump.id
-  coordinates
+  print(vapply(census, sum, numeric(1L)))
 }
 
 polygonColors <- function(resid.vector, upper.limit = 67, alpha = FALSE) {
@@ -383,19 +329,4 @@ polygonColors <- function(resid.vector, upper.limit = 67, alpha = FALSE) {
   } else {
     scales::col_numeric("RdBu", domain = NULL)(seq_along(vec))[color.id]
   }
-}
-
-segmentIntersection <- function(x1, y1, x2, y2, a1, b1, a2, b2) {
-  # returns the point of intersection between two segments or NA if none.
-  # http://stackoverflow.com/questions/20519431/finding-point-of-intersection-in-r
-  # x1, y1, x2, y2 coordinates of first segment's endpoints.
-  # a1, b1, a2, b2 coordinates of second segment's endpoints.
-  denom <- (b2 - b1) * (x2 - x1) - (a2 - a1) * (y2 - y1)
-  denom[abs(denom) < 1e-10] <- NA # parallel lines
-  ua <- ((a2 - a1) * (y1 - b1) - (b2 - b1) * (x1 - a1)) / denom
-  ub <- ((x2 - x1) * (y1 - b1) - (y2 - y1) * (x1 - a1)) / denom
-  x <- x1 + ua * (x2 - x1)
-  y <- y1 + ua * (y2 - y1)
-  inside <- (ua >= 0) & (ua <= 1) & (ub >= 0) & (ub <= 1)
-  data.frame(x = ifelse(inside, x, NA), y = ifelse(inside, y, NA))
 }

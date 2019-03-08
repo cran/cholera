@@ -20,17 +20,17 @@
 #'
 #' \code{vignette("duplicate.missing.cases")}
 #'
-#' \code{vignette("unstacking.bars")}
+#' \code{vignette("kernel.density")}
 #'
 #' \code{vignette("pump.neighborhoods")}
 #'
-#' \code{vignette("kernel.density")}
-#'
 #' \code{vignette("roads")}
+#'
+#' \code{vignette("tiles.polygons")}
 #'
 #' \code{vignette("time.series")}
 #'
-#' And, if interested, see the relevant lab notes, which are available online: \href{https://github.com/lindbrook/cholera/blob/master/docs/pump.neighborhoods.notes.md}{Pump Neighborhood},  \href{https://github.com/lindbrook/cholera/blob/master/docs/duplicate.missing.cases.notes.md}{Duplicate and Missing Cases} and  \href{https://github.com/lindbrook/cholera/blob/master/docs/unstacking.bars.notes.md}{"Unstacking" Bars}
+#' \code{vignette("unstacking.bars")}
 #'
 #' @docType package
 #' @name cholera-package

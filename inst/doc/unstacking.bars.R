@@ -1,5 +1,5 @@
 ## ---- echo = FALSE, message = FALSE--------------------------------------
-knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+knitr::opts_chunk$set(collapse = TRUE, comment = ">")
 library("cholera")
 library("HistData")
 library("ggplot2")
@@ -32,8 +32,7 @@ road.segments <- lapply(unique(roads$street), function(i) {
 
 road.segments <- do.call(rbind, road.segments)
 
-
-## ---- fig.width = 5, fig.height = 5, fig.align = "center", echo = FALSE----
+## ---- fig.width = 5, fig.height = 5, fig.align = "left", echo = FALSE----
 roads.list <- split(roads[, c("x", "y")], roads$street)
 plot(fatalities[, c("x", "y")], xlim = range(roads$x), ylim = range(roads$y),
   pch = 15, cex = 0.5, col = "gray", asp = 1)
@@ -55,7 +54,7 @@ fatalities.unstacked[fatalities.unstacked$case %in% broad38, ]
 ## ------------------------------------------------------------------------
 fatalities.address[136:140, ]
 
-## ---- fig.width = 5, fig.height = 5, fig.align = "center", echo = FALSE----
+## ---- fig.width = 5, fig.height = 5, fig.align = "left", echo = FALSE----
 
 roads.list <- split(roads[, c("x", "y")], roads$street)
 
@@ -151,7 +150,7 @@ p + geom_text(data = broad.df, aes(x = x, y = y), label = "Broad St",
             angle = cambridge.angle)
 
 
-## ---- fig.width = 5, fig.height = 5, fig.align = "center", echo = FALSE----
+## ---- fig.width = 5, fig.height = 5, fig.align = "left", echo = FALSE----
 
 ## Data ##
 

@@ -4,28 +4,28 @@
 \alias{segmentLocator}
 \title{Locate road segment by ID.}
 \usage{
-segmentLocator(id, zoom = FALSE, radius = 0.5, cases = "anchors",
-  unit = "meter", time.unit = "minute", walking.speed = 5,
-  title = TRUE, subtitle = TRUE)
+segmentLocator(id = "216-1", zoom = 0.5, cases = "address",
+  distance.unit = "meter", time.unit = "second", walking.speed = 5,
+  add.title = TRUE, add.subtitle = TRUE, highlight = TRUE)
 }
 \arguments{
 \item{id}{Character. A concatenation of a street's numeric ID, a whole number between 1 and 528, and a second number to identify the segment.}
 
-\item{zoom}{Logical. Default is \code{FALSE}.}
+\item{zoom}{Logical or Numeric. A numeric value >= 0 controls the degree of zoom. The default is 0.5.}
 
-\item{radius}{Numeric. Controls the degree of zoom. For values <= 5, the numeric ID of all cases or just the anchor case is plotted.}
+\item{cases}{Character. Plot cases: \code{NULL}, "address" or "fatality".}
 
-\item{cases}{Character. Plot cases: \code{NULL}, "anchors" or "all".}
-
-\item{unit}{Character. Unit of distance: "meter", "yard" or "native". "native" returns the map's native scale. See \code{vignette("roads")} for information on conversion.}
+\item{distance.unit}{Character. Unit of distance: "meter", "yard" or "native". "native" returns the map's native scale. See \code{vignette("roads")} for information on conversion.}
 
 \item{time.unit}{Character. "hour", "minute", or "second".}
 
 \item{walking.speed}{Numeric. Walking speed in km/hr.}
 
-\item{title}{Logical. Print title.}
+\item{add.title}{Logical. Print title.}
 
-\item{subtitle}{Logical. Print subtitle.}
+\item{add.subtitle}{Logical. Print subtitle.}
+
+\item{highlight}{Logical. Highlight selected road and its cases.}
 }
 \value{
 A base R graphics plot.
@@ -34,13 +34,10 @@ A base R graphics plot.
 Highlights the selected road segment and its cases.
 }
 \note{
-With Dodson and Tobler's data, a street (e.g., Broad Street) is often comprised of multiple straight line segments. To identify each segment individually, an additional number is appended to form a text string ID (e.g., "116-2").  See cholera::road.segments.
+With Dodson and Tobler's data, a street (e.g., Broad Street) is often comprised of multiple straight line segments. To identify each segment individually, an additional number is appended to form a text string ID (e.g., "116-2").  See \code{cholera::road.segments}.
 }
 \examples{
 segmentLocator("190-1")
 segmentLocator("216-1")
-segmentLocator("216-1", unit = "yard")
-}
-\seealso{
-\code{\link{road.segments}}
+segmentLocator("216-1", distance.unit = "yard")
 }

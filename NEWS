@@ -1,3 +1,82 @@
+cholera 0.6.0
+==================
+
+# Fixes #
+
+- fix title in euclideanPath(type = "case-pump").
+- fix destination label for walkingPath(destination = NULL).
+
+# Data Changes #
+
+- add Earl of Aberdeen residence (Argyll House).
+- nominal and orthogonal coordinates for landmarks.
+
+# Function Changes #
+
+- addNeighborhood() -> addNeighborhoodWalking()
+
+# Function Changes - new arguments #
+
+- addSnow(type = "perimeter", line.width = 2)
+- neighborhoodData(embed = TRUE, embed.landmarks = TRUE)
+- neighborhoodEuclidean(case.set = "expected")
+- plot.voronoi(voronoi.cells = TRUE, delauny.triangles = FALSE)
+- snowMap(...)
+- streetNameLocator(add.subtitle = TRUE, token = id)
+- streetNumberLocator(add.subtitle = TRUE, token = id)
+
+# Function Changes - polygon.method argument #
+
+- addNeighborhoodEuclidean(polygon.method = "traveling.salesman")
+- plot.euclidean(polygon.method = "traveling.salesman")
+
+- addNeighborhoodWalking(polygon.method = "pearl.string")
+- plot.walking(polygon.method = "pearl.string")
+
+# Function Change - landmarks as origin and/or destination (treated as cases) #
+
+- euclideanPath()
+- walkingPath()
+- find nearest case or landmark, given pump (i.e., reverse lookup)
+
+# Function Changes - case.location argument: "address" or "nominal" #
+
+- addVoronoi(case.location = "nominal")
+- euclideanPath(case.location = "nominal")
+- neighborhoodEuclidean(case.location = "nominal")
+- addNeighborhoodEuclidean(case.location = "nominal")
+
+# New Functions #
+
+- addCase()
+- addDelauny()
+- addNeighborhoodCases()
+- deldirVertices()
+- orthogonalProjection()
+- profile2D()
+- profile3D()
+- streetHighlight()
+
+# New Exported Functions #
+
+- fixFatalities()
+- landmarkData()
+
+# New S3 Function #
+
+- pearsonResiduals()
+- plot.neighborhood_data()
+
+# New Vignette #
+
+- "deldirVertices(): Tiles, Triangles and Polygons"
+
+# Deprecated Functions #
+
+- euclideanDistance()
+- walkingDistance()
+
+
 cholera 0.5.1
 ==================
 
@@ -39,7 +118,7 @@ cholera 0.5.0
     addMilePosts().
 
 - "pump.subset" and "pump.select" arguments
-    addCases(), addKernelDensity(), addMilePosts(), addNeighborhood(),
+    addCase(), addKernelDensity(), addMilePosts(), addNeighborhood(),
     neighborhoodEuclidean(), neighborhoodWalking()
 
 - "walking.speed" argument added to:
@@ -56,7 +135,8 @@ cholera 0.5.0
     plot.voronoi() adds "euclidean.paths" argument for star graph.
 
 - neighborhoodWalking()
-    "area.polygons" related functions for plot_walking() moved to pearlString.R.
+    "area.polygons" related functions for plot_walking() moved to
+    pearlString.R.
 
 - simulateFatalities():
   default is now 20K observations.
@@ -71,11 +151,11 @@ cholera 0.5.0
     location of walking related helper functions.
 
 - walkingDistance() no longer S3.
-    generic S3 functionality moved to  walkingPath().
+    generic S3 functionality moved to walkingPath().
 
 # New Functions #
 
-- addCases()
+- addCase()
 - addEuclideanPath()
 - addMilePosts()
 - addNeighborhood()

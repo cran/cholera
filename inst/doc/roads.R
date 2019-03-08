@@ -1,11 +1,12 @@
 ## ---- echo = FALSE, message = FALSE--------------------------------------
-# knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
-knitr::opts_chunk$set(collapse = TRUE, comment = "")
+knitr::opts_chunk$set(collapse = TRUE, comment = ">")
 library(cholera)
 
 ## ------------------------------------------------------------------------
 head(roads)
+
 nrow(roads)
+
 length(unique(roads$street))
 
 ## ------------------------------------------------------------------------
@@ -37,6 +38,9 @@ length(border)
 #  roads[roads$name == "Queen Street (I)", "n"] <- 4
 #  roads[roads$name == "Marlborough Mews", "n"] <- 3
 #  roads <- roads[order(roads$id), ]
+
+## ---- echo = FALSE, message = FALSE--------------------------------------
+knitr::opts_chunk$set(collapse = TRUE, comment = "")
 
 ## ---- echo = FALSE-------------------------------------------------------
 road.names <- sort(unique(roads$name))

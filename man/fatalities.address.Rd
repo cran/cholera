@@ -6,7 +6,7 @@
 \title{"Unstacked" amended cholera data with address as unit of observation.}
 \format{A data frame with 4 variables for 321 addresses
  \describe{
-    \item{\code{anchor.case}}{numerical case ID of address}
+    \item{\code{anchor}}{numerical case ID of address}
     \item{\code{x}}{x-coordinate}
     \item{\code{y}}{y-coordinate}
     \item{\code{case.count}}{number of fatalities at address}
@@ -15,7 +15,7 @@
 fatalities.address
 }
 \description{
-An "unstacked" version of the \code{fatalities} dataset. It changes the unit of observation from the case (bar) to the "address", the x-y coordinate of the case at the base of a stack, and makes the number of fatalities an attribute of the "address".
+An "unstacked" version of the \code{fatalities} dataset. It changes the unit of observation from the case (bar) to the "address", the x-y coordinates of the case at the base of a stack, and makes the number of fatalities an attribute of the "address".
 }
 \note{
 \code{\link{unstackFatalities}} documents the code for these data. For details, see \code{vignette}("unstacking.fatalities").

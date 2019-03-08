@@ -2,30 +2,40 @@
 #'
 #' @param pump.select Numeric. Default is NULL; all pumps are used. Otherwise, selection by a vector of numeric IDs: 1 to 13 for \code{pumps}; 1 to 14 for \code{pumps.vestry}. Exclusion (negative selection) is possible (e.g., -6).
 #' @param vestry Logical. \code{FALSE} for original 13 pumps. TRUE for 14 pumps in Vestry Report.
+#' @param case.location Character. For \code{observed = FALSE}: "address" or "nominal". "nominal" is the x-y coordinates of \code{regular.cases}.
 #' @param color Character. Color of cell edges.
-#' @param line.type Character. Type of line for cell edges.
-#' @param ... Additional plotting parameters.
-#' @seealso \code{\link{snowMap}},
-#' \code{\link{addIndexCase}},
-#' \code{\link{addKernelDensity}},
-#' \code{\link{addLandmarks}},
-#' \code{\link{addPlaguePit}},
-#' \code{\link{addSnow}},
-#' \code{\link{addWhitehead}}
-#' @note This function uses deldir::deldir().
+#' @param line.type Character. Type of line for cell edges: lty.
+#' @param line.width Numeric. Width of cell edges: lwd.
+#' @note This function uses \code{deldir::deldir()}.
 #' @import graphics
 #' @export
 #' @examples
 #' snowMap()
 #' addVoronoi()
 
-addVoronoi <- function(pump.select = NULL, vestry = FALSE, color = "black",
-  line.type = "solid", ...) {
+addVoronoi <- function(pump.select = NULL, vestry = FALSE,
+  case.location = "nominal", color = "black", line.type = "solid",
+  line.width = 1) {
 
-  if (vestry) {
-    p.data <- cholera::pumps.vestry
-  } else {
-    p.data <- cholera::pumps
+  if (case.location %in% c("address", "nominal") == FALSE) {
+    stop('case.location must be "address" or "nominal".')
+  }
+
+  if (case.location == "address") {
+    if (vestry) {
+      p.data <- cholera::ortho.proj.pump.vestry
+      p.data$street <- cholera::pumps.vestry$street
+    } else {
+      p.data <- cholera::ortho.proj.pump
+      p.data$street <- cholera::pumps$street
+      names(p.data)[names(p.data) %in% c("x.proj", "y.proj")] <- c("x", "y")
+    }
+  } else if (case.location == "nominal") {
+    if (vestry) {
+      p.data <- cholera::pumps.vestry
+    } else {
+      p.data <- cholera::pumps
+    }
   }
 
   p.count <- nrow(p.data)
@@ -41,9 +51,9 @@ addVoronoi <- function(pump.select = NULL, vestry = FALSE, color = "black",
     pump.data <- cholera::pumps[pump.select, c("x", "y")]
   }
 
-  cells <- deldir::deldir(pump.data, rw = c(range(cholera::roads$x),
+  dat <- deldir::deldir(pump.data, rw = c(range(cholera::roads$x),
     range(cholera::roads$y)), suppressMsge = TRUE)
 
-  plot(cells, add = TRUE, wline = "tess", wpoints = "none", col = color,
-    lty = line.type)
+  plot(dat, add = TRUE, wline = "tess", wpoints = "none", col = color,
+    lty = line.type, lwd = line.width)
 }

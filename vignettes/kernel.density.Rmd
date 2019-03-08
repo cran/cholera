@@ -10,31 +10,31 @@ vignette: >
 ---
 
 ```{r, echo = FALSE, message = FALSE}
-knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+knitr::opts_chunk$set(collapse = TRUE, comment = ">")
 library(cholera)
 ```
-
-## Overview
 
 By default, the `addKernelDensity()` function pools all observations:
 
 ```{r fig.width = 5, fig.height = 5, fig.align = "center", echo = TRUE}
-snowMap(add.title = FALSE)
+snowMap()
 addKernelDensity()
 ```
 
-However, with this function you can also specify which pumps should be considered (i.e., define the "population" of pump neighborhoods) by using the `pump.select` argument and which subset of selected neighborhoods should be plotted by using the `pump.subset` argument.
+However, this presuppose that all cases have a common source. To consider the possible existence of multiple pump neighborhoods, the function provides two ways to explore hypothetical scenarios.
 
-## Selecting a subset of observed neighborhoods:
+By using the `pump.select` argument, you can define a "population" of pump neighborhoods by specify the pumps to consider:
+
 
 ```{r fig.width = 5, fig.height = 5, fig.align = "center", echo = TRUE}
-snowMap(add.title = FALSE)
-addKernelDensity(pump.subset = c(6, 8))
+snowMap()
+addKernelDensity(pump.select = c(6, 8))
 ```
 
-## Defining the set of observed pump neighborhoods:
+By using the `pump.subset` argument, you can define the subset of the "population" to consider:
+
 
 ```{r fig.width = 5, fig.height = 5, fig.align = "center", echo = TRUE}
-snowMap(add.title = FALSE)
-addKernelDensity(pump.select = c(6, 8))
+snowMap()
+addKernelDensity(pump.subset = c(6, 8))
 ```

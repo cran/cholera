@@ -4,10 +4,12 @@
 \alias{addLandmarks}
 \title{Add landmarks to plot.}
 \usage{
-addLandmarks(text.size = 0.5)
+addLandmarks(text.size = 0.5, highlight.perimeter = TRUE)
 }
 \arguments{
 \item{text.size}{Numeric. cex for text labels.}
+
+\item{highlight.perimeter}{Logical. Highlight Lion Brewery and Model Housing.}
 }
 \value{
 Base R points and text.
@@ -21,13 +23,4 @@ The location of 18 Sackville Street and 28 Dean Street are approximate. Falconbe
 \examples{
 snowMap(add.landmarks = FALSE)
 addLandmarks()
-}
-\seealso{
-\code{\link{snowMap}},
-\code{\link{addIndexCase}},
-\code{\link{addKernelDensity}},
-\code{\link{addPlaguePit}},
-\code{\link{addSnow}},
-\code{\link{addVoronoi}},
-\code{\link{addWhitehead}}
 }

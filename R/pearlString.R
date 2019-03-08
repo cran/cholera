@@ -32,7 +32,8 @@ peripheryCases <- function(n.points, radius = pearlStringRadius()) {
   row.names(n.area[which(periphery.test == FALSE), ])
 }
 
-# sort points on periphery to form a "concave" hull
+# Add pearls to string to form a closed, non-intersecting polygon.
+# Default method of neighborhoodWalking().
 pearlString <- function(vertices, radius = pearlStringRadius(),
   orientation = "clockwise") {
 
@@ -45,8 +46,7 @@ pearlString <- function(vertices, radius = pearlStringRadius(),
   for (j in 2:length(pearl.string)) {
     added.pearls <- pearl.string[pearl.string != ""]
     ego.case <- added.pearls[length(added.pearls)]
-    alter.sel <- row.names(dat) %in% added.pearls == FALSE
-    alters <- dat[alter.sel, ]
+    alters <- dat[row.names(dat) %in% added.pearls == FALSE, ]
 
     N  <- signif(alters$x) == signif(dat[ego.case, "x"]) &
           signif(alters$y) == signif(dat[ego.case, "y"] + radius)
@@ -234,4 +234,77 @@ pearlString <- function(vertices, radius = pearlStringRadius(),
     pearl.string[j] <- row.names(alters[sel, ])
   }
   pearl.string
+}
+
+#' Compute polygon vertices via 'TSP' package.
+#'
+#' @param vertices Object. Polygon vertices candidates.
+#' @param tsp.method Character. Traveling saleman algorithm. See TSP::solve_TSP() for details. Default method is repetitive nearest neighbor: "repetitive_nn".
+#' @note Default method for neighborhoodEuclidean().
+#' @noRd
+
+travelingSalesman <- function(vertices, tsp.method = "repetitive_nn") {
+  methods <- c("identity", "random", "nearest_insertion", "farthest_insertion",
+    "cheapest_insertion", "arbitrary_insertion", "nn", "repetitive_nn")
+
+  if (tsp.method %in% methods == FALSE) {
+    stop('tsp.method must be "identity", "random", "nearest_insertion",
+         "farthest_insertion", "cheapest_insertion", "arbitrary_insertion",
+         "nn", or "repetitive_nn".')
+  }
+
+  d <- stats::dist(cholera::regular.cases[vertices, ])
+  distances <- data.frame(t(utils::combn(vertices, 2)), c(d),
+    stringsAsFactors = FALSE)
+  names(distances) <- c("a", "b", "dist")
+  distances$pathID <- paste0(distances$a, "-", distances$b)
+  distances$rev.pathID <- paste0(distances$b, "-", distances$a)
+  tsp <- TSP::TSP(d, labels = vertices)
+  soln <- TSP::solve_TSP(tsp, method = tsp.method)
+  names(soln)
+}
+
+## diagnostic plots ##
+
+#' Plot periphery cases.
+#'
+#' @param x Object. Neighborhood data.
+#' @param i Numeric. Neighborhood ID.
+#' @param pch Numeric.
+#' @param cex Numeric.
+#' @noRd
+
+peripheryAudit <- function(x, i = 1, pch = 16, cex = 0.5) {
+  nearest.pump <- x$nearest.pump
+  p.num <- sort(unique(nearest.pump))
+  neighborhood.cases <- lapply(p.num, function(n) {
+    which(nearest.pump == n)
+  })
+
+  periphery.cases <- parallel::mclapply(neighborhood.cases, peripheryCases,
+    mc.cores = x$cores)
+  points(cholera::regular.cases[periphery.cases[[i]], ], pch = pch, cex = cex,
+    col = snowColors()[i])
+}
+
+#' Plot neighborhood polygon.
+#'
+#' @param x Object. Neighborhood data.
+#' @param i Numeric. Neighborhood ID.
+#' @noRd
+
+polygonAudit <- function(x, i = 1) {
+  nearest.pump <- x$nearest.pump
+  p.num <- sort(unique(nearest.pump))
+  neighborhood.cases <- lapply(p.num, function(n) {
+    which(nearest.pump == n)
+  })
+
+  periphery.cases <- parallel::mclapply(neighborhood.cases, peripheryCases,
+    mc.cores = x$cores)
+  pearl.string <- parallel::mclapply(periphery.cases, pearlString,
+    mc.cores = x$cores)
+  names(pearl.string) <- p.num
+  polygon(cholera::regular.cases[pearlString(periphery.cases[[i]]), ],
+    col = grDevices::adjustcolor(snowColors()[i], alpha.f = 2/3))
 }

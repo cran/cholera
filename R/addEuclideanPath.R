@@ -5,7 +5,7 @@
 #' @param type Character "case-pump", "cases" or "pumps".
 #' @param observed Logical. Use observed or simulated expected data.
 #' @param vestry Logical. \code{TRUE} uses the 14 pumps from the Vestry Report. \code{FALSE} uses the 13 pumps from the original map.
-#' @param unit Character. Unit of distance: "meter", "yard" or "native". "native" returns the map's native scale. See \code{vignette("roads")} for information on unit distances.
+#' @param distance.unit Character. Unit of distance: "meter", "yard" or "native". "native" returns the map's native scale. See \code{vignette("roads")} for information on unit distances.
 #' @param time.unit Character. "hour", "minute", or "second".
 #' @param walking.speed Numeric. Walking speed in km/hr.
 #' @param unit.posts Character. "distance" for mileposts; "time" for timeposts; \code{NULL} for no posts.
@@ -16,9 +16,9 @@
 #' @export
 
 addEuclideanPath <- function(origin, destination = NULL, type = "case-pump",
-  observed = TRUE, vestry = FALSE, unit = "meter", time.unit = "second",
-  walking.speed = 5, unit.posts = "distance", unit.interval = NULL,
-  alpha.level = 1) {
+  observed = TRUE, vestry = FALSE, distance.unit = "meter",
+  time.unit = "second", walking.speed = 5, unit.posts = "distance",
+  unit.interval = NULL, alpha.level = 1) {
 
   if (is.numeric(origin) == FALSE) {
     stop('origin must be numeric.')
@@ -34,15 +34,15 @@ addEuclideanPath <- function(origin, destination = NULL, type = "case-pump",
                     destination = destination,
                     type = type,
                     observed = observed,
+                    case.location = "address",
                     vestry = vestry,
-                    unit = unit,
-                    time.unit = "second",
-                    walking.speed = 5)
+                    distance.unit = distance.unit,
+                    time.unit = time.unit,
+                    walking.speed = walking.speed)
 
   x <- do.call(euclideanPath, arguments)
 
-  colors <- cholera::snowColors(x$vestry)
-
+  colors <- snowColors(x$vestry)
   origin.xy <- x$ego
   alter.xy <- x$alter
   dat <- stats::setNames(rbind(alter.xy, origin.xy), c("x", "y"))
@@ -51,7 +51,7 @@ addEuclideanPath <- function(origin, destination = NULL, type = "case-pump",
     destination.pump <- row.names(x$alter)
     case.color <- colors[paste0("p", destination.pump)]
     points(origin.xy, col = "red")
-    pumpToken(x, case.color, destination.pump)
+    text(origin.xy, labels = x$data$case, pos = 1, col = "red")
   } else if (x$type == "cases" | x$type == "pumps") {
     case.color <- "blue"
     destination.case <- row.names(x$alter)
@@ -69,11 +69,11 @@ addEuclideanPath <- function(origin, destination = NULL, type = "case-pump",
     nominal.time <- paste(round(x$t, 1), "sec")
   }
 
-  if (x$unit == "native") {
+  if (x$distance.unit == "native") {
     d.unit <- "units;"
-  } else if (x$unit == "meter") {
+  } else if (x$distance.unit == "meter") {
     d.unit <- "m;"
-  } else if (x$unit == "yard") {
+  } else if (x$distance.unit == "yard") {
     d.unit <- "yd;"
   }
 
@@ -100,13 +100,13 @@ addEuclideanPath <- function(origin, destination = NULL, type = "case-pump",
       }
 
       if (unit.posts == "distance") {
-        tot <- cholera::unitMeter(stats::dist(dat))
-        h <- seq(0, tot, unit.interval) / cholera::unitMeter(1)
+        tot <- unitMeter(stats::dist(dat))
+        h <- seq(0, tot, unit.interval) / unitMeter(1)
       } else if (unit.posts == "time") {
-        tot <- cholera::distanceTime(cholera::unitMeter(stats::dist(dat),
-          unit = "native"), speed = x$speed)
-        h <- seq(0, tot, unit.interval) * 1000 * x$speed / 60^2 /
-          cholera::unitMeter(1)
+        tot <- distanceTime(unitMeter(stats::dist(dat),
+          distance.unit = "native"), walking.speed = x$walking.speed)
+        h <- seq(0, tot, unit.interval) * 1000 * x$walking.speed / 60^2 /
+          unitMeter(1)
       } else {
         stop('Specify a unit.posts')
       }

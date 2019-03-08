@@ -4,35 +4,30 @@
 #' @param pump.select Numeric. Numeric vector of pump IDs that define which pump neighborhoods to consider (i.e., specify the "population"). Negative selection possible. \code{NULL} selects all pumps.
 #' @param vestry Logical. \code{TRUE} uses the 14 pumps from the Vestry Report. \code{FALSE} uses the 13 in the original map.
 #' @param weighted Logical. \code{TRUE} computes shortest path weighted by road length. \code{FALSE} computes shortest path in terms of the number of nodes.
-#' @param multi.core Logical or Numeric. \code{TRUE} uses \code{parallel::detectCores()}. \code{FALSE} uses one, single core. You can also specify the number logical cores. On Windows, only \code{multi.core = FALSE} is available.
-#' @param area Logical. Area polygons.
+#' @param polygon.method Character. Method of computing polygon vertices: "pearl.string" or "traveling.salesman".
 #' @param path Character. "expected" or "observed".
 #' @param path.color Character. Use a single color for all paths. \code{NULL} uses neighborhood colors defined by \code{snowColors()}.
 #' @param path.width Numeric. Set width of paths.
 #' @param alpha.level Numeric. Alpha level transparency for area plot: a value in [0, 1].
-#' @param ... Additional plotting parameters.
-#' @seealso \code{\link{snowMap}},
-#' \code{\link{addIndexCase}},
-#' \code{\link{addKernelDensity}},
-#' \code{\link{addLandmarks}},
-#' \code{\link{addPlaguePit}},
-#' \code{\link{addVoronoi}},
-#' \code{\link{addWhitehead}}
+#' @param polygon.type Character. "perimeter" or "solid".
+#' @param polygon.col Character.
+#' @param polygon.lwd Numeric.
+#' @param multi.core Logical or Numeric. \code{TRUE} uses \code{parallel::detectCores()}. \code{FALSE} uses one, single core. You can also specify the number logical cores. On Windows, only \code{multi.core = FALSE} is available.
 #' @import graphics
-#' @note This function is computationally intensive. On a single core of a 2.3 GHz Intel i7, plotting observed paths to PDF takes about 5 seconds while doing so for expected paths takes about 28 seconds. Using the parallel implementation on 4 physical (8 logical) cores, these times fall to about 4 and 11 seconds. Note that parallelization is currently only available on Linux and Mac, and that although some precautions are taken in R.app on macOS, the developers of the 'parallel' package, which \code{neighborhoodWalking()} uses, strongly discourage against using parallelization within a GUI or embedded environment. See \code{vignette("parallel")} for details.
+#' @note This function is computationally intensive. On a single core of a 2.3 GHz Intel i7, plotting observed paths to PDF takes about 5 seconds while doing so for expected paths takes about 30 seconds. Using the parallel implementation on 4 physical (8 logical) cores, these times fall to about 4 and 13 seconds. Note that parallelization is currently only available on Linux and Mac, and that although some precautions are taken in R.app on macOS, the developers of the 'parallel' package, which \code{neighborhoodWalking()} uses, strongly discourage against using parallelization within a GUI or embedded environment. See \code{vignette("parallel")} for details.
 #' @export
 #' @examples
 #' \dontrun{
 #'
-#' streetNameLocator("marshall street", zoom = TRUE, highlight = FALSE,
-#'   unit = "meter", cases = NULL)
-#' addNeighborhood(6:7)
-#'
+#' streetNameLocator("marshall street", zoom = 0.5)
+#' addNeighborhoodWalking()
 #' }
 
-addNeighborhood <- function(pump.subset = NULL, pump.select = NULL,
-  vestry = FALSE, weighted = TRUE, multi.core = FALSE, area = TRUE,
-  path = NULL, path.color = NULL, path.width = 3, alpha.level = 0.25, ...) {
+addNeighborhoodWalking <- function(pump.subset = NULL, pump.select = NULL,
+  vestry = FALSE, weighted = TRUE, polygon.method = "pearl.string",
+  path = NULL, path.color = NULL, path.width = 3, alpha.level = 0.25,
+  polygon.type = "solid", polygon.col = NULL, polygon.lwd = 2,
+  multi.core = FALSE) {
 
   if (is.null(path) == FALSE) {
     if (path %in% c("expected", "observed") == FALSE) {
@@ -49,7 +44,7 @@ addNeighborhood <- function(pump.subset = NULL, pump.select = NULL,
   p.ID <- seq_len(p.count)
 
   if (is.null(pump.select) == FALSE) {
-    if (any(pump.select %in% p.ID == FALSE)) {
+    if (any(abs(pump.select) %in% p.ID == FALSE)) {
       stop('If specified, 1 >= |pump.select| <= ', p.count, " when vestry = ",
         vestry, ".")
     }
@@ -74,6 +69,15 @@ addNeighborhood <- function(pump.subset = NULL, pump.select = NULL,
     }
   }
 
+
+  if (polygon.method == "pearl.string") {
+    verticesFn <- pearlString
+  } else if (polygon.method == "traveling.salesman") {
+    verticesFn <- travelingSalesman
+  } else {
+    stop('polygon.method must be "pearl.string" or "traveling.salesman".')
+  }
+
   cores <- multiCore(multi.core)
 
   arguments <- list(pump.select = pump.select,
@@ -96,7 +100,7 @@ addNeighborhood <- function(pump.subset = NULL, pump.select = NULL,
     }, numeric(1L))
   }
 
-  nearest.pump <- data.frame(case = cholera::fatalities.address$anchor.case,
+  nearest.pump <- data.frame(case = cholera::fatalities.address$anchor,
                              pump = nearest.pump)
 
   pumpID <- sort(unique(nearest.pump$pump))
@@ -121,38 +125,23 @@ addNeighborhood <- function(pump.subset = NULL, pump.select = NULL,
             case.set = arguments$case.set,
             pump.select = pump.select,
             cores = cores,
-            metric = 1 / cholera::unitMeter(1, "meter"))
+            metric = 1 / unitMeter(1, "meter"))
 
-  snow.colors <- cholera::snowColors(x$vestry)
+  snow.colors <- snowColors(x$vestry)
 
   if (!is.null(path.color)) {
     snow.colors <- stats::setNames(rep(path.color, length(snow.colors)),
       names(snow.colors))
   }
 
-  dat <- cholera::neighborhoodData(vestry = x$vestry, case.set = "observed")
-  edges <- dat$edges
-  nodes <- dat$nodes
-  p.data <- dat$nodes.pump
-
-  if (is.null(x$pump.select)) {
-    p.node <- p.data$node
-    p.name <- p.data$pump
-  } else {
-    if (all(x$pump.select > 0)) {
-      p.data <- p.data[p.data$pump %in% x$pump.select, ]
-    } else if (all(x$pump.select < 0)) {
-      p.data <- p.data[p.data$pump %in% abs(x$pump.select) == FALSE, ]
-    }
-    p.node <- p.data$node
-    p.name <- p.data$pump
-  }
-
-  n.path.edges <- parallel::mclapply(x$paths, function(neighborhood) {
-    lapply(neighborhood, auditEdge, edges)
-  }, mc.cores = x$cores)
-
-  ##
+  n.walk <- neighborhoodWalking(pump.select = x$pump.select, vestry = x$vestry,
+    case.set = x$case.set, multi.core = x$cores)
+  n.data <- neighborhoodPathData(n.walk)
+  dat <- n.data$dat
+  edges <- n.data$edges
+  n.path.edges <- n.data$neighborhood.path.edges
+  p.node <- n.data$p.node
+  p.name <- n.data$p.name
 
   obs.segment.count <- lapply(n.path.edges, function(x) {
     table(edges[unique(unlist(x)), "id"])
@@ -301,50 +290,76 @@ addNeighborhood <- function(pump.subset = NULL, pump.select = NULL,
     names(split.cases) <- sort(unique(split.outcome$pump))
   }
 
-  if (area) {
-    whole.cases <- lapply(names(wholes), function(nm) {
-      sel <- sim.proj$road.segment %in% wholes[[nm]]
-      cases <- sim.proj[sel, "case"]
-      as.numeric(row.names(cholera::regular.cases[cases, ]))
+
+  whole.cases <- lapply(names(wholes), function(nm) {
+    sel <- sim.proj$road.segment %in% wholes[[nm]]
+    cases <- sim.proj[sel, "case"]
+    as.numeric(row.names(cholera::regular.cases[cases, ]))
+  })
+
+  names(whole.cases) <- names(wholes)
+
+  pearl.neighborhood <- vapply(whole.cases, length, integer(1L))
+  pearl.neighborhood <- names(pearl.neighborhood[pearl.neighborhood != 0])
+
+  if (split.test1 | split.test2) {
+    neighborhood.cases <- lapply(pearl.neighborhood, function(nm) {
+      c(whole.cases[[nm]], split.cases[[nm]])
     })
+  } else {
+    neighborhood.cases <- lapply(pearl.neighborhood, function(nm) {
+      whole.cases[[nm]]
+    })
+  }
 
-    names(whole.cases) <- names(wholes)
+  names(neighborhood.cases) <- pearl.neighborhood
 
-    pearl.neighborhood <- vapply(whole.cases, length, integer(1L))
-    pearl.neighborhood <- names(pearl.neighborhood[pearl.neighborhood != 0])
+  periphery.cases <- parallel::mclapply(neighborhood.cases, peripheryCases,
+    mc.cores = x$cores)
+  pearl.string <- parallel::mclapply(periphery.cases, verticesFn,
+    mc.cores = x$cores)
 
-    if (split.test1 | split.test2) {
-      neighborhood.cases <- lapply(pearl.neighborhood, function(nm) {
-        c(whole.cases[[nm]], split.cases[[nm]])
-      })
-    } else {
-      neighborhood.cases <- lapply(pearl.neighborhood, function(nm) {
-        whole.cases[[nm]]
-      })
-    }
+  if (is.null(pump.subset)) {
+    invisible(lapply(names(pearl.string), function(nm) {
+      sel <- paste0("p", nm)
 
-    names(neighborhood.cases) <- pearl.neighborhood
+      if (is.null(polygon.col)) {
+        polygon.col <- grDevices::adjustcolor(snow.colors[sel],
+          alpha.f = alpha.level)
+      } else {
+        polygon.col <- grDevices::adjustcolor(polygon.col,
+          alpha.f = alpha.level)
+      }
 
-    periphery.cases <- parallel::mclapply(neighborhood.cases, peripheryCases,
-      mc.cores = x$cores)
-
-    pearl.string <- parallel::mclapply(periphery.cases, pearlString,
-      mc.cores = x$cores)
-
-    if (is.null(pump.subset)) {
-      invisible(lapply(names(pearl.string), function(nm) {
-        sel <- paste0("p", nm)
+      if (polygon.type == "perimeter") {
         polygon(cholera::regular.cases[pearl.string[[nm]], ],
-          col = grDevices::adjustcolor(snow.colors[sel], alpha.f = alpha.level))
-      }))
-    } else {
-      n.subset <- pearl.string[pump.subset]
-      invisible(lapply(names(n.subset), function(nm) {
-        sel <- paste0("p", nm)
+          border = polygon.col, lwd = polygon.lwd)
+      } else if (polygon.type == "solid") {
         polygon(cholera::regular.cases[pearl.string[[nm]], ],
-          col = grDevices::adjustcolor(snow.colors[sel], alpha.f = alpha.level))
-      }))
-    }
+          col = polygon.col)
+      }
+    }))
+  } else {
+    n.subset <- pearl.string[pump.subset]
+    invisible(lapply(names(n.subset), function(nm) {
+      sel <- paste0("p", nm)
+
+      if (is.null(polygon.col)) {
+        polygon.col <- grDevices::adjustcolor(snow.colors[sel],
+          alpha.f = alpha.level)
+      } else {
+        polygon.col <- grDevices::adjustcolor(polygon.col,
+          alpha.f = alpha.level)
+      }
+
+      if (polygon.type == "perimeter") {
+        polygon(cholera::regular.cases[pearl.string[[nm]], ],
+          border = polygon.col, lwd = polygon.lwd)
+      } else if (polygon.type == "solid") {
+        polygon(cholera::regular.cases[pearl.string[[nm]], ],
+          col = polygon.col)
+      }
+    }))
   }
 
   if (is.null(path) == FALSE) {

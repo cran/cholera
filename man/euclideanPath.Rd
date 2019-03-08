@@ -4,26 +4,33 @@
 \alias{euclideanPath}
 \title{Compute path of the Euclidean distance between cases and/or pumps.}
 \usage{
-euclideanPath(origin, destination = NULL, type = "case-pump",
-  observed = TRUE, vestry = FALSE, unit = "meter",
-  time.unit = "second", walking.speed = 5)
+euclideanPath(origin = 1, destination = NULL, type = "case-pump",
+  observed = TRUE, case.location = "nominal", landmark.cases = TRUE,
+  vestry = FALSE, distance.unit = "meter", time.unit = "second",
+  walking.speed = 5, multi.core = FALSE)
 }
 \arguments{
-\item{origin}{Numeric or Integer. Numeric ID of case or pump.}
+\item{origin}{Numeric or Character. Numeric ID of case or pump. Character landmark name.}
 
-\item{destination}{Numeric or Integer. Numeric ID(s) of case(s) or pump(s). Exclusion is possible via negative selection (e.g., -7). Default is \code{NULL}: this returns closest pump or "anchor" case.}
+\item{destination}{Numeric or Character. Numeric ID(s) of case(s) or pump(s). Exclusion is possible via negative selection (e.g., -7). Default is \code{NULL}, which returns the closest pump, "anchor" case or landmark.}
 
 \item{type}{Character "case-pump", "cases" or "pumps".}
 
 \item{observed}{Logical. Use observed or "simulated" expected data.}
 
+\item{case.location}{Character. For \code{observed = FALSE}: "address" or "nominal". "nominal" is the x-y coordinates of \code{regular.cases}.}
+
+\item{landmark.cases}{Logical. \code{TRUE} includes landmarks as cases.}
+
 \item{vestry}{Logical. \code{TRUE} uses the 14 pumps from the Vestry Report. \code{FALSE} uses the 13 pumps from the original map.}
 
-\item{unit}{Character. Unit of distance: "meter", "yard" or "native". "native" returns the map's native scale. See \code{vignette("roads")} for information on unit distances.}
+\item{distance.unit}{Character. Unit of distance: "meter", "yard" or "native". "native" returns the map's native scale. See \code{vignette("roads")} for information on unit distances.}
 
 \item{time.unit}{Character. "hour", "minute", or "second".}
 
 \item{walking.speed}{Numeric. Default is 5 km/hr.}
+
+\item{multi.core}{Logical or Numeric. \code{TRUE} uses \code{parallel::detectCores()}. \code{FALSE} uses one, single core. You can also specify the number logical cores. On Windows, only \code{multi.core = FALSE} is available.}
 }
 \value{
 An R list with 3 data frames: x-y coordinates for the origin and destination, and a summary of results.
@@ -38,6 +45,9 @@ The function uses a case's "address" (i.e., "anchor" case of a stack) to compute
 # path from case 1 to nearest pump.
 euclideanPath(1)
 
+# path from pump 1 to nearest case.
+euclideanPath(NULL, 1)
+
 # path from case 1 to pump 6.
 euclideanPath(1, 6)
 
@@ -50,6 +60,9 @@ euclideanPath(1, 6, type = "cases")
 # path from pump 1 to pump 6.
 euclideanPath(1, 6, type = "pumps")
 
-# Plot result
+# compute multiple cases.
+lapply(1:3, euclideanPath)
+
+# plot path
 plot(euclideanPath(1))
 }

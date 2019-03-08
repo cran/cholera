@@ -4,19 +4,25 @@
 \alias{caseLocator}
 \title{Locate case by numerical ID.}
 \usage{
-caseLocator(case, zoom = FALSE, observed = TRUE, radius = 2,
-  stacked = TRUE)
+caseLocator(case = 1, zoom = 1, observed = TRUE, add.title = TRUE,
+  highlight.segment = TRUE, data = FALSE, add = FALSE, col = "red")
 }
 \arguments{
 \item{case}{Numeric or Integer. Whole number between 1 and 578.}
 
-\item{zoom}{Logical.}
+\item{zoom}{Logical or Numeric.A numeric value >= 0 controls the degree of zoom. The default is 1.}
 
 \item{observed}{Logical. \code{TRUE} for observed. \code{FALSE} for simulated.}
 
-\item{radius}{Numeric. Controls the degree of zoom.}
+\item{add.title}{Logical. Include title.}
 
-\item{stacked}{Logical. \code{TRUE} uses \code{fatalities} ("stacked" data); \code{FALSE} uses \code{fatalities.address} ("unstacked" data).}
+\item{highlight.segment}{Logical. Highlight case's segment.}
+
+\item{data}{Logical. Output data.}
+
+\item{add}{Logical. Add to existing plot or separate plot.}
+
+\item{col}{Character. Point color.}
 }
 \value{
 A base R graphics plot.
@@ -27,10 +33,5 @@ Highlight selected observed or simulated case and its home road segment.
 \examples{
 caseLocator(290)
 caseLocator(290, zoom = TRUE)
-caseLocator(290, stacked = FALSE)
-caseLocator(290, zoom = TRUE, stacked = FALSE)
 caseLocator(290, observed = FALSE)
-}
-\seealso{
-\code{\link{fatalities}}, \code{\link{fatalities.address}}, \code{\link{fatalities.unstacked}}
 }

@@ -49,7 +49,7 @@ classifierAudit <- function(case = 483, segment = "326-2", observed = TRUE,
   y.proj <- segment.slope * x.proj + segment.intercept
 
   if (coordinates) {
-    data.frame(x = x.proj, y = y.proj)
+    data.frame(x.proj, y.proj, row.names = NULL)
   } else {
     # Bisection / Intersection test
     distB <- stats::dist(rbind(seg.df[1, ], c(x.proj, y.proj))) +
@@ -57,13 +57,17 @@ classifierAudit <- function(case = 483, segment = "326-2", observed = TRUE,
 
     distance <- stats::dist(seg.df)
 
+    proj <- rbind(obs, data.frame(x = x.proj, y = y.proj, row.names = NULL))
+    ortho.distance <- stats::dist(proj)
+
     out <- list(case = case,
                 segment = segment,
                 ols = ols,
                 seg.df = seg.df,
                 obs = obs,
-                distance = distance,
-                test = signif(distance) == signif(distB))
+                distance = ortho.distance,
+                test = signif(distance) == signif(distB),
+                coords = data.frame(x.proj, y.proj, row.names = NULL))
 
     class(out) <- "classifier_audit"
     out
@@ -92,8 +96,7 @@ print.classifier_audit <- function(x, ...) {
 #'
 #' Plot case, segment and orthogonal projector.
 #' @param x An object of class "classifier_audit" created by \code{classifierAudit()}.
-#' @param zoom Logical.
-#' @param radius Numeric. Controls the degree of zoom.
+#' @param zoom Logical or Numeric. A numeric value >= 0 controls the degree of zoom. The default is 0.5.
 #' @param unit Character. Unit of distance: "meter" (the default), "yard" or "native". "native" returns the map's native scale. "unit" is meaningful only when "weighted" is \code{TRUE}. See \code{vignette("roads")} for information on unit distances.
 #' @param ... Additional parameters.
 #' @return A base R graphic.
@@ -101,26 +104,18 @@ print.classifier_audit <- function(x, ...) {
 #' @examples
 #' plot(classifierAudit(case = 483, segment = "326-2"))
 
-plot.classifier_audit <- function(x, zoom = TRUE, radius = 0.5, unit = "meter",
-  ...) {
-
+plot.classifier_audit <- function(x, zoom = 0.5, unit = "meter", ...) {
   if (unit %in% c("meter", "yard", "native") == FALSE) {
     stop('unit must be "meter", "yard" or "native".')
   }
 
   obs <- x$obs
-  segment.slope <- stats::coef(x$ols)[2]
-  segment.intercept <- stats::coef(x$ols)[1]
-  orthogonal.slope <- -1 / segment.slope
-  orthogonal.intercept <- obs$y - orthogonal.slope * obs$x
+  coords <- x$coords
+  x.proj <- coords$x.proj
+  y.proj <- coords$y.proj
 
-  x.proj <- (orthogonal.intercept - segment.intercept) /
-            (segment.slope - orthogonal.slope)
-
-  y.proj <- segment.slope * x.proj + segment.intercept
-
-  cholera::segmentLocator(x$segment, zoom = zoom, radius = radius,
-    title = FALSE, subtitle = FALSE)
+  segmentLocator(x$segment, zoom = zoom, add.title = FALSE,
+    add.subtitle = FALSE)
 
   # Bisection / Intersection test
   distB <- stats::dist(rbind(x$seg.df[1, ], c(x.proj, y.proj))) +
@@ -138,18 +133,18 @@ plot.classifier_audit <- function(x, zoom = TRUE, radius = 0.5, unit = "meter",
   }
 
   if (unit == "meter") {
-    ortho.dist <- cholera::unitMeter(x$distance, "meter")
+    ortho.dist <- unitMeter(x$distance, "meter")
     d.unit <- "m"
   } else if (unit == "yard") {
-    ortho.dist <- cholera::unitMeter(x$distance, "yard")
+    ortho.dist <- unitMeter(x$distance, "yard")
     d.unit <- "yd"
   } else if (unit == "native") {
-    ortho.dist <- cholera::unitMeter(x$distance, "native")
+    ortho.dist <- unitMeter(x$distance, "native")
     d.unit <- "units"
   }
 
   nm <- cholera::road.segments[cholera::road.segments$id == x$segment, "name"]
 
   title(main = paste0(nm, ": Segment # ", x$segment, ", Case # ", x$case),
-        sub = paste(x$test, "; dist =", round(ortho.dist, 1), d.unit))
+        sub = paste(x$test, "; ortho.dist =", round(ortho.dist, 1), d.unit))
 }

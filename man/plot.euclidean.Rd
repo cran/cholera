@@ -2,12 +2,22 @@
 % Please edit documentation in R/euclidean.R
 \name{plot.euclidean}
 \alias{plot.euclidean}
-\title{Plot method for neighborhoodWalking().}
+\title{Plot method for neighborhoodEuclidean().}
 \usage{
-\method{plot}{euclidean}(x, ...)
+\method{plot}{euclidean}(x, type = "star",
+  polygon.method = "traveling.salesman", add.observed.points = TRUE,
+  msg = FALSE, ...)
 }
 \arguments{
 \item{x}{An object of class "euclidean" created by \code{neighborhoodEuclidean()}.}
+
+\item{type}{Character. "star", "area.points" or "area.polygons". "area" flavors only valid when \code{case.set = "expected"}.}
+
+\item{polygon.method}{Character. Method of computing polygon vertices: "pearl.string" or "traveling.salesman".}
+
+\item{add.observed.points}{Logical. Add observed fatality "addresses".}
+
+\item{msg}{Logical. Toggle in-progress messages.}
 
 \item{...}{Additional plotting parameters.}
 }
@@ -15,5 +25,18 @@
 A base R plot.
 }
 \description{
-Plot method for neighborhoodWalking().
+Plot method for neighborhoodEuclidean().
+}
+\note{
+This uses an approximate computation of polygons, using the 'TSP' package, that may produce non-simple and/or overlapping polygons.
+}
+\examples{
+\dontrun{
+
+plot(neighborhoodEuclidean())
+plot(neighborhoodEuclidean(-6))
+plot(neighborhoodEuclidean(pump.select = 6:7))
+plot(neighborhoodEuclidean(case.set = "expected"), type = "area.points")
+plot(neighborhoodEuclidean(case.set = "expected"), type = "area.polygons")
+}
 }

@@ -4,16 +4,15 @@
 \alias{addWalkingPath}
 \title{Add the shortest walking path between a selected cases or pumps.}
 \usage{
-addWalkingPath(origin, destination = NULL, type = "case-pump",
-  observed = TRUE, weighted = TRUE, vestry = FALSE, unit = "meter",
-  time.unit = "second", walking.speed = 5, zoom = TRUE,
-  radius = 0.5, unit.posts = "distance", unit.interval = NULL,
-  alpha.level = 1)
+addWalkingPath(origin = 1, destination = NULL, type = "case-pump",
+  observed = TRUE, weighted = TRUE, vestry = FALSE,
+  distance.unit = "meter", time.unit = "second", walking.speed = 5,
+  unit.posts = "distance", unit.interval = NULL, alpha.level = 1)
 }
 \arguments{
 \item{origin}{Numeric or Integer. Numeric ID of case or pump.}
 
-\item{destination}{Numeric or Integer. Numeric ID(s) of case(s) or pump(s). Exclusion is possible via negative selection (e.g., -7). Default is \code{NULL}: this returns closest pump or "anchor" case.}
+\item{destination}{Numeric or Integer. Numeric ID(s) of case(s) or pump(s). Exclusion is possible via negative selection (e.g., -7). Default is \code{NULL}: this returns closest pump or "anchor" case. Character landmark name (case insensitive).}
 
 \item{type}{Character "case-pump", "cases" or "pumps".}
 
@@ -23,15 +22,11 @@ addWalkingPath(origin, destination = NULL, type = "case-pump",
 
 \item{vestry}{Logical. \code{TRUE} uses the 14 pumps from the Vestry Report. \code{FALSE} uses the 13 in the original map.}
 
-\item{unit}{Character. Unit of distance: "meter", "yard" or "native". "native" returns the map's native scale. \code{unit} is meaningful only when "weighted" is \code{TRUE}. See \code{vignette("roads")} for information on unit distances.}
+\item{distance.unit}{Character. Unit of distance: "meter", "yard" or "native". "native" returns the map's native scale. \code{unit} is meaningful only when "weighted" is \code{TRUE}. See \code{vignette("roads")} for information on unit distances.}
 
 \item{time.unit}{Character. "hour", "minute", or "second".}
 
 \item{walking.speed}{Numeric. Walking speed in km/hr.}
-
-\item{zoom}{Logical.}
-
-\item{radius}{Numeric. Controls the degree of zoom.}
 
 \item{unit.posts}{Character. "distance" for mileposts; "time" for timeposts.}
 
@@ -48,6 +43,8 @@ Add the shortest walking path between a selected cases or pumps.
 \note{
 The function uses a case's "address" (i.e., a stack's "anchor" case) to compute distance. Time is computed using cholera::distanceTime(). Adam and Eve Court, and Falconberg Court and Falconberg Mews, are disconnected from the larger road network; they form two isolated subgraphs. This has two consequences: first, only cases on Adam and Eve Court can reach pump 2 and those cases cannot reach any other pump; second, cases on Falconberg Court and Mews cannot reach any pump. Unreachable pumps will return distances of \code{Inf}. Arrow points represent mileposts or timeposts to the destination.
 }
-\seealso{
-\code{\link{fatalities}}, \code{vignette("pump.neighborhoods")}
+\examples{
+streetNameLocator("broad street", zoom = TRUE, highlight = FALSE,
+  add.subtitle = FALSE)
+addWalkingPath(447)
 }

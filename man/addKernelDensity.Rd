@@ -5,9 +5,9 @@
 \title{Add 2D kernel density contours.}
 \usage{
 addKernelDensity(pump.subset = "pooled", pump.select = NULL,
-  neighborhood.type = "walking", obs.unit = "unstacked",
+  neighborhood.type = "walking", cases = "unstacked",
   bandwidth = 0.5, color = "black", line.type = "solid",
-  multi.core = FALSE, ...)
+  multi.core = FALSE)
 }
 \arguments{
 \item{pump.subset}{Character or Numeric: "pooled", "individual", or numeric vector. "pooled" treats all observations as a single set. "individual" is a shortcut for all individual pump neighborhoods. Use of vector of numeric pump IDs to subset from the neighborhoods defined by \code{pump.select}. Negative selection possible. \code{NULL} selects all pumps in \code{pump.select}.}
@@ -16,7 +16,7 @@ addKernelDensity(pump.subset = "pooled", pump.select = NULL,
 
 \item{neighborhood.type}{Character. "voronoi" or "walking"}
 
-\item{obs.unit}{Character. Unit of observation: "unstacked" uses \code{fatalities.unstacked}; "address" uses \code{fatalities.address}; "fatality" uses \code{fatalities}.}
+\item{cases}{Character. Unit of observation: "unstacked" uses \code{fatalities.unstacked}; "address" uses \code{fatalities.address}; "fatality" uses \code{fatalities}.}
 
 \item{bandwidth}{Numeric. Bandwidth for kernel density estimation.}
 
@@ -25,8 +25,6 @@ addKernelDensity(pump.subset = "pooled", pump.select = NULL,
 \item{line.type}{Character. Line type for contour lines.}
 
 \item{multi.core}{Logical or Numeric. \code{TRUE} uses \code{parallel::detectCores()}. \code{FALSE} uses one, single core. You can also specify the number logical cores. On Windows, only \code{multi.core = FALSE} is available.}
-
-\item{...}{Additional plotting parameters.}
 }
 \value{
 Add contours to a graphics plot.
@@ -35,7 +33,7 @@ Add contours to a graphics plot.
 Add 2D kernel density contours based on selected sets of observations.
 }
 \note{
-This function uses KernSmooth::bkde2D().
+This function uses \code{KernSmooth::bkde2D()}.
 }
 \examples{
 \dontrun{
@@ -52,13 +50,4 @@ addKernelDensity(c(6, 8))
 snowMap()
 addKernelDensity(pump.select = c(6, 8))
 }
-}
-\seealso{
-\code{\link{snowMap}},
-\code{\link{addIndexCase}},
-\code{\link{addLandmarks}},
-\code{\link{addPlaguePit}},
-\code{\link{addSnow}},
-\code{\link{addVoronoi}},
-\code{\link{addWhitehead}}
 }

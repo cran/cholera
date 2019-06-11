@@ -16,10 +16,10 @@
 #'   \item{\code{cores}: number of cores to use for parallel implementation.}
 #'   \item{\code{metric}: incremental metric used to find cut point on split road segments.}
 #' }
-#' @note This function is computationally intensive. On a single core of a 2.3 GHz Intel i7, plotting observed paths to PDF takes about 5 seconds while doing so for expected paths takes about 30 seconds. Using the parallel implementation on 4 physical (8 logical) cores, these times fall to about 4 and 13 seconds. Note that parallelization is currently only available on Linux and Mac, and that although some precautions are taken in R.app on macOS, the developers of the 'parallel' package, which \code{neighborhoodWalking()} uses, strongly discourage against using parallelization within a GUI or embedded environment. See \code{vignette("parallel")} for details.
+#' @note This function is computationally intensive. On a single core of a 2.3 GHz Intel i7, plotting observed paths to PDF takes about 4.4 seconds while doing so for expected paths takes about 27 seconds. Using the parallel implementation on 4 physical (8 logical) cores, these times fall to about 3.9 and 12 seconds. Note that parallelization is currently only available on Linux and Mac, and that although some precautions are taken in R.app on macOS, the developers of the 'parallel' package, which \code{neighborhoodWalking()} uses, strongly discourage against using parallelization within a GUI or embedded environment. See \code{vignette("parallel")} for details.
 #' @export
 #' @examples
-#' \dontrun{
+#' \donttest{
 #'
 #' neighborhoodWalking()
 #' neighborhoodWalking(pump.select = -6)
@@ -106,14 +106,15 @@ neighborhoodWalking <- function(pump.select = NULL, vestry = FALSE,
   names(neighborhood.paths) <- pumpID
 
   out <- list(paths = neighborhood.paths,
-              cases = neighborhood.cases,
+              cases = stats::setNames(neighborhood.cases, paste0("p", pumpID)),
               vestry = vestry,
               weighted = weighted,
               case.set = case.set,
               pump.select = pump.select,
               snow.colors = snow.colors,
+              pumpID = pumpID,
               cores = cores,
-              metric = 1 / unitMeter(1, "meter"))
+              metric = 1 / unitMeter(1))
 
   class(out) <- "walking"
   out
@@ -123,14 +124,13 @@ neighborhoodWalking <- function(pump.select = NULL, vestry = FALSE,
 #'
 #' @param x An object of class "walking" created by \code{neighborhoodWalking()}.
 #' @param type Character. "road", "area.points" or "area.polygons". "area" flavors only valid when \code{case.set = "expected"}.
-#' @param polygon.method Character. Method of computing polygon vertices: "pearl.string" or "traveling.salesman".
 #' @param msg Logical. Toggle in-progress messages.
 #' @param ... Additional plotting parameters.
 #' @return A base R plot.
 #' @note When plotting area graphs with simulated data (i.e., \code{case.set = "expected"}), there may be discrepancies between observed cases and expected neighborhoods, particularly between neighborhoods. The "area.points" plot takes about 28 seconds (11 using the parallel implementation). The "area.polygons" plot takes 49 seconds (17 using the parallel implementation).
 #' @export
 #' @examples
-#' \dontrun{
+#' \donttest{
 #'
 #' plot(neighborhoodWalking())
 #' plot(neighborhoodWalking(case.set = "expected"))
@@ -138,13 +138,7 @@ neighborhoodWalking <- function(pump.select = NULL, vestry = FALSE,
 #' plot(neighborhoodWalking(case.set = "expected"), type = "area.polygons")
 #' }
 
-plot.walking <- function(x, type = "road", polygon.method = "pearl.string",
-  msg = FALSE, ...) {
-
-  if (class(x) != "walking") {
-    stop('"x"\'s class needs to be "walking".')
-  }
-
+plot.walking <- function(x, type = "road", msg = FALSE, ...) {
   if (type %in% c("road", "area.points", "area.polygons") == FALSE) {
     stop('type must be "road", "area.points", "area.polygons".')
   }
@@ -152,14 +146,6 @@ plot.walking <- function(x, type = "road", polygon.method = "pearl.string",
   if (type %in% c("area.points", "area.polygons")) {
     if (x$case.set != "expected") {
       stop('area plots valid only when case.set = "expected".')
-    }
-
-    if (polygon.method == "pearl.string") {
-      verticesFn <- pearlString
-    } else if (polygon.method == "traveling.salesman") {
-      verticesFn <- travelingSalesman
-    } else {
-      stop('polygon.method must be "pearl.string" or "traveling.salesman".')
     }
   }
 
@@ -198,7 +184,7 @@ plot.walking <- function(x, type = "road", polygon.method = "pearl.string",
     invisible(lapply(names(x$cases), function(nm) {
       sel <- cholera::fatalities.address$anchor %in% x$cases[[nm]]
       points(cholera::fatalities.address[sel, c("x", "y")], pch = 20,
-        cex = 0.75, col = x$snow.colors[paste0("p", nm)])
+        cex = 0.75, col = x$snow.colors[nm])
     }))
 
   } else if (x$case.set == "snow") {
@@ -295,7 +281,7 @@ plot.walking <- function(x, type = "road", polygon.method = "pearl.string",
 
       periphery.cases <- parallel::mclapply(neighborhood.cases, peripheryCases,
         mc.cores = x$cores)
-      pearl.string <- parallel::mclapply(periphery.cases, verticesFn,
+      pearl.string <- parallel::mclapply(periphery.cases, travelingSalesman,
         mc.cores = x$cores)
 
       invisible(lapply(names(pearl.string), function(nm) {
@@ -328,7 +314,13 @@ plot.walking <- function(x, type = "road", polygon.method = "pearl.string",
   }
 
   pumpTokens(x$pump.select, x$vestry, x$case.set, x$snow.colors, type)
-  title(main = "Pump Neighborhoods: Walking")
+
+  if (is.null(x$pump.select)) {
+    title(main = "Pump Neighborhoods: Walking")
+  } else {
+    title(main = paste0("Pump Neighborhoods: Walking", "\n", "Pumps ",
+      paste(sort(x$pump.select), collapse = ", ")))
+  }
 
   if (msg) {
     if (x$case.set == "expected") message("Done!")
@@ -337,29 +329,43 @@ plot.walking <- function(x, type = "road", polygon.method = "pearl.string",
 
 #' Print method for neighborhoodWalking().
 #'
-#' Return count of paths (anchor cases) by pump neighborhood.
+#' Parameter values for neighborhoodWalking().
 #' @param x An object of class "walking" created by \code{neighborhoodWalking()}.
 #' @param ... Additional parameters.
-#' @return An R vector.
+#' @return A list of argument values.
 #' @export
 #' @examples
-#' \dontrun{
+#' \donttest{
 #'
 #' neighborhoodWalking()
 #' print(neighborhoodWalking())
 #' }
 
 print.walking <- function(x, ...) {
-  if (class(x) != "walking") {
-    stop('"x"\'s class needs to be "walking".')
-  }
+  print(x[c("pumpID", "case.set", "vestry")])
+}
 
-  if (x$case.set == "observed" | x$case.set == "snow") {
-    out <- vapply(x$paths, length, numeric(1L))
-  } else if (x$case.set == "expected") {
-    out <- expectedCount(x)
+#' Summary method for neighborhoodWalking().
+#'
+#' Return computed counts for walking neighborhoods.
+#' @param object Object. An object of class "walking" created by \code{neighborhoodWalking()}.
+#' @param ... Additional parameters.
+#' @return An R vector.
+#' @export
+#' @examples
+#' \donttest{
+#'
+#' summary(neighborhoodWalking())
+#' }
+
+summary.walking <- function(object, ...) {
+  if (object$case.set == "observed" | object$case.set == "snow") {
+    out <- vapply(object$paths, length, numeric(1L))
+    out <- stats::setNames(out, paste0("p", object$pumpID))
+  } else if (object$case.set == "expected") {
+    out <- expectedCount(object)
   }
-  print(out)
+  out
 }
 
 expectedCount <- function(x) {
@@ -419,5 +425,6 @@ expectedCount <- function(x) {
 
   count.data <- merge(whole.count, split.count, by = "pump", all.x = TRUE)
   count.data[is.na(count.data)] <- 0
-  stats::setNames(count.data$count.x + count.data$count.y, count.data$pump)
+  stats::setNames(count.data$count.x + count.data$count.y,
+    paste0("p", count.data$pump))
 }

@@ -13,7 +13,7 @@
 #' @return An R list with two elements: a character vector of path nodes and a data frame summary.
 #' @export
 #' @examples
-#' \dontrun{
+#' \donttest{
 #'
 #' # path from case 1 to nearest pump.
 #' walkingPath(1)
@@ -90,6 +90,17 @@ walkingPath <- function(origin = 1, destination = NULL, type = "case-pump",
     if (is.null(origin) == FALSE) {
       if (any(abs(origin) == 2)) {
         message('Pump 2 is a technical isolate. Already not considered.')
+      }
+    }
+  }
+
+  if (type %in% c("cases", "pumps")) {
+    if (is.null(origin) == FALSE & is.null(destination) == FALSE) {
+      alpha.omega <- c(origin, destination)
+      if (all(is.numeric(alpha.omega)) | all(is.character(alpha.omega))) {
+        if (origin == destination) {
+          stop("origin and destination are at same address!")
+        }
       }
     }
   }
@@ -373,17 +384,16 @@ walkingPath <- function(origin = 1, destination = NULL, type = "case-pump",
     if (is.null(destination)) {
       node.sel <- nodes$anchor != 0 & nodes$node %in% ego.node == FALSE
       alters <- nodes[node.sel, "node"]
-    } else {
+
+    } else if (is.numeric(destination)) {
       if (observed) {
-        if (is.numeric(destination)) {
-          if (all(destination > 0)) {
-            alter.sel <- cholera::anchor.case$case%in% destination
-          } else if (all(destination < 0)) {
-            alter.sel <- cholera::anchor.case$case %in% abs(destination) ==
-              FALSE
-          } else stop("all positive or all negative.")
-          alter.case <- unique(cholera::anchor.case[alter.sel, "anchor"])
-        }
+        if (all(destination > 0)) {
+          alter.sel <- cholera::anchor.case$case%in% destination
+        } else if (all(destination < 0)) {
+          alter.sel <- cholera::anchor.case$case %in% abs(destination) ==
+            FALSE
+        } else stop("all positive or all negative.")
+        alter.case <- unique(cholera::anchor.case[alter.sel, "anchor"])
       } else {
         if (all(destination > 0)) {
           alter.case <- nodes$anchor[nodes$anchor %in% destination]
@@ -392,18 +402,55 @@ walkingPath <- function(origin = 1, destination = NULL, type = "case-pump",
         } else stop("all positive or all negative.")
       }
 
-      if (is.character(destination)) {
-        destination <- caseAndSpace(destination)
-        if (destination %in% cholera::landmark.squares$name) {
-          sq.test <- grepl(destination, cholera::landmarks$name)
-          if (any(sq.test)) {
-            alter.case <- cholera::landmarks[sq.test, "case"]
-          } else stop('Use a valid landmark square name for destination.')
+      if (observed) {
+        # same stack test
+        if (all(is.numeric(c(ego.id, alter.case)))) {
+          ego.anchor <- cholera::anchor.case[cholera::anchor.case$case %in%
+            ego.id, "anchor"]
+          alter.anchor <- cholera::anchor.case[cholera::anchor.case$case %in%
+            alter.case, "anchor"]
+          stack.test <- vapply(c(ego.anchor, alter.anchor), length, numeric(1L))
 
-        } else if (destination %in% cholera::landmarks$name) {
+          if (all(stack.test== 1)) {
+            if (ego.anchor == alter.anchor) {
+              stop("origin and destination are at same address!")
+            }
+          }
+        }
+      }
+
+      alters <- nodes$node[nodes$anchor %in% alter.case &
+                           nodes$node %in% ego.node == FALSE]
+
+    } else if (is.character(destination)) {
+      destination <- caseAndSpace(destination)
+      if (destination %in% cholera::landmark.squares$name) {
+        sq.test <- grepl(destination, cholera::landmarks$name)
+        if (any(sq.test)) {
+          alter.case <- cholera::landmarks[sq.test, "case"]
+        } else stop('Use a valid landmark square name for destination.')
+
+
+      } else if (destination == "St James Workhouse") {
+        st.james.node <- nodes[nodes$anchor == 369, "node"]
+        if (ego.node == st.james.node) {
+          stop("origin and destination are at same address!")
+        } else {
           sel <- cholera::landmarks$name == destination
           alter.case <- cholera::landmarks[sel, "case"]
-        } else stop('Use a valid landmark name for destination.')
+        }
+
+      } else if (destination %in% cholera::landmarks$name) {
+        sel <- cholera::landmarks$name == destination
+        alter.case <- cholera::landmarks[sel, "case"]
+
+      } else stop('Use a valid landmark name for destination.')
+
+      # post caseAndSpace()
+      if (is.character(origin) & is.character(destination)) {
+        if (origin == destination) {
+          stop("origin and destination are at same address!")
+        }
       }
 
       alters <- nodes$node[nodes$anchor %in% alter.case &
@@ -421,8 +468,8 @@ walkingPath <- function(origin = 1, destination = NULL, type = "case-pump",
       alter.node <- nodes[nodes$anchor == alter.anchor, "node"]
 
       if (is.character(destination)) {
-        alter.id <- cholera::landmarks[cholera::landmarks$case == alter.anchor,
-          "name"]
+        alter.id <- cholera::landmarks[cholera::landmarks$case %in%
+          alter.anchor, "name"]
       } else {
         alter.id <- alter.anchor
       }
@@ -483,7 +530,7 @@ walkingPath <- function(origin = 1, destination = NULL, type = "case-pump",
     }
 
     if (is.character(destination)) {
-      landmark.sel <- cholera::landmarks$case == alter.anchor
+      landmark.sel <- cholera::landmarks$case %in% alter.anchor
       landmark.data <- cholera::landmarks[landmark.sel, ]
       alter.id <- landmark.data$name
       alter.anchor <- landmark.data$case
@@ -653,7 +700,7 @@ walkingPath <- function(origin = 1, destination = NULL, type = "case-pump",
 #' @export
 #' @section Note: Arrows represent mileposts or timeposts to the destination.
 #' @examples
-#' \dontrun{
+#' \donttest{
 #'
 #' plot(walkingPath(15))
 #' plot(walkingPath(15), unit.posts = "time")
@@ -729,7 +776,7 @@ plot.walking_path <- function(x, zoom = 0.5, unit.posts = "distance",
     }
   }
 
-  ## square data ##
+  ## city square data ##
 
   if (any(grepl("case", names(x$data)))) {
     ego <- unlist(x$data[, grepl("case", names(x$data))][1])
@@ -792,7 +839,7 @@ plot.walking_path <- function(x, zoom = 0.5, unit.posts = "distance",
         destination.obs <- cholera::regular.cases[alter.anchor, ]
       }
     } else if (is.character(unlist(x$data[2]))) {
-      sel <- cholera::landmarks$case == alter.anchor
+      sel <- cholera::landmarks$case %in% alter.anchor
       destination.obs <- cholera::landmarks[sel, c("x.proj", "y.proj")]
       names(destination.obs) <- c("x", "y")
     } else {
@@ -914,8 +961,10 @@ plot.walking_path <- function(x, zoom = 0.5, unit.posts = "distance",
   if ((is.logical(zoom) & zoom == TRUE) | is.numeric(zoom)) {
     if (x$type %in% c("case-pump", "cases")) {
       if (is.numeric(ego)) {
-        text(case.data[case.data$case == ego.data$anchor, c("x", "y")],
-          labels = ego.data$anchor, pos = 1, col = "red")
+        if (x$observed) sel <- case.data$case == ego.data$anchor
+        else sel <- row.names(case.data) == ego.data$anchor
+        text(case.data[sel, c("x", "y")], labels = ego.data$anchor, pos = 1,
+          col = "red")
       } else if (is.character(ego)) {
         if (grepl("Soho Square", ego)) {
           text(sq.center.origin$x, sq.center.origin$y,
@@ -932,7 +981,9 @@ plot.walking_path <- function(x, zoom = 0.5, unit.posts = "distance",
 
     if (x$type == "cases") {
       if (is.numeric(alter)) {
-        text(case.data[case.data$case == alter.data$anchor, c("x", "y")],
+        if (x$observed) sel <- case.data$case == alter.data$anchor
+        else sel <- row.names(case.data) == alter.data$anchor
+        text(case.data[sel, c("x", "y")],
           labels = alter.data$anchor, pos = 1, col = "red")
       } else if (is.character(alter)) {
         if (grepl("Soho Square", alter)) {
@@ -993,9 +1044,9 @@ plot.walking_path <- function(x, zoom = 0.5, unit.posts = "distance",
       edge.data <- identifyEdges(path.edge, edges)
 
       if (unit.posts == "distance") {
-        cumulative <- unitMeter(cumsum(edge.data$d), "meter")
+        cumulative <- unitMeter(cumsum(edge.data$d))
       } else if (unit.posts == "time") {
-        cumulative <- distanceTime(cumsum(edge.data$d),
+        cumulative <- distanceTime(unitMeter(cumsum(edge.data$d)),
           walking.speed = x$walking.speed)
       }
 
@@ -1110,7 +1161,7 @@ plot.walking_path <- function(x, zoom = 0.5, unit.posts = "distance",
 #' @return An R data frame.
 #' @export
 #' @examples
-#' \dontrun{
+#' \donttest{
 #'
 #' walkingPath()
 #' print(walkingPath())

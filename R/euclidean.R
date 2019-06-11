@@ -7,10 +7,10 @@
 #' @param case.set Character. "observed" or "expected".
 #' @param multi.core Logical or Numeric. \code{TRUE} uses \code{parallel::detectCores()}. \code{FALSE} uses one, single core. You can also specify the number logical cores. On Windows, only \code{multi.core = FALSE} is available.
 #' @return An R vector.
-#' @note This function is computationally intensive when \code{case.set = "expected"}.
+#' @note This function is computationally intensive. On a single core of a 2.3 GHz Intel i7, plotting observed paths to PDF takes about 3.6 seconds while doing so for expected paths takes about 109 seconds. Using the parallel implementation on 4 physical (8 logical) cores, these times fall to about 1.4 and 28 seconds. Note that parallelization is currently only available on Linux and Mac, and that although some precautions are taken in R.app on macOS, the developers of the 'parallel' package, which \code{neighborhoodWalking()} uses, strongly discourage against using parallelization within a GUI or embedded environment. See \code{vignette("parallel")} for details.
 #' @export
 #' @examples
-#' \dontrun{
+#' \donttest{
 #'
 #' neighborhoodEuclidean()
 #' neighborhoodEuclidean(-6)
@@ -91,7 +91,6 @@ neighborhoodEuclidean <- function(pump.select = NULL, vestry = FALSE,
 #'
 #' @param x An object of class "euclidean" created by \code{neighborhoodEuclidean()}.
 #' @param type Character. "star", "area.points" or "area.polygons". "area" flavors only valid when \code{case.set = "expected"}.
-#' @param polygon.method Character. Method of computing polygon vertices: "pearl.string" or "traveling.salesman".
 #' @param add.observed.points Logical. Add observed fatality "addresses".
 #' @param msg Logical. Toggle in-progress messages.
 #' @param ... Additional plotting parameters.
@@ -99,7 +98,7 @@ neighborhoodEuclidean <- function(pump.select = NULL, vestry = FALSE,
 #' @note This uses an approximate computation of polygons, using the 'TSP' package, that may produce non-simple and/or overlapping polygons.
 #' @export
 #' @examples
-#' \dontrun{
+#' \donttest{
 #'
 #' plot(neighborhoodEuclidean())
 #' plot(neighborhoodEuclidean(-6))
@@ -108,25 +107,12 @@ neighborhoodEuclidean <- function(pump.select = NULL, vestry = FALSE,
 #' plot(neighborhoodEuclidean(case.set = "expected"), type = "area.polygons")
 #' }
 
-plot.euclidean <- function(x, type = "star",
-  polygon.method = "traveling.salesman", add.observed.points = TRUE,
+plot.euclidean <- function(x, type = "star", add.observed.points = TRUE,
   msg = FALSE, ...) {
-
-  if (class(x) != "euclidean") {
-    stop('"x"\'s class needs to be "euclidean".')
-  }
 
   if (type %in% c("area.points", "area.polygons")) {
     if (x$case.set != "expected") {
       stop('area plots valid only when case.set = "expected".')
-    }
-
-    if (polygon.method == "pearl.string") {
-      verticesFn <- pearlString
-    } else if (polygon.method == "traveling.salesman") {
-      verticesFn <- travelingSalesman
-    } else {
-      stop('polygon.method must be "pearl.string" or "traveling.salesman".')
     }
   }
 
@@ -205,7 +191,7 @@ plot.euclidean <- function(x, type = "star",
 
     periphery.cases <- parallel::mclapply(neighborhood.cases, peripheryCases,
       mc.cores = x$cores)
-    pearl.string <- parallel::mclapply(periphery.cases, verticesFn,
+    pearl.string <- parallel::mclapply(periphery.cases, travelingSalesman,
       mc.cores = x$cores)
     names(pearl.string) <- p.num
 
@@ -226,14 +212,33 @@ plot.euclidean <- function(x, type = "star",
 
 #' Print method for neighborhoodEuclidean().
 #'
+#' Parameter values for neighborhoodEuclidean().
 #' @param x An object of class "euclidean" created by \code{neighborhoodEuclidean()}.
 #' @param ... Additional parameters.
-#' @return An R class 'table' vector.
+#' @return A list of argument values.
 #' @export
+#' @examples
+#' \donttest{
+#'
+#' neighborhoodEuclidean()
+#' print(neighborhoodEuclidean())
+#' }
 
 print.euclidean <- function(x, ...) {
-  if (class(x) != "euclidean") {
-    stop('"x"\'s class needs to be "euclidean".')
-  }
-  print(table(x$nearest.pump))
+  print(x[c("pump.id", "case.set", "case.location", "vestry")])
+}
+
+#' Summary method for neighborhoodEuclidean().
+#'
+#' Return computed counts for Euclidean neighborhoods.
+#' @param object Object. An object of class "euclidean" created by \code{neighborhoodEuclidean()}.
+#' @param ... Additional parameters.
+#' @return A vector of counts by neighborhood.
+#' @export
+#' @examples
+#' summary(neighborhoodEuclidean())
+
+summary.euclidean <- function(object, ...) {
+  xtab <- table(object$nearest.pump)
+  stats::setNames(xtab, paste0("p", names(xtab)))
 }

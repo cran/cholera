@@ -5,10 +5,9 @@
 \title{Add expected walking neighborhoods.}
 \usage{
 addNeighborhoodWalking(pump.subset = NULL, pump.select = NULL,
-  vestry = FALSE, weighted = TRUE, polygon.method = "pearl.string",
-  path = NULL, path.color = NULL, path.width = 3,
-  alpha.level = 0.25, polygon.type = "solid", polygon.col = NULL,
-  polygon.lwd = 2, multi.core = FALSE)
+  vestry = FALSE, weighted = TRUE, path = NULL, path.color = NULL,
+  path.width = 3, alpha.level = 0.25, polygon.type = "solid",
+  polygon.col = NULL, polygon.lwd = 2, multi.core = FALSE)
 }
 \arguments{
 \item{pump.subset}{Numeric. Vector of numeric pump IDs to subset from the neighborhoods defined by \code{pump.select}. Negative selection possible. \code{NULL} uses all pumps in \code{pump.select}.}
@@ -18,8 +17,6 @@ addNeighborhoodWalking(pump.subset = NULL, pump.select = NULL,
 \item{vestry}{Logical. \code{TRUE} uses the 14 pumps from the Vestry Report. \code{FALSE} uses the 13 in the original map.}
 
 \item{weighted}{Logical. \code{TRUE} computes shortest path weighted by road length. \code{FALSE} computes shortest path in terms of the number of nodes.}
-
-\item{polygon.method}{Character. Method of computing polygon vertices: "pearl.string" or "traveling.salesman".}
 
 \item{path}{Character. "expected" or "observed".}
 
@@ -41,10 +38,10 @@ addNeighborhoodWalking(pump.subset = NULL, pump.select = NULL,
 Add expected walking neighborhoods.
 }
 \note{
-This function is computationally intensive. On a single core of a 2.3 GHz Intel i7, plotting observed paths to PDF takes about 5 seconds while doing so for expected paths takes about 30 seconds. Using the parallel implementation on 4 physical (8 logical) cores, these times fall to about 4 and 13 seconds. Note that parallelization is currently only available on Linux and Mac, and that although some precautions are taken in R.app on macOS, the developers of the 'parallel' package, which \code{neighborhoodWalking()} uses, strongly discourage against using parallelization within a GUI or embedded environment. See \code{vignette("parallel")} for details.
+This function is computationally intensive. On a single core of a 2.3 GHz Intel i7, plotting observed paths to PDF takes about 4.4 seconds while doing so for expected paths takes about 28 seconds. Using the parallel implementation on 4 physical (8 logical) cores, these times fall to about 3.7 and 12 seconds. Note that parallelization is currently only available on Linux and Mac, and that although some precautions are taken in R.app on macOS, the developers of the 'parallel' package, which \code{neighborhoodWalking()} uses, strongly discourage against using parallelization within a GUI or embedded environment. See \code{vignette("parallel")} for details.
 }
 \examples{
-\dontrun{
+\donttest{
 
 streetNameLocator("marshall street", zoom = 0.5)
 addNeighborhoodWalking()

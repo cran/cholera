@@ -18,12 +18,12 @@ distanceTime <- function(x, distance.unit = "meter", time.unit = "second",
     stop('distance.unit must be "meter", "yard" or "native".')
   }
 
-  if (time.unit %in% c("minute", "hour", "second") == FALSE) {
+  if (time.unit %in% c("hour", "minute", "second") == FALSE) {
     stop('unit must be "hour", "minute" or "second".')
   }
 
   if (distance.unit == "native") {
-    speed <- walking.speed * unitMeter(1, "meter")
+    speed <- walking.speed * unitMeter(1)
   } else if (distance.unit == "yard") {
     speed <- walking.speed * 1.0936 # yd/hr
   } else if (distance.unit == "meter") {

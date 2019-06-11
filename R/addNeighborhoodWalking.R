@@ -4,7 +4,6 @@
 #' @param pump.select Numeric. Numeric vector of pump IDs that define which pump neighborhoods to consider (i.e., specify the "population"). Negative selection possible. \code{NULL} selects all pumps.
 #' @param vestry Logical. \code{TRUE} uses the 14 pumps from the Vestry Report. \code{FALSE} uses the 13 in the original map.
 #' @param weighted Logical. \code{TRUE} computes shortest path weighted by road length. \code{FALSE} computes shortest path in terms of the number of nodes.
-#' @param polygon.method Character. Method of computing polygon vertices: "pearl.string" or "traveling.salesman".
 #' @param path Character. "expected" or "observed".
 #' @param path.color Character. Use a single color for all paths. \code{NULL} uses neighborhood colors defined by \code{snowColors()}.
 #' @param path.width Numeric. Set width of paths.
@@ -14,20 +13,19 @@
 #' @param polygon.lwd Numeric.
 #' @param multi.core Logical or Numeric. \code{TRUE} uses \code{parallel::detectCores()}. \code{FALSE} uses one, single core. You can also specify the number logical cores. On Windows, only \code{multi.core = FALSE} is available.
 #' @import graphics
-#' @note This function is computationally intensive. On a single core of a 2.3 GHz Intel i7, plotting observed paths to PDF takes about 5 seconds while doing so for expected paths takes about 30 seconds. Using the parallel implementation on 4 physical (8 logical) cores, these times fall to about 4 and 13 seconds. Note that parallelization is currently only available on Linux and Mac, and that although some precautions are taken in R.app on macOS, the developers of the 'parallel' package, which \code{neighborhoodWalking()} uses, strongly discourage against using parallelization within a GUI or embedded environment. See \code{vignette("parallel")} for details.
+#' @note This function is computationally intensive. On a single core of a 2.3 GHz Intel i7, plotting observed paths to PDF takes about 4.4 seconds while doing so for expected paths takes about 28 seconds. Using the parallel implementation on 4 physical (8 logical) cores, these times fall to about 3.7 and 12 seconds. Note that parallelization is currently only available on Linux and Mac, and that although some precautions are taken in R.app on macOS, the developers of the 'parallel' package, which \code{neighborhoodWalking()} uses, strongly discourage against using parallelization within a GUI or embedded environment. See \code{vignette("parallel")} for details.
 #' @export
 #' @examples
-#' \dontrun{
+#' \donttest{
 #'
 #' streetNameLocator("marshall street", zoom = 0.5)
 #' addNeighborhoodWalking()
 #' }
 
 addNeighborhoodWalking <- function(pump.subset = NULL, pump.select = NULL,
-  vestry = FALSE, weighted = TRUE, polygon.method = "pearl.string",
-  path = NULL, path.color = NULL, path.width = 3, alpha.level = 0.25,
-  polygon.type = "solid", polygon.col = NULL, polygon.lwd = 2,
-  multi.core = FALSE) {
+  vestry = FALSE, weighted = TRUE, path = NULL, path.color = NULL,
+  path.width = 3, alpha.level = 0.25, polygon.type = "solid",
+  polygon.col = NULL, polygon.lwd = 2, multi.core = FALSE) {
 
   if (is.null(path) == FALSE) {
     if (path %in% c("expected", "observed") == FALSE) {
@@ -67,15 +65,6 @@ addNeighborhoodWalking <- function(pump.subset = NULL, pump.select = NULL,
         stop('pump.subset should be a subset of pump.select.')
       }
     }
-  }
-
-
-  if (polygon.method == "pearl.string") {
-    verticesFn <- pearlString
-  } else if (polygon.method == "traveling.salesman") {
-    verticesFn <- travelingSalesman
-  } else {
-    stop('polygon.method must be "pearl.string" or "traveling.salesman".')
   }
 
   cores <- multiCore(multi.core)
@@ -125,7 +114,7 @@ addNeighborhoodWalking <- function(pump.subset = NULL, pump.select = NULL,
             case.set = arguments$case.set,
             pump.select = pump.select,
             cores = cores,
-            metric = 1 / unitMeter(1, "meter"))
+            metric = 1 / unitMeter(1))
 
   snow.colors <- snowColors(x$vestry)
 
@@ -316,7 +305,7 @@ addNeighborhoodWalking <- function(pump.subset = NULL, pump.select = NULL,
 
   periphery.cases <- parallel::mclapply(neighborhood.cases, peripheryCases,
     mc.cores = x$cores)
-  pearl.string <- parallel::mclapply(periphery.cases, verticesFn,
+  pearl.string <- parallel::mclapply(periphery.cases, travelingSalesman,
     mc.cores = x$cores)
 
   if (is.null(pump.subset)) {
@@ -337,7 +326,7 @@ addNeighborhoodWalking <- function(pump.subset = NULL, pump.select = NULL,
       } else if (polygon.type == "solid") {
         polygon(cholera::regular.cases[pearl.string[[nm]], ],
           col = polygon.col)
-      }
+      } else stop('polygon.type must be "perimeter" or "solid".')
     }))
   } else {
     n.subset <- pearl.string[pump.subset]
@@ -358,7 +347,7 @@ addNeighborhoodWalking <- function(pump.subset = NULL, pump.select = NULL,
       } else if (polygon.type == "solid") {
         polygon(cholera::regular.cases[pearl.string[[nm]], ],
           col = polygon.col)
-      }
+      } else stop('polygon.type must be "perimeter" or "solid".')
     }))
   }
 

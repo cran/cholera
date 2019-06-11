@@ -2,12 +2,12 @@
 knitr::opts_chunk$set(collapse = TRUE, comment = ">")
 library(cholera)
 
-## ----deldirVertices, eval = FALSE----------------------------------------
-#  deldirVertices(sites, rw.data = NULL, rw = NULL, type = "tiles")
+## ----voronoiPolygons, eval = FALSE---------------------------------------
+#  voronoiPolygons(sites, rw.data = NULL, rw = NULL, type = "tiles")
 
 ## ----counting_tiles, echo = TRUE, eval = TRUE----------------------------
 # compute vertices of Voronoi tiles
-vertices <- deldirVertices(sites = cholera::pumps, rw.data = cholera::roads)
+vertices <- voronoiPolygons(sites = cholera::pumps, rw.data = cholera::roads)
 
 # locations of the 578 fatalities in Soho
 cases <- cholera::fatalities.unstacked
@@ -25,7 +25,7 @@ vapply(census, sum, integer(1L))
 
 ## ----counting_triangles, echo = TRUE, eval = TRUE------------------------
 # compute vertices of Delauny triangles
-vertices <- deldirVertices(sites = cholera::pumps,
+vertices <- voronoiPolygons(sites = cholera::pumps,
   rw.data = cholera::roads, type = "triangles")
 
 # locations of the 578 fatalities in Soho
@@ -44,7 +44,7 @@ vapply(census, sum, integer(1L))
 
 ## ----coloring_tiles, fig.align = "left", fig.width = 5, fig.height = 5, echo = TRUE, eval = TRUE----
 # compute vertices of Voronoi tiles
-vertices <- deldirVertices(sites = cholera::pumps, rw.data = cholera::roads)
+vertices <- voronoiPolygons(sites = cholera::pumps, rw.data = cholera::roads)
 
 # define colors
 snow.colors <- grDevices::adjustcolor(snowColors(), alpha.f = 1/3)
@@ -57,7 +57,7 @@ invisible(lapply(seq_along(vertices), function(i) {
 
 ## ----coloring_triangles, fig.align = "left", fig.width = 5, fig.height = 5, echo = TRUE, eval = TRUE----
 # compute vertices of Delauny triangles
-vertices <- deldirVertices(sites = cholera::pumps,
+vertices <- voronoiPolygons(sites = cholera::pumps,
   rw.data = cholera::roads, type = "triangles")
 
 # define colors

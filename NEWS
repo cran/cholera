@@ -1,3 +1,51 @@
+cholera 0.6.5
+==================
+
+# Fixes #
+
+- fix plot.walking_path() timeposts.
+- fix plot.walking_path(observed = FALSE).
+- fix St James Workhouse for walkingPath(type = "cases").
+- fix St James Workhouse for euclideanPath(type = "cases").
+- fix city squares for plot.euclidean_path().
+- fix computed time in nearestPump() and amend sim.walking.distance.
+
+# New Data #
+
+- add sim.walking.distance.
+
+# Function Changes #
+
+- add nearestPump(metric = "euclidean").
+- add distance.unit argument to addWhitehead().
+- add pch and point.size arguments to addNeighborhoodCases().
+- add pos argument to addCase().
+- add output argument to voronoiPolygons().
+- add summary.euclidean(), summary.voronoi() and summary.walking().
+- add multi.core argument to simWalkingDistance().
+- add case.location to addEuclideanPath().
+- add 'case' argument to pumpCase().
+- amend travelingSalesman() argument in addSnow().
+- amend print.euclidean(), print.voronoi() and print.walking().
+- amend argument 'case' to 'data' in addKernelDensity().
+- amend plot.walking() titles.
+- deprecate pearlString() in favor of travelingSalesman().
+- deprecate statistic argument in neighborhoodVoronoi().
+- enable col argument in addRoads().
+- enable 'address' and 'nominal' cases in plot.voronoi().
+- exclude landmarks from case.set - "expected".
+- rename deldirVertices() back to voronoiPolygons().
+
+# Vignettes #
+
+- rename "deldirPolygons()" to "voronoiPolygons()".
+- remove Pump Neighborhoods vignette.
+
+# DESCRIPTION #
+
+- remove 'scales" from Imports.
+
+
 cholera 0.6.0
 ==================
 

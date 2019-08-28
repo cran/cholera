@@ -4,12 +4,11 @@
 #' @param pump Numeric. Select pump as focal point.
 #' @param vestry Logical. \code{TRUE} uses the 14 pumps from the Vestry Report. \code{FALSE} uses the 13 in the original map.
 #' @param type Character. Type of graphic: "base" or "ggplot2".
-#' @param multi.core Logical or Numeric. \code{TRUE} uses \code{parallel::detectCores()}. \code{FALSE} uses one, single core. You can also specify the number logical cores. On Windows, only \code{multi.core = FALSE} is available.
+#' @param multi.core Logical or Numeric. \code{TRUE} uses \code{parallel::detectCores()}. \code{FALSE} uses one, single core. You can also specify the number logical cores. See \code{vignette("Parallelization")} for details.
 #' @import ggplot2
 #' @export
 #' @examples
 #' \donttest{
-#'
 #' profile2D(angle = 30)
 #' profile2D(angle = 30, type = "ggplot2")
 #' }
@@ -183,13 +182,13 @@ orthogonalCoordinates <- function(case, pump = 7, angle = 0, vestry = FALSE,
 #' @param pump Numeric. Selected pump focal point.
 #' @param angle Numeric. Angle of perspective axis in degrees.
 #' @param vestry Logical. \code{TRUE} for the 14 pumps from Vestry Report. \code{FALSE} for the original 13 pumps.
-#' @param multi.core Logical or Numeric. \code{TRUE} uses \code{parallel::detectCores()}. \code{FALSE} uses one, single core. You can also specify the number logical cores. On Windows, only \code{multi.core = FALSE} is available.
+#' @param multi.core Logical or Numeric. \code{TRUE} uses \code{parallel::detectCores()}. \code{FALSE} uses one, single core. You can also specify the number logical cores.
 #' @noRd
 
 profilePerspective <- function(output = "inside", pump = 7, angle = 0,
   vestry = FALSE, multi.core = FALSE) {
 
-  walk <- nearestPump(vestry = vestry, multi.core = multi.core)
+  walk <- nearestPump(vestry = vestry, multi.core = multi.core)$distance
   neighborhood.select <- walk[walk$pump == pump, ]
   neighborhood.others <- walk[walk$pump != pump, ]
 
@@ -206,7 +205,7 @@ profilePerspective <- function(output = "inside", pump = 7, angle = 0,
   coords <- lapply(cases, function(x) orthogonalCoordinates(x, angle = angle))
   coords <- stats::setNames(do.call(rbind, coords), vars)
 
-  dat <- cholera::fatalities.address[cholera::fatalities.address$anchor %in% 
+  dat <- cholera::fatalities.address[cholera::fatalities.address$anchor %in%
     cases, ]
   dat <- cbind(dat, coords)
 

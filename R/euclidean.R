@@ -5,20 +5,20 @@
 #' @param vestry Logical. \code{TRUE} uses the 14 pumps from the Vestry Report. \code{FALSE} uses the 13 in the original map.
 #' @param case.location Character. "address" or "nominal". For \code{observed = TRUE}: "address" uses \code{ortho.proj} and "nominal" uses \code{fatalities}. For \code{observed = TRUE}: "address" uses \code{sim.ortho.proj} and "nominal" uses \code{regular.cases}.
 #' @param case.set Character. "observed" or "expected".
-#' @param multi.core Logical or Numeric. \code{TRUE} uses \code{parallel::detectCores()}. \code{FALSE} uses one, single core. You can also specify the number logical cores. On Windows, only \code{multi.core = FALSE} is available.
+#' @param multi.core Logical or Numeric. \code{TRUE} uses \code{parallel::detectCores()}. \code{FALSE} uses one, single core. You can also specify the number logical cores. See \code{vignette("Parallelization")} for details.
+#' @param dev.mode Logical. Development mode uses parallel::parLapply().
 #' @return An R vector.
-#' @note This function is computationally intensive. On a single core of a 2.3 GHz Intel i7, plotting observed paths to PDF takes about 3.6 seconds while doing so for expected paths takes about 109 seconds. Using the parallel implementation on 4 physical (8 logical) cores, these times fall to about 1.4 and 28 seconds. Note that parallelization is currently only available on Linux and Mac, and that although some precautions are taken in R.app on macOS, the developers of the 'parallel' package, which \code{neighborhoodWalking()} uses, strongly discourage against using parallelization within a GUI or embedded environment. See \code{vignette("parallel")} for details.
 #' @export
 #' @examples
 #' \donttest{
-#'
 #' neighborhoodEuclidean()
 #' neighborhoodEuclidean(-6)
 #' neighborhoodEuclidean(pump.select = 6:7)
 #' }
 
 neighborhoodEuclidean <- function(pump.select = NULL, vestry = FALSE,
-   case.location = "nominal", case.set = "observed", multi.core = FALSE) {
+   case.location = "nominal", case.set = "observed", multi.core = FALSE,
+   dev.mode = FALSE) {
 
   if (case.set %in% c("observed", "expected") == FALSE) {
     stop('case.set must be "observed" or "expected".')
@@ -66,10 +66,21 @@ neighborhoodEuclidean <- function(pump.select = NULL, vestry = FALSE,
     observed <- FALSE
   }
 
-  nearest.pump <- parallel::mclapply(anchors, function(x) {
-    euclideanPath(x, destination = pump.id, vestry = vestry,
-      observed = observed, case.location = case.location)$data$pump
-  }, mc.cores = cores)
+  if ((.Platform$OS.type == "windows" & cores > 1) | dev.mode) {
+    cl <- parallel::makeCluster(cores)
+    parallel::clusterExport(cl = cl, envir = environment(),
+      varlist = c("pump.id", "vestry", "observed", "case.location"))
+    nearest.pump <- parallel::parLapply(cl, anchors, function(x) {
+      cholera::euclideanPath(x, destination = pump.id, vestry = vestry,
+        observed = observed, case.location = case.location)$data$pump
+    })
+    parallel::stopCluster(cl)
+  } else {
+    nearest.pump <- parallel::mclapply(anchors, function(x) {
+      euclideanPath(x, destination = pump.id, vestry = vestry,
+        observed = observed, case.location = case.location)$data$pump
+    }, mc.cores = cores)
+  }
 
   out <- list(pump.data = pump.data,
               pump.select = pump.select,
@@ -81,7 +92,8 @@ neighborhoodEuclidean <- function(pump.select = NULL, vestry = FALSE,
               anchors = anchors,
               observed = observed,
               nearest.pump = unlist(nearest.pump),
-              cores = cores)
+              cores = cores,
+              dev.mode = dev.mode)
 
   class(out) <- "euclidean"
   out
@@ -99,7 +111,6 @@ neighborhoodEuclidean <- function(pump.select = NULL, vestry = FALSE,
 #' @export
 #' @examples
 #' \donttest{
-#'
 #' plot(neighborhoodEuclidean())
 #' plot(neighborhoodEuclidean(-6))
 #' plot(neighborhoodEuclidean(pump.select = 6:7))
@@ -189,10 +200,8 @@ plot.euclidean <- function(x, type = "star", add.observed.points = TRUE,
       which(nearest.pump == n)
     })
 
-    periphery.cases <- parallel::mclapply(neighborhood.cases, peripheryCases,
-      mc.cores = x$cores)
-    pearl.string <- parallel::mclapply(periphery.cases, travelingSalesman,
-      mc.cores = x$cores)
+    periphery.cases <- lapply(neighborhood.cases, peripheryCases)
+    pearl.string <- lapply(periphery.cases, travelingSalesman)
     names(pearl.string) <- p.num
 
     invisible(lapply(names(pearl.string), function(nm) {
@@ -219,7 +228,6 @@ plot.euclidean <- function(x, type = "star", add.observed.points = TRUE,
 #' @export
 #' @examples
 #' \donttest{
-#'
 #' neighborhoodEuclidean()
 #' print(neighborhoodEuclidean())
 #' }

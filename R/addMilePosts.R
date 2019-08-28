@@ -1,4 +1,4 @@
-#' Add distance or time based "mileposts" to a walking neighborhood plot.
+#' Add distance or time based "mileposts" to an observed walking neighborhood plot.
 #'
 #' @param pump.subset Numeric. Vector of numeric pump IDs to subset from the neighborhoods defined by \code{pump.select}. Negative selection possible. \code{NULL} uses all pumps in \code{pump.select}.
 #' @param pump.select Numeric. Numeric vector of pumps to define possible pump neighborhoods (i.e. the "population"). Negative selection is possible. NULL selects all "observed" pumps (i.e., pumps with at least one case).
@@ -7,20 +7,22 @@
 #' @param interval Numeric. Interval between mileposts: 50 meters for "distance";  60 seconds for "time".
 #' @param walking.speed Numeric. Walking speed in km/hr.
 #' @param type Character. "arrows" or "points".
-#' @param multi.core Logical or Numeric. \code{TRUE} uses \code{parallel::detectCores()}. \code{FALSE} uses one, single core. You can also specify the number logical cores. On Windows, only \code{multi.core = FALSE} is available.
+#' @param multi.core Logical or Numeric. \code{TRUE} uses \code{parallel::detectCores()}. \code{FALSE} uses one, single core. You can also specify the number logical cores. See \code{vignette("Parallelization")} for details.
+#' @param dev.mode Logical. Development mode uses parallel::parLapply().
 #' @return R base graphics arrows or points.
 #' @export
 
 addMilePosts <- function(pump.subset = NULL, pump.select = NULL,
   vestry = FALSE, unit = "distance", interval = NULL, walking.speed = 5,
-  type = "arrows", multi.core = FALSE) {
+  type = "arrows", multi.core = FALSE, dev.mode = FALSE) {
 
   if (type %in% c("arrows", "points") == FALSE) {
     stop('type must either be "arrows" or "points"')
   }
 
   cores <- multiCore(multi.core)
-  x <- neighborhoodWalking(pump.select, vestry, multi.core = cores)
+  x <- neighborhoodWalking(pump.select, vestry, multi.core = cores,
+    dev.mode = dev.mode)
   dat <- neighborhoodData(vestry = x$vestry, case.set = "observed")
   edges <- dat$edges
   nodes <- dat$nodes
@@ -40,9 +42,9 @@ addMilePosts <- function(pump.subset = NULL, pump.select = NULL,
   }
 
   # vector of nodes for the 321 observed anchor cases
-  n.path.edges <- parallel::mclapply(x$paths, function(neighborhood) {
-    lapply(neighborhood, auditEdge, edges, output = "id2")
-  }, mc.cores = x$cores)
+    n.path.edges <- lapply(x$paths, function(neighborhood) {
+      lapply(neighborhood, auditEdge, edges, output = "id2")
+    })
 
   if (!is.null(pump.subset)) {
     if (all(pump.subset > 0)) {

@@ -1,7 +1,6 @@
 #' Set or compute the number of cores for parallelized functions.
 #'
-#' Uses parallel::mclapply().
-#' @param x Logical or Numeric. \code{TRUE} uses \code{parallel::detectCores()}. \code{FALSE} uses one, single core. You can also specify the number of logical cores to use.
+#' @param x Logical or Numeric. \code{TRUE} returns the number of logical cores. \code{FALSE} uses one, single core. You can also specify the number of cores.
 #' @noRd
 
 multiCore <- function(x = TRUE) {

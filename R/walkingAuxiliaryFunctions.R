@@ -1,8 +1,8 @@
-#' Common auxillary functions for walking path functions.
+#' Common auxiliary functions for walking path functions.
 #' walking(), walkingPath(), addMilePosts(), milePosts(), addNeighborhood().
 #' @noRd
 
-walkingAuxillaryFunctions <- function() NULL
+walkingAuxiliaryFunctions <- function() NULL
 
 auditEdge <- function(p, edges, output = "logical") {
   if (output == "logical") {
@@ -39,8 +39,22 @@ checkSegment <- function(s, dat, edges, p.node, sub.edge = FALSE) {
 }
 
 wholeSegments <- function(segs, dat, edges, p.name, p.node, x) {
-  distances <- parallel::mclapply(segs, checkSegment, dat, edges, p.node,
-    mc.cores = x$cores)
+  if (x$dev.mode) {
+    cl <- parallel::makeCluster(x$cores)
+
+    parallel::clusterExport(cl = cl, envir = environment(),
+      varlist = c("dat", "edges", "p.node"))
+
+    distances <- parallel::parLapply(cl, segs, function(s) {
+      checkSegment(s, dat, edges, p.node)
+    })
+
+    parallel::stopCluster(cl)
+  } else {
+    distances <- parallel::mclapply(segs, checkSegment, dat, edges, p.node,
+      mc.cores = x$cores)
+  }
+
   audit <- lapply(distances, function(d) {
     unique(vapply(d, which.min, integer(1L)))
   })
@@ -341,28 +355,28 @@ areaPointsData <- function(sim.proj.segs, wholes, snow.colors, sim.proj,
     sim.proj.wholes[sel, "color"] <- snow.colors[paste0("p", nm)]
   }
 
-  sim.proj.splits <- sim.proj[sim.proj$case %in% unlist(split.cases), ]
-  sim.proj.splits$pump <- NA
-  sim.proj.splits$color <- NA
+  if (is.null(split.cases) == FALSE) {
+    sim.proj.splits <- sim.proj[sim.proj$case %in% unlist(split.cases), ]
+    sim.proj.splits$pump <- NA
+    sim.proj.splits$color <- NA
 
-  for (nm in names(split.cases)) {
-    sel <- sim.proj.splits$case %in% split.cases[[nm]]
-    sim.proj.splits[sel, "pump"] <- as.numeric(nm)
-    sim.proj.splits[sel, "color"] <- snow.colors[paste0("p", nm)]
-  }
+    for (nm in names(split.cases)) {
+      sel <- sim.proj.splits$case %in% split.cases[[nm]]
+      sim.proj.splits[sel, "pump"] <- as.numeric(nm)
+      sim.proj.splits[sel, "color"] <- snow.colors[paste0("p", nm)]
+    }
+  } else sim.proj.splits <- NULL
 
   list(sim.proj.wholes = sim.proj.wholes,
        sim.proj.splits = sim.proj.splits)
 }
 
-
-# for neighborhoodWalking():expectedCount() and pearsonResiduals.walking()
-observedExpected <- function(x) {
+# for neighborhoodWalking(), expectedCount() and pearsonResiduals.walking()
+observedExpected <- function(x, n.data) {
   if (class(x) != "walking") {
     stop('"x"\'s class needs to be "walking".')
   }
 
-  n.data <- neighborhoodPathData(x)
   dat <- n.data$dat
   edges <- n.data$edges
   neighborhood.path.edges <- n.data$neighborhood.path.edges
@@ -402,8 +416,22 @@ observedExpected <- function(x) {
   obs.partial.segments <- setdiff(partial.segs, unlist(obs.partial.whole))
 
   if (length(obs.partial.segments) > 0) {
-    obs.partial.split.data <- parallel::mclapply(obs.partial.segments,
-      splitSegments, edges, p.name, p.node, x, mc.cores = x$cores)
+    if (x$dev.mode) {
+      cl <- parallel::makeCluster(x$cores)
+
+      parallel::clusterExport(cl = cl, envir = environment(),
+        varlist = c("edges", "p.name", "p.node", "x", "checkSegment",
+        "splitSegments"))
+
+      obs.partial.split.data <- parallel::parLapply(cl, obs.partial.segments,
+        function(seg) splitSegments(seg, edges, p.name, p.node, x))
+
+      parallel::stopCluster(cl)
+    } else {
+      obs.partial.split.data <- parallel::mclapply(obs.partial.segments,
+        splitSegments, edges, p.name, p.node, x, mc.cores = x$cores)
+    }
+
     cutpoints <- cutpointValues(obs.partial.split.data)
     obs.partial.split.pump <- lapply(obs.partial.split.data, function(x)
       unique(x$pump))
@@ -445,8 +473,21 @@ observedExpected <- function(x) {
   unobs.split.segments <- setdiff(unobs.segments, unlist(unobs.whole))
 
   if (length(unobs.split.segments) > 0) {
-    unobs.split.data <- parallel::mclapply(unobs.split.segments,
-      splitSegments, edges, p.name, p.node, x, mc.cores = x$cores)
+    if (x$dev.mode) {
+      cl <- parallel::makeCluster(x$cores)
+
+      parallel::clusterExport(cl = cl, envir = environment(),
+        varlist = c("edges", "p.name", "p.node", "x", "splitSegments"))
+
+      unobs.split.data <- parallel::parLapply(cl, unobs.split.segments,
+        function(seg) splitSegments(seg, edges, p.name, p.node, x))
+
+      parallel::stopCluster(cl)
+    } else {
+      unobs.split.data <- parallel::mclapply(unobs.split.segments,
+        splitSegments, edges, p.name, p.node, x, mc.cores = x$cores)
+    }
+
     cutpoints <- cutpointValues(unobs.split.data)
     unobs.split.pump <- lapply(unobs.split.data, function(x) unique(x$pump))
     unobs.split <- splitData(unobs.split.segments, cutpoints, edges)
@@ -480,7 +521,7 @@ observedExpected <- function(x) {
 
   names(expected.wholes) <- pumpID
 
-  # obs.split.test <- length(obs.partial.segments)
+  obs.split.test <- length(obs.partial.segments)
   unobs.split.test <- length(unobs.split.segments)
 
   if (obs.split.test > 0 & unobs.split.test == 0) {
@@ -495,6 +536,10 @@ observedExpected <- function(x) {
     exp.splits <- c(obs.partial.split, unobs.split)
     exp.splits.pump <- c(obs.partial.split.pump, unobs.split.pump)
     exp.splits.segs <- c(obs.partial.segments, unobs.split.segments)
+  } else {
+    exp.splits <- NULL
+    exp.splits.pump <- NULL
+    exp.splits.segs <- NULL
   }
 
   list(observed.wholes = observed.wholes,
@@ -531,13 +576,100 @@ neighborhoodPathData <- function(x) {
     p.name <- p.data$pump
   }
 
-  neighborhood.path.edges <- parallel::mclapply(x$paths, function(neigh) {
-    lapply(neigh, auditEdge, edges)
-  }, mc.cores = x$cores)
+  if (x$dev.mode) {
+    neighborhood.path.edges <- lapply(x$paths, function(neigh) {
+      lapply(neigh, auditEdge, edges)
+    })
+  } else {
+    neighborhood.path.edges <- parallel::mclapply(x$paths, function(neigh) {
+      lapply(neigh, auditEdge, edges)
+    }, mc.cores = x$cores)
+  }
 
   list(dat = dat,
        edges = edges,
        p.node = p.node,
        p.name = p.name,
        neighborhood.path.edges = neighborhood.path.edges)
+}
+
+expectedCount <- function(x) {
+  OE <- observedExpected(x, neighborhoodPathData(x))
+  wholes <- OE$expected.wholes
+  splits <- OE$exp.splits
+  splits.pump <- OE$exp.splits.pump
+  splits.segs <- OE$exp.splits.segs
+
+  sim.proj <- cholera::sim.ortho.proj
+  sim.proj.segs <- unique(sim.proj$road.segment)
+
+  snow.colors <- snowColors(x$vestry)
+
+  if (OE$obs.split.test > 0 | OE$unobs.split.test > 0) {
+    split.outcome <- splitOutcomes(x, splits.segs, sim.proj, splits,
+      splits.pump)
+    split.outcome <- do.call(rbind, split.outcome)
+    split.outcome <- split.outcome[!is.na(split.outcome$pump), ]
+    split.cases <- lapply(sort(unique(split.outcome$pump)), function(p) {
+      split.outcome[split.outcome$pump == p, "case"]
+    })
+    names(split.cases) <- sort(unique(split.outcome$pump))
+  } else split.cases <- NULL
+
+  ap <- areaPointsData(sim.proj.segs, wholes, snow.colors, sim.proj,
+    split.cases)
+
+  split.count <- table(ap$sim.proj.splits$pump)
+  whole.count <- table(ap$sim.proj.wholes$pump)
+
+  split.count <- data.frame(pump = as.numeric(names(split.count)),
+                            count = unclass(split.count),
+                            stringsAsFactors = FALSE)
+  whole.count <- data.frame(pump = as.numeric(names(whole.count)),
+                            count = unclass(whole.count),
+                            stringsAsFactors = FALSE)
+
+  count.data <- merge(whole.count, split.count, by = "pump", all.x = TRUE)
+  count.data[is.na(count.data)] <- 0
+  stats::setNames(count.data$count.x + count.data$count.y,
+    paste0("p", count.data$pump))
+}
+
+splitOutcomes <- function(x, splits.segs, sim.proj, splits, splits.pump) {
+  split_outcomes <- function(i, splits.segs, sim.proj, splits, splits.pump) {
+    id <- sim.proj$road.segment == splits.segs[i] &
+          is.na(sim.proj$road.segment) == FALSE
+    sim.data <- sim.proj[id, ]
+    split.data <- splits[[i]]
+    sel <- vapply(seq_len(nrow(sim.data)), function(j) {
+      obs <- sim.data[j, c("x.proj", "y.proj")]
+      distance <- vapply(seq_len(nrow(split.data)), function(k) {
+        stats::dist(matrix(c(obs, split.data[k, ]), 2, 2, byrow = TRUE))
+      }, numeric(1L))
+      test1 <- signif(sum(distance[1:2])) ==
+        signif(c(stats::dist(split.data[c(1, 2), ])))
+      test2 <- signif(sum(distance[3:4])) ==
+        signif(c(stats::dist(split.data[c(3, 4), ])))
+      ifelse(any(c(test1, test2)), which(c(test1, test2)), NA)
+    }, integer(1L))
+
+    data.frame(case = sim.data$case, pump = splits.pump[[i]][sel])
+  }
+
+  if (x$dev.mode) {
+    cl <- parallel::makeCluster(x$cores)
+    parallel::clusterExport(cl = cl, envir = environment(),
+      varlist = c("splits.segs", "sim.proj", "splits", "splits.pump",
+      "split_outcomes"))
+    output <- parallel::parLapply(cl, seq_along(splits.segs), function(i) {
+      split_outcomes(i, splits.segs, sim.proj, splits, splits.pump)
+    })
+    parallel::stopCluster(cl)
+  } else {
+    output <- parallel::mclapply(seq_along(splits.segs), function(i) {
+      split_outcomes(i, splits.segs, sim.proj, splits, splits.pump)
+    }, mc.cores = x$cores)
+  }
+
+  output
 }

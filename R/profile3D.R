@@ -4,11 +4,10 @@
 #' @param pump.subset Numeric. Vector of numeric pump IDs to subset from the neighborhoods defined by \code{pump.select}. Negative selection possible. \code{NULL} selects all pumps in \code{pump.select}.
 #' @param vestry Logical. \code{TRUE} uses the 14 pumps from the Vestry Report. \code{FALSE} uses the 13 in the original map.
 #' @param drop.neg.subset Logical. Drop negative subset selection
-#' @param multi.core Logical or Numeric. \code{TRUE} uses \code{parallel::detectCores()}. \code{FALSE} uses one, single core. You can also specify the number logical cores. On Windows, only \code{multi.core = FALSE} is available.
+#' @param multi.core Logical or Numeric. \code{TRUE} uses \code{parallel::detectCores()}. \code{FALSE} uses one, single core. You can also specify the number logical cores. See \code{vignette("Parallelization")} for details.
 #' @export
 #' @examples
 #' \donttest{
-#'
 #' profile3D(pump.select = 6:7)
 #' profile3D(pump.subset = -7)
 #' profile3D(pump.subset = -7, drop.neg.subset = TRUE)
@@ -42,7 +41,7 @@ profile3D <- function(pump.select = NULL, pump.subset = NULL, vestry = FALSE,
     }
   }
 
-  nearest.pump <- nearestPump(pump.id, multi.core = cores)
+  nearest.pump <- nearestPump(pump.id, multi.core = cores)$distance
 
   x <- cholera::fatalities.address$x
   y <- cholera::fatalities.address$y

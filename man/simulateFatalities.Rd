@@ -5,14 +5,16 @@
 \title{Generate simulated fatalities.}
 \usage{
 simulateFatalities(compute = FALSE, multi.core = FALSE,
-  simulated.obs = 20000L)
+  simulated.obs = 20000L, dev.mode = FALSE)
 }
 \arguments{
 \item{compute}{Logical. \code{TRUE} computes data. \code{FALSE} uses pre-computed data. For replication of data used in the package,}
 
-\item{multi.core}{Logical or Numeric. \code{TRUE} uses \code{parallel::detectCores()}. \code{FALSE} uses one, single core. With Numeric, you specify the number logical cores (rounds with \code{as.integer()}). On Windows, only \code{multi.core = FALSE} is available.}
+\item{multi.core}{Logical or Numeric. \code{TRUE} uses \code{parallel::detectCores()}. \code{FALSE} uses one, single core. With Numeric, you specify the number logical cores (rounds with \code{as.integer()}). See \code{vignette("Parallelization")} for details.}
 
 \item{simulated.obs}{Numeric. Number of sample cases.}
+
+\item{dev.mode}{Logical. Development mode uses parallel::parLapply().}
 }
 \value{
 An R list with two elements: \code{\link{sim.ortho.proj}} and \code{\link{regular.cases}}
@@ -21,5 +23,5 @@ An R list with two elements: \code{\link{sim.ortho.proj}} and \code{\link{regula
 Places regularly spaced "simulated" or "expected" cases across the face of the map. The function finds the "addresses" of cases via orthogonal projection or simple proximity. These data are used to generate "expected" pump neighborhoods. The function relies on \code{sp::spsample()} and \code{sp::Polygon()}.
 }
 \note{
-This function is computationally intensive. With "simulated.obs" set to 20,000 simulated cases (actually generating 19,993 cases), the function takes about 83 minutes to run on a single core of a 2.3 GHz Intel Core i7 with R version 3.6.0 and 19 minutes to run on eight logical (four physical) cores. This function documents the code that generates \code{\link{sim.ortho.proj}} and \code{\link{regular.cases}}. In real world terms, the distance between of these simulated cases is approximately 6 meters.
+This function is computationally intensive. With "simulated.obs" set to 20,000 simulated cases (actually generating 19,993 cases). This function documents the code that generates \code{\link{sim.ortho.proj}} and \code{\link{regular.cases}}. In real world terms, the distance between of these simulated cases is approximately 6 meters.
 }

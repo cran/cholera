@@ -5,7 +5,8 @@
 #' @param vestry Logical. \code{TRUE} uses the 14 pumps from the Vestry report. \code{FALSE} uses the 13 in the original map.
 #' @param weighted Logical. \code{TRUE} computes shortest path weighted by road length. \code{FALSE} computes shortest path in terms of the number of nodes.
 #' @param case.set Character. "observed", "expected" or "snow". "snow" captures John Snow's annotation of the Broad Street pump neighborhood printed in the Vestry report version of the map.
-#' @param multi.core Logical or Numeric. \code{TRUE} uses \code{parallel::detectCores()}. \code{FALSE} uses one, single core. You can also specify the number logical cores. On Windows, only \code{multi.core = FALSE} is available.
+#' @param multi.core Logical or Numeric. \code{TRUE} uses \code{parallel::detectCores()}. \code{FALSE} uses one, single core. You can also specify the number logical cores. See \code{vignette("Parallelization")} for details.
+#' @param dev.mode Logical. Development mode uses parallel::parLapply().
 #' @return An R list with 7 objects:
 #' \itemize{
 #'   \item{\code{paths}: list of paths to nearest or selected pump(s).}
@@ -16,17 +17,16 @@
 #'   \item{\code{cores}: number of cores to use for parallel implementation.}
 #'   \item{\code{metric}: incremental metric used to find cut point on split road segments.}
 #' }
-#' @note This function is computationally intensive. On a single core of a 2.3 GHz Intel i7, plotting observed paths to PDF takes about 4.4 seconds while doing so for expected paths takes about 27 seconds. Using the parallel implementation on 4 physical (8 logical) cores, these times fall to about 3.9 and 12 seconds. Note that parallelization is currently only available on Linux and Mac, and that although some precautions are taken in R.app on macOS, the developers of the 'parallel' package, which \code{neighborhoodWalking()} uses, strongly discourage against using parallelization within a GUI or embedded environment. See \code{vignette("parallel")} for details.
 #' @export
 #' @examples
 #' \donttest{
-#'
 #' neighborhoodWalking()
 #' neighborhoodWalking(pump.select = -6)
 #' }
 
 neighborhoodWalking <- function(pump.select = NULL, vestry = FALSE,
-  weighted = TRUE, case.set = "observed", multi.core = FALSE) {
+  weighted = TRUE, case.set = "observed", multi.core = FALSE,
+  dev.mode = FALSE) {
 
   if (is.null(pump.select) == FALSE) {
     if (is.numeric(pump.select) == FALSE) stop("pump.select must be numeric.")
@@ -55,30 +55,18 @@ neighborhoodWalking <- function(pump.select = NULL, vestry = FALSE,
     stop('case.set must be "observed", "expected" or "snow".')
   }
 
-  cores <- multiCore(multi.core)
   snow.colors <- snowColors(vestry = vestry)
+  cores <- multiCore(multi.core)
 
-  arguments <- list(pump.select = pump.select,
-                    vestry = vestry,
-                    weighted = weighted,
-                    case.set = case.set,
-                    multi.core = cores)
+  nearest.data <- nearestPump(pump.select = pump.select,
+                              vestry = vestry,
+                              weighted = weighted,
+                              case.set = "observed",
+                              multi.core = cores,
+                              dev.mode = dev.mode)
 
-  if (case.set == "expected") arguments$case.set <- "observed"
-
-  nearest.path <- do.call("nearestPump", c(arguments, output = "path"))
-
-  if (vestry) {
-    nearest.pump <- vapply(nearest.path, function(paths) {
-      sel <- cholera::ortho.proj.pump.vestry$node %in% paths[length(paths)]
-      cholera::ortho.proj.pump.vestry[sel, "pump.id"]
-    }, numeric(1L))
-  } else {
-    nearest.pump <- vapply(nearest.path, function(paths) {
-      sel <- cholera::ortho.proj.pump$node %in% paths[length(paths)]
-      cholera::ortho.proj.pump[sel, "pump.id"]
-    }, numeric(1L))
-  }
+  nearest.dist <- nearest.data$distance
+  nearest.path <- nearest.data$path
 
   if (case.set == "snow") {
     snow.anchors <- cholera::snow.neighborhood[cholera::snow.neighborhood %in%
@@ -87,10 +75,10 @@ neighborhoodWalking <- function(pump.select = NULL, vestry = FALSE,
                                pump = nearest.pump)
   } else {
     nearest.pump <- data.frame(case = cholera::fatalities.address$anchor,
-                               pump = nearest.pump)
+                               pump = nearest.dist$pump)
   }
 
-  pumpID <- sort(unique(nearest.pump$pump))
+  pumpID <- sort(unique(nearest.dist$pump))
 
   neighborhood.cases <- lapply(pumpID, function(p) {
     nearest.pump[nearest.pump$pump == p, "case"]
@@ -114,7 +102,8 @@ neighborhoodWalking <- function(pump.select = NULL, vestry = FALSE,
               snow.colors = snow.colors,
               pumpID = pumpID,
               cores = cores,
-              metric = 1 / unitMeter(1))
+              metric = 1 / unitMeter(1),
+              dev.mode = dev.mode)
 
   class(out) <- "walking"
   out
@@ -127,11 +116,10 @@ neighborhoodWalking <- function(pump.select = NULL, vestry = FALSE,
 #' @param msg Logical. Toggle in-progress messages.
 #' @param ... Additional plotting parameters.
 #' @return A base R plot.
-#' @note When plotting area graphs with simulated data (i.e., \code{case.set = "expected"}), there may be discrepancies between observed cases and expected neighborhoods, particularly between neighborhoods. The "area.points" plot takes about 28 seconds (11 using the parallel implementation). The "area.polygons" plot takes 49 seconds (17 using the parallel implementation).
+#' @note When plotting area graphs with simulated data (i.e., \code{case.set = "expected"}), there may be discrepancies between observed cases and expected neighborhoods, particularly between neighborhoods.
 #' @export
 #' @examples
 #' \donttest{
-#'
 #' plot(neighborhoodWalking())
 #' plot(neighborhoodWalking(case.set = "expected"))
 #' plot(neighborhoodWalking(case.set = "expected"), type = "area.points")
@@ -201,7 +189,7 @@ plot.walking <- function(x, type = "road", msg = FALSE, ...) {
     }))
 
   } else if (x$case.set == "expected") {
-    OE <- observedExpected(x)
+    OE <- observedExpected(x, n.data)
     wholes <- OE$expected.wholes
     splits <- OE$exp.splits
     splits.pump <- OE$exp.splits.pump
@@ -211,30 +199,8 @@ plot.walking <- function(x, type = "road", msg = FALSE, ...) {
     sim.proj.segs <- unique(sim.proj$road.segment)
 
     if (OE$obs.split.test > 0 | OE$unobs.split.test > 0) {
-      split.outcome <- parallel::mclapply(seq_along(splits.segs), function(i) {
-        id <- sim.proj$road.segment == splits.segs[i] &
-              is.na(sim.proj$road.segment) == FALSE
-
-        sim.data <- sim.proj[id, ]
-        split.data <- splits[[i]]
-
-        sel <- vapply(seq_len(nrow(sim.data)), function(j) {
-          obs <- sim.data[j, c("x.proj", "y.proj")]
-          distance <- vapply(seq_len(nrow(split.data)), function(k) {
-            stats::dist(matrix(c(obs, split.data[k, ]), 2, 2, byrow = TRUE))
-          }, numeric(1L))
-
-          test1 <- signif(sum(distance[1:2])) ==
-            signif(c(stats::dist(split.data[c(1, 2), ])))
-          test2 <- signif(sum(distance[3:4])) ==
-            signif(c(stats::dist(split.data[c(3, 4), ])))
-
-          ifelse(any(c(test1, test2)), which(c(test1, test2)), NA)
-        }, integer(1L))
-
-        data.frame(case = sim.data$case, pump = splits.pump[[i]][sel])
-      }, mc.cores = x$cores)
-
+      split.outcome <- splitOutcomes(x, splits.segs, sim.proj, splits,
+        splits.pump)
       split.outcome <- do.call(rbind, split.outcome)
       split.outcome <- split.outcome[!is.na(split.outcome$pump), ]
       split.cases <- lapply(sort(unique(split.outcome$pump)), function(p) {
@@ -279,10 +245,22 @@ plot.walking <- function(x, type = "road", msg = FALSE, ...) {
 
       names(neighborhood.cases) <- pearl.neighborhood
 
-      periphery.cases <- parallel::mclapply(neighborhood.cases, peripheryCases,
-        mc.cores = x$cores)
-      pearl.string <- parallel::mclapply(periphery.cases, travelingSalesman,
-        mc.cores = x$cores)
+      if ((.Platform$OS.type == "windows" & x$cores > 1) | x$dev.mode) {
+        cl <- parallel::makeCluster(x$cores)
+        parallel::clusterExport(cl = cl, envir = environment(),
+          varlist = c("peripheryCases", "pearlStringRadius",
+          "travelingSalesman"))
+        periphery.cases <- parallel::parLapply(cl, neighborhood.cases,
+          peripheryCases)
+        pearl.string <- parallel::parLapply(cl, periphery.cases,
+          travelingSalesman)
+        parallel::stopCluster(cl)
+      } else {
+        periphery.cases <- parallel::mclapply(neighborhood.cases,
+          peripheryCases, mc.cores = x$core)
+        pearl.string <- parallel::mclapply(periphery.cases, travelingSalesman,
+          mc.cores = x$cores)
+      }
 
       invisible(lapply(names(pearl.string), function(nm) {
         sel <- paste0("p", nm)
@@ -336,7 +314,6 @@ plot.walking <- function(x, type = "road", msg = FALSE, ...) {
 #' @export
 #' @examples
 #' \donttest{
-#'
 #' neighborhoodWalking()
 #' print(neighborhoodWalking())
 #' }
@@ -354,7 +331,6 @@ print.walking <- function(x, ...) {
 #' @export
 #' @examples
 #' \donttest{
-#'
 #' summary(neighborhoodWalking())
 #' }
 
@@ -363,68 +339,8 @@ summary.walking <- function(object, ...) {
     out <- vapply(object$paths, length, numeric(1L))
     out <- stats::setNames(out, paste0("p", object$pumpID))
   } else if (object$case.set == "expected") {
+
     out <- expectedCount(object)
   }
   out
-}
-
-expectedCount <- function(x) {
-  OE <- observedExpected(x)
-  splits <- OE$exp.splits
-  splits.pump <- OE$exp.splits.pump
-  splits.segs <- OE$exp.splits.segs
-  wholes <- OE$expected.wholes
-
-  sim.proj <- cholera::sim.ortho.proj
-  sim.proj.segs <- unique(sim.proj$road.segment)
-
-  snow.colors <- snowColors(x$vestry)
-
-  if (OE$obs.split.test > 0 | OE$unobs.split.test > 0) {
-    split.outcome <- parallel::mclapply(seq_along(splits.segs), function(i) {
-      id <- sim.proj$road.segment == splits.segs[i] &
-            is.na(sim.proj$road.segment) == FALSE
-      sim.data <- sim.proj[id, ]
-      split.data <- splits[[i]]
-
-      sel <- vapply(seq_len(nrow(sim.data)), function(j) {
-        obs <- sim.data[j, c("x.proj", "y.proj")]
-        distance <- vapply(seq_len(nrow(split.data)), function(k) {
-          stats::dist(matrix(c(obs, split.data[k, ]), 2, 2, byrow = TRUE))
-        }, numeric(1L))
-        test1 <- signif(sum(distance[1:2])) ==
-          signif(c(stats::dist(split.data[c(1, 2), ])))
-        test2 <- signif(sum(distance[3:4])) ==
-          signif(c(stats::dist(split.data[c(3, 4), ])))
-        ifelse(any(c(test1, test2)), which(c(test1, test2)), NA)
-      }, integer(1L))
-
-      data.frame(case = sim.data$case, pump = splits.pump[[i]][sel])
-    }, mc.cores = x$cores)
-
-    split.outcome <- do.call(rbind, split.outcome)
-    split.outcome <- split.outcome[!is.na(split.outcome$pump), ]
-    split.cases <- lapply(sort(unique(split.outcome$pump)), function(p) {
-      split.outcome[split.outcome$pump == p, "case"]
-    })
-    names(split.cases) <- sort(unique(split.outcome$pump))
-  } else stop("error!")
-
-  ap <- areaPointsData(sim.proj.segs, wholes, snow.colors, sim.proj,
-    split.cases)
-
-  split.count <- table(ap$sim.proj.splits$pump)
-  whole.count <- table(ap$sim.proj.wholes$pump)
-
-  split.count <- data.frame(pump = as.numeric(names(split.count)),
-                            count = unclass(split.count),
-                            stringsAsFactors = FALSE)
-  whole.count <- data.frame(pump = as.numeric(names(whole.count)),
-                            count = unclass(whole.count),
-                            stringsAsFactors = FALSE)
-
-  count.data <- merge(whole.count, split.count, by = "pump", all.x = TRUE)
-  count.data[is.na(count.data)] <- 0
-  stats::setNames(count.data$count.x + count.data$count.y,
-    paste0("p", count.data$pump))
 }

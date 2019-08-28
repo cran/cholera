@@ -8,7 +8,6 @@
 #' @export
 #' @examples
 #' \donttest{
-#'
 #' plot(neighborhoodVoronoi())
 #' addSnow()
 #' }
@@ -31,9 +30,9 @@ addSnow <- function(type = "area", color = "dodgerblue", alpha.level = 0.25,
         col = color)
     }))
   } else if (type == "area" | type == "perimeter") {
-    snow.area <- cholera::regular.cases[snow$sim.case, ]
+    snow.area <- row.names(cholera::regular.cases[snow$sim.case, ])
     radius <- c(stats::dist(cholera::regular.cases[c(1, 3), ]))
-    periphery.cases <- peripheryCases(row.names(snow.area), pearlStringRadius())
+    periphery.cases <- peripheryCases(snow.area)
     pearl.string <- travelingSalesman(periphery.cases)
 
     if (type == "perimeter") {

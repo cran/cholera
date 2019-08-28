@@ -1,3 +1,28 @@
+cholera 0.7.0
+==================
+
+# New Feature #
+
+- support for parallel computation on Windows.
+
+# Fixes #
+
+- fix computation of core in neighborhoodWalking().
+- fix nearestPump(metric = "euclidean", case.set = ("observed", "expected")).
+
+# Function Changes #
+
+- rename and amend simWalkingDistance() to simulateWalkingDistance().
+- deprecate case.set argument in addNeighborhoodCases().
+- add nearestPump(metric = "walking", case.set = "expected").
+- amend expectedCount() for summary.walking().
+- add unstackAuxiliaryFunctions.R
+
+# Vignettes #
+
+- add Parallelizaiton vignette
+
+
 cholera 0.6.5
 ==================
 

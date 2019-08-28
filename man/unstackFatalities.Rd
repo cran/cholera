@@ -5,14 +5,16 @@
 \title{Unstack "stacks" in Snow's cholera map.}
 \usage{
 unstackFatalities(multi.core = FALSE, compute = FALSE,
-  fatalities = fixFatalities())
+  fatalities = fixFatalities(), dev.mode = FALSE)
 }
 \arguments{
-\item{multi.core}{Logical or Numeric. \code{TRUE} uses \code{parallel::detectCores()}. \code{FALSE} uses one, single core. With Numeric, you specify the number logical cores. On Windows, only \code{multi.core = FALSE} is available.}
+\item{multi.core}{Logical or Numeric. \code{TRUE} uses \code{parallel::detectCores()}. \code{FALSE} uses one, single core. With Numeric, you specify the number logical cores. See \code{vignette("Parallelization")} for details.}
 
 \item{compute}{Logical. \code{TRUE} computes data. \code{FALSE} uses pre-computed data.}
 
 \item{fatalities}{Corrected fatalities data from \code{cholera::fixFatalities()}. For original data, use \code{HistData::Snow.deaths}.}
+
+\item{dev.mode}{Logical. Development mode uses parallel::parLapply().}
 }
 \value{
 An R list that includes \code{anchor.case}, \code{fatalities.address}, \code{fatalities.unstacked} and \code{ortho.proj}.
@@ -20,10 +22,9 @@ An R list that includes \code{anchor.case}, \code{fatalities.address}, \code{fat
 \description{
 Unstacks fatalities data by 1) assigning the coordinates of the base case to all cases in a stack and 2) setting the base case as an "address" and making the number of fatalities an attribute.
 }
-\section{Notes}{
- This function is computationally intensive. On a 2.3 GHz Intel Core i7 with R version 3.6.0, it takes approximately 156 seconds to run on one core and approximately 37 seconds to run on eight logical (four physical) cores. These functions document the code that generates \code{\link{anchor.case}}, \code{\link{fatalities.address}}, \code{\link{fatalities.unstacked}} and \code{\link{ortho.proj}}.
+\note{
+This function is computationally intensive. This function documents the code that generates \code{\link{anchor.case}},  \code{\link{fatalities.address}}, \code{\link{fatalities.unstacked}} and \code{\link{ortho.proj}}.
 }
-
 \seealso{
 \code{vignette("unstacking.fatalities")}
 }

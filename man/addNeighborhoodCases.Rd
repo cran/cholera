@@ -8,7 +8,7 @@ addNeighborhoodCases(pump.subset = NULL, pump.select = NULL,
   metric = "walking", type = "stack.base", token = "point",
   text.size = 0.5, pch = 16, point.size = 0.5, vestry = FALSE,
   weighted = TRUE, color = NULL, case.location = "nominal",
-  observed = TRUE, alpha.level = 0.5, multi.core = FALSE)
+  alpha.level = 0.5, multi.core = FALSE)
 }
 \arguments{
 \item{pump.subset}{Numeric. Vector of numeric pump IDs to subset from the neighborhoods defined by \code{pump.select}. Negative selection possible. \code{NULL} uses all pumps in \code{pump.select}.}
@@ -35,18 +35,15 @@ addNeighborhoodCases(pump.subset = NULL, pump.select = NULL,
 
 \item{case.location}{Character. For \code{metric = "euclidean"}: "address" uses \code{ortho.proj}; "nominal" uses \code{fatalities}.}
 
-\item{observed}{Logical. TRUE is observed; FALSE is expected or simulated.}
-
 \item{alpha.level}{Numeric. Alpha level transparency for area plot: a value in [0, 1].}
 
-\item{multi.core}{Logical or Numeric. \code{TRUE} uses \code{parallel::detectCores()}. \code{FALSE} uses one, single core. You can also specify the number logical cores. On Windows, only \code{multi.core = FALSE} is available.}
+\item{multi.core}{Logical or Numeric. \code{TRUE} uses \code{parallel::detectCores()}. \code{FALSE} uses one, single core. You can also specify the number logical cores. See \code{vignette("Parallelization")} for details.}
 }
 \description{
 Add cases to a plot as "address" or "fatalities" and as points or IDs.
 }
 \examples{
 \donttest{
-
 snowMap(add.cases = FALSE)
 addNeighborhoodCases(pump.subset = c(6, 10))
 

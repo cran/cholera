@@ -1,5 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
+[![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/cholera)](https://cran.r-project.org/package=cholera)
+[![GitHub\_Status\_Badge](https://img.shields.io/badge/GitHub-0.7.0-red.svg)](https://github.com/lindbrook/cholera/blob/master/NEWS)
 ## cholera: amend, augment and aid analysis of Snow’s cholera map
 
 #### package features
@@ -22,6 +24,8 @@
     location of the Broad Street pump.
   - Adds two aggregate time series fatalities data sets, taken from the
     Vestry report.
+  - With ‘cholera’ version 0.7.0, support for parallel computation now
+    includes Windows in addition to Linux and macOS.
 
 #### getting started
 
@@ -31,17 +35,13 @@ To install ‘cholera’ from CRAN:
 install.packages("cholera")
 ```
 
-To install the current development version from GitHub:
+To install the current development version from
+GitHub:
 
 ``` r
-# Note that you may need to install the 'devtools' package:
-# install.packages("devtools")
+# You may need to first install the 'devtools' via install.packages("devtools").
 
-# For 'devtools' (< 2.0.0)
 devtools::install_github("lindbrook/cholera", build_vignettes = TRUE)
-
-# For 'devtools' (>= 2.0.0)
-devtools::install_github("lindbrook/cholera", build_opts = c("--no-resave-data", "--no-manual"))
 ```
 
 ## background
@@ -162,8 +162,8 @@ To explore “observed” walking neighborhoods, use `neighborhoodWalking()`
 with the `pump.select` argument:
 
 ``` r
-plot(neighborhoodWalking(6:7))
-plot(neighborhoodWalking(-7))
+plot(neighborhoodWalking(pump.select = 6:7))
+plot(neighborhoodWalking(pump.select = -7))
 ```
 
 <img src="man/figures/README-unnamed-chunk-7-1.png" width="50%" /><img src="man/figures/README-unnamed-chunk-7-2.png" width="50%" />
@@ -173,8 +173,8 @@ To explore “expected” walking neighborhoods, add the case.set =
 argument:
 
 ``` r
-plot(neighborhoodWalking(6:7, case.set = "expected"), type = "area.polygons")
-plot(neighborhoodWalking(-7, case.set = "expected"), type = "area.polygons")
+plot(neighborhoodWalking(pump.select =  6:7, case.set = "expected"), type = "area.polygons")
+plot(neighborhoodWalking(pump.select = -7, case.set = "expected"), type = "area.polygons")
 ```
 
 <img src="man/figures/README-unnamed-chunk-8-1.png" width="50%" /><img src="man/figures/README-unnamed-chunk-8-2.png" width="50%" />
@@ -185,8 +185,8 @@ To explore “observed” Euclidean neighborhoods, use
 `neighborhoodEuclidean()` with the `pump.select` argument:
 
 ``` r
-plot(neighborhoodEuclidean(6:7))
-plot(neighborhoodEuclidean(-7))
+plot(neighborhoodEuclidean(pump.select = 6:7))
+plot(neighborhoodEuclidean(pump.select = -7))
 ```
 
 <img src="man/figures/README-unnamed-chunk-9-1.png" width="50%" /><img src="man/figures/README-unnamed-chunk-9-2.png" width="50%" />
@@ -195,51 +195,21 @@ To explore “expected” Euclidean neighborhoods, use
 `neighborhoodVoronoi()` with the `pump.select` argument:
 
 ``` r
-plot(neighborhoodVoronoi(6:7))
-plot(neighborhoodVoronoi(-7))
+plot(neighborhoodVoronoi(pump.select = 6:7))
+plot(neighborhoodVoronoi(pump.select = -7))
 ```
 
 <img src="man/figures/README-unnamed-chunk-10-1.png" width="50%" /><img src="man/figures/README-unnamed-chunk-10-2.png" width="50%" />
 
 #### note on computational performance
 
-`neighborhoodWalking()` and `neighborhoodEuclidean()` are
-computationally intensive. Using R version 3.6.0 on a single core of a
-2.3 GHz Intel i7, the former plots observed paths to PDF in about 4.4
-seconds and expected paths in 27 seconds. Using the function’s parallel
-implementation on 4 physical (8 logical) cores, the times fall to about
-3.9 and 12 seconds. The latter plots observed paths to PDF in about 3.6
-seconds and expected paths in 109 seconds. Using the function’s parallel
-implementation on 4 physical (8 logical) cores, the times fall to about
-1.4 and 28 seconds.
-
-Note that parallelization is currently only available on Linux and Mac.
-
-Also, note that although some precautions are taken in R.app on macOS,
-the developers of the ‘parallel’ package, which both functions use,
-strongly discourage against using parallelization within a GUI or
-embedded environment. See `vignette("parallel")` for details.
-
-#### warning message
-
-With R version 3.6.0, you may see the warning below when loading
-‘cholera’:
-
-    > library(cholera)
-    Registered S3 methods overwritten by 'ggplot2':
-      method         from
-      [.quosures     rlang
-      c.quosures     rlang
-      print.quosures rlang
-
-My understanding is that this is more annoying than problematic. It’s
-fixed in ‘ggplot2’ in version 3.2.0. If that version is not yet on CRAN,
-install the development version from GitHub:
-
-``` r
-# For 'devtools' (>= 2.0.0)
-devtools::install_github("tidyverse/ggplot2", build_opts = c("--no-resave-data", "--no-manual"))
-```
+Support for parallel computation for selected functions on Linux, Mac
+and Windows implemented using the ‘parallel’ package, which is part of
+the base R distribution: to enable parallelization, set `multi.core =
+TRUE` where available. Note that although some precautions are taken in
+R.app on macOS, the developers of the ‘parallel’ package strongly
+discourage against using parallelization within a GUI or embedded
+environment. See `vignette("Parallelization")` for details.
 
 #### vignettes
 

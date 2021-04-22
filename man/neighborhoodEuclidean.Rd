@@ -5,8 +5,8 @@
 \title{Compute Euclidean path pump neighborhoods.}
 \usage{
 neighborhoodEuclidean(pump.select = NULL, vestry = FALSE,
-  case.location = "nominal", case.set = "observed",
-  multi.core = FALSE, dev.mode = FALSE)
+  case.location = "nominal", case.set = "observed", multi.core = TRUE,
+  dev.mode = FALSE)
 }
 \arguments{
 \item{pump.select}{Numeric. Vector of numeric pump IDs to define pump neighborhoods (i.e., the "population"). Negative selection possible. \code{NULL} selects all pumps.}
@@ -28,7 +28,7 @@ An R vector.
 Plots star graph from pump to its cases.
 }
 \examples{
-\donttest{
+\dontrun{
 neighborhoodEuclidean()
 neighborhoodEuclidean(-6)
 neighborhoodEuclidean(pump.select = 6:7)

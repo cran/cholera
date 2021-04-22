@@ -21,16 +21,6 @@ addEuclideanPath <- function(origin, destination = NULL, type = "case-pump",
   distance.unit = "meter", time.unit = "second", walking.speed = 5,
   unit.posts = "distance", unit.interval = NULL, alpha.level = 1) {
 
-  if (is.numeric(origin) == FALSE) {
-    stop('origin must be numeric.')
-  }
-
-  if (is.null(destination) == FALSE) {
-    if (is.numeric(destination) == FALSE) {
-      stop('destination must be numeric.')
-    }
-  }
-
   arguments <- list(origin = origin,
                     destination = destination,
                     type = type,
@@ -105,7 +95,7 @@ addEuclideanPath <- function(origin, destination = NULL, type = "case-pump",
         h <- seq(0, tot, unit.interval) / unitMeter(1)
       } else if (unit.posts == "time") {
         tot <- distanceTime(unitMeter(stats::dist(dat),
-          distance.unit = "native"), walking.speed = x$walking.speed)
+          output.unit = "nominal"), walking.speed = x$walking.speed)
         h <- seq(0, tot, unit.interval) * 1000 * x$walking.speed / 60^2 /
           unitMeter(1)
       } else {

@@ -14,7 +14,7 @@
 #' @note This function uses \code{KernSmooth::bkde2D()}.
 #' @export
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' snowMap()
 #' addKernelDensity()
 #'
@@ -30,7 +30,7 @@
 
 addKernelDensity <- function(pump.subset = "pooled", pump.select = NULL,
   neighborhood.type = "walking", data = "unstacked", bandwidth = 0.5,
-  color = "black", line.type = "solid", multi.core = FALSE) {
+  color = "black", line.type = "solid", multi.core = TRUE) {
 
   if (!is.null(data) & !all(data %in% c("unstacked", "address", "fatality"))) {
     stop('data must be "unstacked", "address" or "fatality".')
@@ -42,7 +42,9 @@ addKernelDensity <- function(pump.subset = "pooled", pump.select = NULL,
 
   if (is.character(pump.subset)) {
     if (pump.subset %in% c("individual", "pooled") == FALSE) {
-      stop("If not numeric, pump.subset must either be 'individual' or 'pooled'.")
+      txt1 <- "If not numeric,"
+      txt2 <- "pump.subset must either be 'individual' or 'pooled'."
+      stop(paste(txt1, txt2))
     }
   }
 

@@ -4,8 +4,7 @@
 \alias{plot.euclidean}
 \title{Plot method for neighborhoodEuclidean().}
 \usage{
-\method{plot}{euclidean}(x, type = "star", add.observed.points = TRUE,
-  msg = FALSE, ...)
+\method{plot}{euclidean}(x, type = "star", add.observed.points = TRUE, msg = FALSE, ...)
 }
 \arguments{
 \item{x}{An object of class "euclidean" created by \code{neighborhoodEuclidean()}.}
@@ -28,7 +27,7 @@ Plot method for neighborhoodEuclidean().
 This uses an approximate computation of polygons, using the 'TSP' package, that may produce non-simple and/or overlapping polygons.
 }
 \examples{
-\donttest{
+\dontrun{
 plot(neighborhoodEuclidean())
 plot(neighborhoodEuclidean(-6))
 plot(neighborhoodEuclidean(pump.select = 6:7))

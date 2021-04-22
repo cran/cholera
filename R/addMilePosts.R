@@ -14,7 +14,7 @@
 
 addMilePosts <- function(pump.subset = NULL, pump.select = NULL,
   vestry = FALSE, unit = "distance", interval = NULL, walking.speed = 5,
-  type = "arrows", multi.core = FALSE, dev.mode = FALSE) {
+  type = "arrows", multi.core = TRUE, dev.mode = FALSE) {
 
   if (type %in% c("arrows", "points") == FALSE) {
     stop('type must either be "arrows" or "points"')
@@ -42,9 +42,9 @@ addMilePosts <- function(pump.subset = NULL, pump.select = NULL,
   }
 
   # vector of nodes for the 321 observed anchor cases
-    n.path.edges <- lapply(x$paths, function(neighborhood) {
-      lapply(neighborhood, auditEdge, edges, output = "id2")
-    })
+  n.path.edges <- lapply(x$paths, function(neighborhood) {
+    lapply(neighborhood, auditEdge, edges, output = "id2")
+  })
 
   if (!is.null(pump.subset)) {
     if (all(pump.subset > 0)) {

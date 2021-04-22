@@ -1,3 +1,37 @@
+cholera 0.7.5
+==================
+
+# New Data #
+
+- oxford.weather
+
+# New Functions #
+
+- isoLines()
+- isoVertices()
+- oxfordWeather()
+- povertyLondon()
+- segmentHighlight()
+- winterTemperatures()
+
+# Function Changes #
+
+- add addCase(case = NULL).
+- add and set neighborhoodVoronoi(case.location = "address").
+- add and set neighborhoodVoronoi(pump.location = "nominal").
+- add subtitles for selected pumps in plot.euclidean().
+
+# Fixes #
+
+- fix unneeded warnings in addEuclideanPath().
+- fix typo, from Silver Street to Cross Street, for meter benchmark in roads
+  vignette.
+
+# Vignettes #
+
+- add discussion of Euclidean and Voronoi "expected" neighborhoods.
+
+
 cholera 0.7.0
 ==================
 
@@ -20,7 +54,7 @@ cholera 0.7.0
 
 # Vignettes #
 
-- add Parallelizaiton vignette
+- add Parallelization vignette.
 
 
 cholera 0.6.5
@@ -68,7 +102,7 @@ cholera 0.6.5
 
 # DESCRIPTION #
 
-- remove 'scales" from Imports.
+- remove 'scales' from Imports.
 
 
 cholera 0.6.0

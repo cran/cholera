@@ -4,9 +4,8 @@
 \alias{neighborhoodWalking}
 \title{Compute walking path pump neighborhoods.}
 \usage{
-neighborhoodWalking(pump.select = NULL, vestry = FALSE,
-  weighted = TRUE, case.set = "observed", multi.core = FALSE,
-  dev.mode = FALSE)
+neighborhoodWalking(pump.select = NULL, vestry = FALSE, weighted = TRUE,
+  case.set = "observed", multi.core = TRUE, dev.mode = FALSE)
 }
 \arguments{
 \item{pump.select}{Numeric. Vector of numeric pump IDs to define pump neighborhoods (i.e., the "population"). Negative selection possible. \code{NULL} selects all pumps. Note that you can't just select the pump on Adam and Eve Court (#2) because it's technically an isolate.}
@@ -37,7 +36,7 @@ An R list with 7 objects:
 Group cases into neighborhoods based on walking distance.
 }
 \examples{
-\donttest{
+\dontrun{
 neighborhoodWalking()
 neighborhoodWalking(pump.select = -6)
 }

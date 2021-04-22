@@ -1,7 +1,5 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
-[![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/cholera)](https://cran.r-project.org/package=cholera)
-[![GitHub\_Status\_Badge](https://img.shields.io/badge/GitHub-0.7.0-red.svg)](https://github.com/lindbrook/cholera/blob/master/NEWS)
 ## cholera: amend, augment and aid analysis of Snow’s cholera map
 
 #### package features
@@ -24,8 +22,8 @@
     location of the Broad Street pump.
   - Adds two aggregate time series fatalities data sets, taken from the
     Vestry report.
-  - With ‘cholera’ version 0.7.0, support for parallel computation now
-    includes Windows in addition to Linux and macOS.
+  - With ‘cholera’ version \>= 0.7.0, support for parallel computation
+    now includes Windows in addition to Linux and macOS.
 
 #### getting started
 
@@ -39,9 +37,8 @@ To install the current development version from
 GitHub:
 
 ``` r
-# You may need to first install the 'devtools' via install.packages("devtools").
-
-devtools::install_github("lindbrook/cholera", build_vignettes = TRUE)
+# You may need to first install the 'remotes' via install.packages("remotes").
+remotes::install_github("lindbrook/cholera", build_vignettes = TRUE)
 ```
 
 ## background
@@ -151,10 +148,21 @@ then compute the shortest path to the nearest pump.
 
 ``` r
 plot(neighborhoodWalking(case.set = "expected"), "area.polygons")
+```
+
+<img src="man/figures/README-unnamed-chunk-6-1.png" width="50%" />
+
+For Euclidean distance based neighborhoods, we can use the same
+simulated data and compute the as-the-crow-flies distance to the nearest
+pump. Or, we can leverage a more computationally efficient approach,
+Voronoi tessellation, which will produce the same neighborhoods.
+
+``` r
+plot(neighborhoodEuclidean(case.set = "expected"))
 plot(neighborhoodVoronoi())
 ```
 
-<img src="man/figures/README-unnamed-chunk-6-1.png" width="50%" /><img src="man/figures/README-unnamed-chunk-6-2.png" width="50%" />
+<img src="man/figures/README-unnamed-chunk-7-1.png" width="50%" /><img src="man/figures/README-unnamed-chunk-7-2.png" width="50%" />
 
 #### exploring walking neighborhoods
 
@@ -166,7 +174,7 @@ plot(neighborhoodWalking(pump.select = 6:7))
 plot(neighborhoodWalking(pump.select = -7))
 ```
 
-<img src="man/figures/README-unnamed-chunk-7-1.png" width="50%" /><img src="man/figures/README-unnamed-chunk-7-2.png" width="50%" />
+<img src="man/figures/README-unnamed-chunk-8-1.png" width="50%" /><img src="man/figures/README-unnamed-chunk-8-2.png" width="50%" />
 
 To explore “expected” walking neighborhoods, add the case.set =
 “expected”
@@ -177,7 +185,7 @@ plot(neighborhoodWalking(pump.select =  6:7, case.set = "expected"), type = "are
 plot(neighborhoodWalking(pump.select = -7, case.set = "expected"), type = "area.polygons")
 ```
 
-<img src="man/figures/README-unnamed-chunk-8-1.png" width="50%" /><img src="man/figures/README-unnamed-chunk-8-2.png" width="50%" />
+<img src="man/figures/README-unnamed-chunk-9-1.png" width="50%" /><img src="man/figures/README-unnamed-chunk-9-2.png" width="50%" />
 
 #### exploring Euclidean neighborhoods
 
@@ -189,7 +197,7 @@ plot(neighborhoodEuclidean(pump.select = 6:7))
 plot(neighborhoodEuclidean(pump.select = -7))
 ```
 
-<img src="man/figures/README-unnamed-chunk-9-1.png" width="50%" /><img src="man/figures/README-unnamed-chunk-9-2.png" width="50%" />
+<img src="man/figures/README-unnamed-chunk-10-1.png" width="50%" /><img src="man/figures/README-unnamed-chunk-10-2.png" width="50%" />
 
 To explore “expected” Euclidean neighborhoods, use
 `neighborhoodVoronoi()` with the `pump.select` argument:
@@ -199,17 +207,16 @@ plot(neighborhoodVoronoi(pump.select = 6:7))
 plot(neighborhoodVoronoi(pump.select = -7))
 ```
 
-<img src="man/figures/README-unnamed-chunk-10-1.png" width="50%" /><img src="man/figures/README-unnamed-chunk-10-2.png" width="50%" />
+<img src="man/figures/README-unnamed-chunk-11-1.png" width="50%" /><img src="man/figures/README-unnamed-chunk-11-2.png" width="50%" />
 
 #### note on computational performance
 
-Support for parallel computation for selected functions on Linux, Mac
-and Windows implemented using the ‘parallel’ package, which is part of
-the base R distribution: to enable parallelization, set `multi.core =
-TRUE` where available. Note that although some precautions are taken in
-R.app on macOS, the developers of the ‘parallel’ package strongly
-discourage against using parallelization within a GUI or embedded
-environment. See `vignette("Parallelization")` for details.
+Parallel computation is implemented using the ‘parallel’ package, which
+is part of the base R distribution. To enable parallelization, set
+`multi.core = TRUE` where available. Note that although some precautions
+are taken in R.app on macOS, the developers of the ‘parallel’ package
+strongly discourage against using parallelization within a GUI or
+embedded environment. See `vignette("Parallelization")` for details.
 
 #### vignettes
 
@@ -253,7 +260,12 @@ of the functions in ‘cholera’.
 Series](https://github.com/lindbrook/cholera/blob/master/docs/vignettes/time.series.md)
 discusses functions and data related to the aggregate time series
 fatalities data and the questions surrounding the effect of the removal
-of the handle from the Broad Street pump.
+of the handle from the Broad Street
+pump.
+
+[Parallelization](https://github.com/lindbrook/cholera/blob/master/docs/vignettes/parallelization.md)
+discusses the parallelization of selected functions and provides
+benchmark timings.
 
 #### lab notes
 

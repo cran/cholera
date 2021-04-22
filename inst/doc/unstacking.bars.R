@@ -1,4 +1,4 @@
-## ---- echo = FALSE, message = FALSE--------------------------------------
+## ---- echo = FALSE, message = FALSE-------------------------------------------
 knitr::opts_chunk$set(collapse = TRUE, comment = ">")
 library("cholera")
 library("HistData")
@@ -32,7 +32,7 @@ road.segments <- lapply(unique(roads$street), function(i) {
 
 road.segments <- do.call(rbind, road.segments)
 
-## ---- fig.width = 5, fig.height = 5, fig.align = "left", echo = FALSE----
+## ---- fig.width = 5, fig.height = 5, fig.align = "left", echo = FALSE---------
 roads.list <- split(roads[, c("x", "y")], roads$street)
 plot(fatalities[, c("x", "y")], xlim = range(roads$x), ylim = range(roads$y),
   pch = 15, cex = 0.5, col = "gray", asp = 1)
@@ -40,7 +40,7 @@ invisible(lapply(roads.list, lines, col = "gray"))
 points(HistData::Snow.pumps[, c("x", "y")], pch = 17, cex = 1, col = "blue")
 
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 ## The 18 cases at 38 Broad Street ##
 
 broad38 <- c(239, 12, 310, 398, 562, 397, 421, 190, 290, 61, 174, 547, 523,
@@ -48,13 +48,13 @@ broad38 <- c(239, 12, 310, 398, 562, 397, 421, 190, 290, 61, 174, 547, 523,
 
 fatalities[fatalities$case %in% broad38, ]
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 fatalities.unstacked[fatalities.unstacked$case %in% broad38, ]
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 fatalities.address[136:140, ]
 
-## ---- fig.width = 5, fig.height = 5, fig.align = "left", echo = FALSE----
+## ---- fig.width = 5, fig.height = 5, fig.align = "left", echo = FALSE---------
 
 roads.list <- split(roads[, c("x", "y")], roads$street)
 
@@ -150,7 +150,7 @@ p + geom_text(data = broad.df, aes(x = x, y = y), label = "Broad St",
             angle = cambridge.angle)
 
 
-## ---- fig.width = 5, fig.height = 5, fig.align = "left", echo = FALSE----
+## ---- fig.width = 5, fig.height = 5, fig.align = "left", echo = FALSE---------
 
 ## Data ##
 

@@ -7,7 +7,7 @@
 addNeighborhoodWalking(pump.subset = NULL, pump.select = NULL,
   vestry = FALSE, weighted = TRUE, path = NULL, path.color = NULL,
   path.width = 3, alpha.level = 0.25, polygon.type = "solid",
-  polygon.col = NULL, polygon.lwd = 2, multi.core = FALSE,
+  polygon.col = NULL, polygon.lwd = 2, multi.core = TRUE,
   dev.mode = FALSE)
 }
 \arguments{
@@ -41,7 +41,7 @@ addNeighborhoodWalking(pump.subset = NULL, pump.select = NULL,
 Add expected walking neighborhoods.
 }
 \examples{
-\donttest{
+\dontrun{
 streetNameLocator("marshall street", zoom = 0.5)
 addNeighborhoodWalking()
 }

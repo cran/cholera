@@ -1,11 +1,11 @@
-## ----setup, include = FALSE----------------------------------------------
+## ----setup, include = FALSE---------------------------------------------------
 knitr::opts_chunk$set(collapse = TRUE, comment = ">")
 library(cholera)
 
-## ----voronoiPolygons, eval = FALSE---------------------------------------
+## ----voronoiPolygons, eval = FALSE--------------------------------------------
 #  voronoiPolygons(sites, rw.data = NULL, rw = NULL, type = "tiles")
 
-## ----counting_tiles, echo = TRUE, eval = TRUE----------------------------
+## ----counting_tiles, echo = TRUE, eval = TRUE---------------------------------
 # compute vertices of Voronoi tiles
 vertices <- voronoiPolygons(sites = cholera::pumps, rw.data = cholera::roads)
 
@@ -23,7 +23,7 @@ names(census) <- paste0("p", cholera::pumps$id)
 # count of fatalities by neighborhood
 vapply(census, sum, integer(1L))
 
-## ----counting_triangles, echo = TRUE, eval = TRUE------------------------
+## ----counting_triangles, echo = TRUE, eval = TRUE-----------------------------
 # compute vertices of Delauny triangles
 vertices <- voronoiPolygons(sites = cholera::pumps,
   rw.data = cholera::roads, type = "triangles")

@@ -1,46 +1,63 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 
 <head>
 
 <meta charset="utf-8" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 
 <meta name="author" content="lindbrook" />
 
-<meta name="date" content="2019-08-27" />
+<meta name="date" content="2021-04-21" />
 
 <title>Roads</title>
 
+<script src="data:application/javascript;base64,Ly8gUGFuZG9jIDIuOSBhZGRzIGF0dHJpYnV0ZXMgb24gYm90aCBoZWFkZXIgYW5kIGRpdi4gV2UgcmVtb3ZlIHRoZSBmb3JtZXIgKHRvCi8vIGJlIGNvbXBhdGlibGUgd2l0aCB0aGUgYmVoYXZpb3Igb2YgUGFuZG9jIDwgMi44KS4KZG9jdW1lbnQuYWRkRXZlbnRMaXN0ZW5lcignRE9NQ29udGVudExvYWRlZCcsIGZ1bmN0aW9uKGUpIHsKICB2YXIgaHMgPSBkb2N1bWVudC5xdWVyeVNlbGVjdG9yQWxsKCJkaXYuc2VjdGlvbltjbGFzcyo9J2xldmVsJ10gPiA6Zmlyc3QtY2hpbGQiKTsKICB2YXIgaSwgaCwgYTsKICBmb3IgKGkgPSAwOyBpIDwgaHMubGVuZ3RoOyBpKyspIHsKICAgIGggPSBoc1tpXTsKICAgIGlmICghL15oWzEtNl0kL2kudGVzdChoLnRhZ05hbWUpKSBjb250aW51ZTsgIC8vIGl0IHNob3VsZCBiZSBhIGhlYWRlciBoMS1oNgogICAgYSA9IGguYXR0cmlidXRlczsKICAgIHdoaWxlIChhLmxlbmd0aCA+IDApIGgucmVtb3ZlQXR0cmlidXRlKGFbMF0ubmFtZSk7CiAgfQp9KTsK"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
 
 
-<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  code {
+    white-space: pre;
+  }
+  .sourceCode {
+    overflow: visible;
+  }
+</style>
 <style type="text/css" data-origin="pandoc">
-a.sourceLine { display: inline-block; line-height: 1.25; }
-a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
-a.sourceLine:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
 div.sourceCode { margin: 1em 0; }
 pre.sourceCode { margin: 0; }
 @media screen {
 div.sourceCode { overflow: auto; }
 }
 @media print {
-code.sourceCode { white-space: pre-wrap; }
-a.sourceLine { text-indent: -1em; padding-left: 1em; }
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
 }
-pre.numberSource a.sourceLine
-  { position: relative; left: -4em; }
-pre.numberSource a.sourceLine::before
-  { content: attr(data-line-number);
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
     position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; pointer-events: all; display: inline-block;
+    border: none; display: inline-block;
     -webkit-touch-callout: none; -webkit-user-select: none;
     -khtml-user-select: none; -moz-user-select: none;
     -ms-user-select: none; user-select: none;
@@ -49,9 +66,9 @@ pre.numberSource a.sourceLine::before
   }
 pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
 div.sourceCode
-  {  }
+  {   }
 @media screen {
-a.sourceLine::before { text-decoration: underline; }
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 code span.al { color: #ff0000; font-weight: bold; } /* Alert */
 code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
@@ -108,189 +125,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 
 
-<style type="text/css">body {
-background-color: #fff;
-margin: 1em auto;
-max-width: 700px;
-overflow: visible;
-padding-left: 2em;
-padding-right: 2em;
-font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
-font-size: 14px;
-line-height: 1.35;
-}
-#header {
-text-align: center;
-}
-#TOC {
-clear: both;
-margin: 0 0 10px 10px;
-padding: 4px;
-width: 400px;
-border: 1px solid #CCCCCC;
-border-radius: 5px;
-background-color: #f6f6f6;
-font-size: 13px;
-line-height: 1.3;
-}
-#TOC .toctitle {
-font-weight: bold;
-font-size: 15px;
-margin-left: 5px;
-}
-#TOC ul {
-padding-left: 40px;
-margin-left: -1.5em;
-margin-top: 5px;
-margin-bottom: 5px;
-}
-#TOC ul ul {
-margin-left: -2em;
-}
-#TOC li {
-line-height: 16px;
-}
-table {
-margin: 1em auto;
-border-width: 1px;
-border-color: #DDDDDD;
-border-style: outset;
-border-collapse: collapse;
-}
-table th {
-border-width: 2px;
-padding: 5px;
-border-style: inset;
-}
-table td {
-border-width: 1px;
-border-style: inset;
-line-height: 18px;
-padding: 5px 5px;
-}
-table, table th, table td {
-border-left-style: none;
-border-right-style: none;
-}
-table thead, table tr.even {
-background-color: #f7f7f7;
-}
-p {
-margin: 0.5em 0;
-}
-blockquote {
-background-color: #f6f6f6;
-padding: 0.25em 0.75em;
-}
-hr {
-border-style: solid;
-border: none;
-border-top: 1px solid #777;
-margin: 28px 0;
-}
-dl {
-margin-left: 0;
-}
-dl dd {
-margin-bottom: 13px;
-margin-left: 13px;
-}
-dl dt {
-font-weight: bold;
-}
-ul {
-margin-top: 0;
-}
-ul li {
-list-style: circle outside;
-}
-ul ul {
-margin-bottom: 0;
-}
-pre, code {
-background-color: #f7f7f7;
-border-radius: 3px;
-color: #333;
-white-space: pre-wrap; 
-}
-pre {
-border-radius: 3px;
-margin: 5px 0px 10px 0px;
-padding: 10px;
-}
-pre:not([class]) {
-background-color: #f7f7f7;
-}
-code {
-font-family: Consolas, Monaco, 'Courier New', monospace;
-font-size: 85%;
-}
-p > code, li > code {
-padding: 2px 0px;
-}
-div.figure {
-text-align: center;
-}
-img {
-background-color: #FFFFFF;
-padding: 2px;
-border: 1px solid #DDDDDD;
-border-radius: 3px;
-border: 1px solid #CCCCCC;
-margin: 0 5px;
-}
-h1 {
-margin-top: 0;
-font-size: 35px;
-line-height: 40px;
-}
-h2 {
-border-bottom: 4px solid #f7f7f7;
-padding-top: 10px;
-padding-bottom: 2px;
-font-size: 145%;
-}
-h3 {
-border-bottom: 2px solid #f7f7f7;
-padding-top: 10px;
-font-size: 120%;
-}
-h4 {
-border-bottom: 1px solid #f7f7f7;
-margin-left: 8px;
-font-size: 105%;
-}
-h5, h6 {
-border-bottom: 1px solid #ccc;
-font-size: 105%;
-}
-a {
-color: #0033dd;
-text-decoration: none;
-}
-a:hover {
-color: #6666ff; }
-a:visited {
-color: #800080; }
-a:visited:hover {
-color: #BB00BB; }
-a[href^="http:"] {
-text-decoration: underline; }
-a[href^="https:"] {
-text-decoration: underline; }
 
-code > span.kw { color: #555; font-weight: bold; } 
-code > span.dt { color: #902000; } 
-code > span.dv { color: #40a070; } 
-code > span.bn { color: #d14; } 
-code > span.fl { color: #d14; } 
-code > span.ch { color: #d14; } 
-code > span.st { color: #d14; } 
-code > span.co { color: #888888; font-style: italic; } 
-code > span.ot { color: #007020; } 
-code > span.al { color: #ff0000; font-weight: bold; } 
-code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61717; background-color: #e3d2d2; } 
-</style>
+<link rel="stylesheet" href="data:text/css,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" type="text/css" />
 
 
 
@@ -304,7 +140,7 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 
 <h1 class="title toc-ignore">Roads</h1>
 <h4 class="author">lindbrook</h4>
-<h4 class="date">2019-08-27</h4>
+<h4 class="date">2021-04-21</h4>
 
 
 
@@ -315,32 +151,32 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <div id="roads-data" class="section level2">
 <h2>Roads data</h2>
 <p>Before discussing the details, some discussion of the structure of <code>roads</code> is warranted. The data contain 1241 pairs of x-y coordinates that define the endpoints of straight line segments used to describe some 528 numerically identified “streets”.</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="kw">head</span>(roads)</a>
-<a class="sourceLine" id="cb1-2" data-line-number="2"><span class="op">&gt;</span><span class="st">   </span>street n        x        y id      name</a>
-<a class="sourceLine" id="cb1-3" data-line-number="3"><span class="op">&gt;</span><span class="st"> </span><span class="dv">1</span>      <span class="dv">1</span> <span class="dv">2</span> <span class="fl">16.73800</span> <span class="fl">18.69600</span>  <span class="dv">1</span> Map Frame</a>
-<a class="sourceLine" id="cb1-4" data-line-number="4"><span class="op">&gt;</span><span class="st"> </span><span class="dv">2</span>      <span class="dv">1</span> <span class="dv">2</span> <span class="fl">17.66000</span> <span class="fl">18.71200</span>  <span class="dv">2</span> Map Frame</a>
-<a class="sourceLine" id="cb1-5" data-line-number="5"><span class="op">&gt;</span><span class="st"> </span><span class="dv">3</span>      <span class="dv">2</span> <span class="dv">2</span> <span class="fl">14.46200</span> <span class="fl">18.65500</span>  <span class="dv">3</span> Map Frame</a>
-<a class="sourceLine" id="cb1-6" data-line-number="6"><span class="op">&gt;</span><span class="st"> </span><span class="dv">4</span>      <span class="dv">2</span> <span class="dv">2</span> <span class="fl">16.73800</span> <span class="fl">18.69600</span>  <span class="dv">4</span> Map Frame</a>
-<a class="sourceLine" id="cb1-7" data-line-number="7"><span class="op">&gt;</span><span class="st"> </span><span class="dv">5</span>      <span class="dv">3</span> <span class="dv">2</span> <span class="fl">12.79388</span> <span class="fl">18.61613</span>  <span class="dv">5</span> Map Frame</a>
-<a class="sourceLine" id="cb1-8" data-line-number="8"><span class="op">&gt;</span><span class="st"> </span><span class="dv">6</span>      <span class="dv">3</span> <span class="dv">2</span> <span class="fl">14.46200</span> <span class="fl">18.65500</span>  <span class="dv">6</span> Map Frame</a>
-<a class="sourceLine" id="cb1-9" data-line-number="9"></a>
-<a class="sourceLine" id="cb1-10" data-line-number="10"><span class="kw">nrow</span>(roads)</a>
-<a class="sourceLine" id="cb1-11" data-line-number="11"><span class="op">&gt;</span><span class="st"> </span>[<span class="dv">1</span>] <span class="dv">1241</span></a>
-<a class="sourceLine" id="cb1-12" data-line-number="12"></a>
-<a class="sourceLine" id="cb1-13" data-line-number="13"><span class="kw">length</span>(<span class="kw">unique</span>(roads<span class="op">$</span>street))</a>
-<a class="sourceLine" id="cb1-14" data-line-number="14"><span class="op">&gt;</span><span class="st"> </span>[<span class="dv">1</span>] <span class="dv">528</span></a></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(roads)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>   street n        x        y id      name</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span> <span class="dv">1</span>      <span class="dv">1</span> <span class="dv">2</span> <span class="fl">16.73800</span> <span class="fl">18.69600</span>  <span class="dv">1</span> Map Frame</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span> <span class="dv">2</span>      <span class="dv">1</span> <span class="dv">2</span> <span class="fl">17.66000</span> <span class="fl">18.71200</span>  <span class="dv">2</span> Map Frame</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span> <span class="dv">3</span>      <span class="dv">2</span> <span class="dv">2</span> <span class="fl">14.46200</span> <span class="fl">18.65500</span>  <span class="dv">3</span> Map Frame</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span> <span class="dv">4</span>      <span class="dv">2</span> <span class="dv">2</span> <span class="fl">16.73800</span> <span class="fl">18.69600</span>  <span class="dv">4</span> Map Frame</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span> <span class="dv">5</span>      <span class="dv">3</span> <span class="dv">2</span> <span class="fl">12.79388</span> <span class="fl">18.61613</span>  <span class="dv">5</span> Map Frame</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span> <span class="dv">6</span>      <span class="dv">3</span> <span class="dv">2</span> <span class="fl">14.46200</span> <span class="fl">18.65500</span>  <span class="dv">6</span> Map Frame</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">nrow</span>(roads)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span> [<span class="dv">1</span>] <span class="dv">1241</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="fu">length</span>(<span class="fu">unique</span>(roads<span class="sc">$</span>street))</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span> [<span class="dv">1</span>] <span class="dv">528</span></span></code></pre></div>
 <p>The correspondence between these 528 “streets” and streets in the real world is not one-to-one. Excluding the 50 “streets” used to draw the map’s frame, the remaining 478 “streets” actually describe 206 real world roads (e.g., Oxford Street, Regent Street).</p>
 <p>This discrepancy emerges because real world streets are approximated using straight line segments. In fact 40% of the “real world” roads are composed of multiple “street” segments: for example, Oxford Street consists of 26 line segments and Broad Street consists of 6.</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="co"># Map Border &quot;Streets&quot; #</span></a>
-<a class="sourceLine" id="cb2-2" data-line-number="2"></a>
-<a class="sourceLine" id="cb2-3" data-line-number="3">top &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">12</span>, <span class="dv">14</span>)</a>
-<a class="sourceLine" id="cb2-4" data-line-number="4">right &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">37</span>, <span class="dv">62</span>, <span class="dv">74</span>, <span class="dv">142</span>, <span class="dv">147</span>, <span class="dv">205</span>, <span class="dv">240</span>, <span class="dv">248</span>, <span class="dv">280</span>, <span class="dv">360</span>, <span class="dv">405</span>, <span class="dv">419</span>, <span class="dv">465</span>)</a>
-<a class="sourceLine" id="cb2-5" data-line-number="5">bottom &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">483</span>, <span class="kw">seq</span>(<span class="dv">487</span>, <span class="dv">495</span>, <span class="dv">2</span>), <span class="dv">498</span>, <span class="dv">500</span>, <span class="kw">seq</span>(<span class="dv">503</span>, <span class="dv">519</span>, <span class="dv">2</span>))</a>
-<a class="sourceLine" id="cb2-6" data-line-number="6">left &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">31</span>, <span class="dv">79</span>, <span class="dv">114</span>, <span class="dv">285</span>, <span class="dv">348</span>, <span class="dv">397</span>, <span class="dv">469</span>)</a>
-<a class="sourceLine" id="cb2-7" data-line-number="7">border &lt;-<span class="st"> </span><span class="kw">sort</span>(<span class="kw">c</span>(bottom, left, top, right))</a>
-<a class="sourceLine" id="cb2-8" data-line-number="8"></a>
-<a class="sourceLine" id="cb2-9" data-line-number="9"><span class="kw">length</span>(border)</a>
-<a class="sourceLine" id="cb2-10" data-line-number="10"><span class="op">&gt;</span><span class="st"> </span>[<span class="dv">1</span>] <span class="dv">50</span></a></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Map Border &quot;Streets&quot; #</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>top <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>, <span class="dv">14</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>right <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">37</span>, <span class="dv">62</span>, <span class="dv">74</span>, <span class="dv">142</span>, <span class="dv">147</span>, <span class="dv">205</span>, <span class="dv">240</span>, <span class="dv">248</span>, <span class="dv">280</span>, <span class="dv">360</span>, <span class="dv">405</span>, <span class="dv">419</span>, <span class="dv">465</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>bottom <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">483</span>, <span class="fu">seq</span>(<span class="dv">487</span>, <span class="dv">495</span>, <span class="dv">2</span>), <span class="dv">498</span>, <span class="dv">500</span>, <span class="fu">seq</span>(<span class="dv">503</span>, <span class="dv">519</span>, <span class="dv">2</span>))</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>left <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">31</span>, <span class="dv">79</span>, <span class="dv">114</span>, <span class="dv">285</span>, <span class="dv">348</span>, <span class="dv">397</span>, <span class="dv">469</span>)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>border <span class="ot">&lt;-</span> <span class="fu">sort</span>(<span class="fu">c</span>(bottom, left, top, right))</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="fu">length</span>(border)</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span> [<span class="dv">1</span>] <span class="dv">50</span></span></code></pre></div>
 </div>
 <div id="road-names" class="section level2">
 <h2>Road names</h2>
@@ -352,22 +188,22 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <h2>Queen Street (I) and Marlborough Mews</h2>
 <p>There is one apparent coding error in Dodson and Tobler’s road data. Queen Street (I) extends too far: the water pump #5 is clearly located on Marlborough Mews (see <a href="http://www.ph.ucla.edu/epi/snow/highressnowmap.html">map</a>, cited above) but ends up on Queen Street (I).</p>
 <p>I amend this by moving the end point of Queen Street (I) westward so that the street only runs in a north-south direction. I do so by reassigning the segment that runs east-west to be part of Marlborough Mews.</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1">snow.streets &lt;-<span class="st"> </span>HistData<span class="op">::</span>Snow.streets</a>
-<a class="sourceLine" id="cb3-2" data-line-number="2">snow.streets<span class="op">$</span>id &lt;-<span class="st"> </span><span class="kw">seq_len</span>(<span class="kw">nrow</span>(snow.streets))</a>
-<a class="sourceLine" id="cb3-3" data-line-number="3"></a>
-<a class="sourceLine" id="cb3-4" data-line-number="4"><span class="co"># Data frame of road names</span></a>
-<a class="sourceLine" id="cb3-5" data-line-number="5">road.data &lt;-<span class="st"> </span><span class="kw">read.csv</span>(<span class="st">&quot;~/Documents/Data IV/Snow/road3b.csv&quot;</span>,</a>
-<a class="sourceLine" id="cb3-6" data-line-number="6">  <span class="dt">stringsAsFactors =</span> <span class="ot">FALSE</span>)</a>
-<a class="sourceLine" id="cb3-7" data-line-number="7"></a>
-<a class="sourceLine" id="cb3-8" data-line-number="8">roads &lt;-<span class="st"> </span><span class="kw">merge</span>(snow.streets, road.data, <span class="dt">by =</span> <span class="st">&quot;street&quot;</span>, <span class="dt">all.x =</span> <span class="ot">TRUE</span>)</a>
-<a class="sourceLine" id="cb3-9" data-line-number="9">roads[<span class="kw">is.na</span>(roads<span class="op">$</span>name), <span class="st">&quot;name&quot;</span>] &lt;-<span class="st"> &quot;Map Frame&quot;</span></a>
-<a class="sourceLine" id="cb3-10" data-line-number="10"></a>
-<a class="sourceLine" id="cb3-11" data-line-number="11">roads[roads<span class="op">$</span>id <span class="op">==</span><span class="st"> </span><span class="dv">277</span>, <span class="st">&quot;street&quot;</span>] &lt;-<span class="st"> </span><span class="dv">116</span></a>
-<a class="sourceLine" id="cb3-12" data-line-number="12">roads[roads<span class="op">$</span>id <span class="op">==</span><span class="st"> </span><span class="dv">277</span>, <span class="st">&quot;name&quot;</span>] &lt;-<span class="st"> &quot;Marlborough Mews&quot;</span></a>
-<a class="sourceLine" id="cb3-13" data-line-number="13">roads[roads<span class="op">$</span>id <span class="op">==</span><span class="st"> </span><span class="dv">277</span>, <span class="kw">c</span>(<span class="st">&quot;x&quot;</span>, <span class="st">&quot;y&quot;</span>)] &lt;-<span class="st"> </span>roads[roads<span class="op">$</span>id <span class="op">==</span><span class="st"> </span><span class="dv">276</span>, <span class="kw">c</span>(<span class="st">&quot;x&quot;</span>, <span class="st">&quot;y&quot;</span>)]</a>
-<a class="sourceLine" id="cb3-14" data-line-number="14">roads[roads<span class="op">$</span>name <span class="op">==</span><span class="st"> &quot;Queen Street (I)&quot;</span>, <span class="st">&quot;n&quot;</span>] &lt;-<span class="st"> </span><span class="dv">4</span></a>
-<a class="sourceLine" id="cb3-15" data-line-number="15">roads[roads<span class="op">$</span>name <span class="op">==</span><span class="st"> &quot;Marlborough Mews&quot;</span>, <span class="st">&quot;n&quot;</span>] &lt;-<span class="st"> </span><span class="dv">3</span></a>
-<a class="sourceLine" id="cb3-16" data-line-number="16">roads &lt;-<span class="st"> </span>roads[<span class="kw">order</span>(roads<span class="op">$</span>id), ]</a></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>snow.streets <span class="ot">&lt;-</span> HistData<span class="sc">::</span>Snow.streets</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>snow.streets<span class="sc">$</span>id <span class="ot">&lt;-</span> <span class="fu">seq_len</span>(<span class="fu">nrow</span>(snow.streets))</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Data frame of road names</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>road.data <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">&quot;~/Documents/Data IV/Snow/road3b.csv&quot;</span>,</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">stringsAsFactors =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>roads <span class="ot">&lt;-</span> <span class="fu">merge</span>(snow.streets, road.data, <span class="at">by =</span> <span class="st">&quot;street&quot;</span>, <span class="at">all.x =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>roads[<span class="fu">is.na</span>(roads<span class="sc">$</span>name), <span class="st">&quot;name&quot;</span>] <span class="ot">&lt;-</span> <span class="st">&quot;Map Frame&quot;</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>roads[roads<span class="sc">$</span>id <span class="sc">==</span> <span class="dv">277</span>, <span class="st">&quot;street&quot;</span>] <span class="ot">&lt;-</span> <span class="dv">116</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>roads[roads<span class="sc">$</span>id <span class="sc">==</span> <span class="dv">277</span>, <span class="st">&quot;name&quot;</span>] <span class="ot">&lt;-</span> <span class="st">&quot;Marlborough Mews&quot;</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>roads[roads<span class="sc">$</span>id <span class="sc">==</span> <span class="dv">277</span>, <span class="fu">c</span>(<span class="st">&quot;x&quot;</span>, <span class="st">&quot;y&quot;</span>)] <span class="ot">&lt;-</span> roads[roads<span class="sc">$</span>id <span class="sc">==</span> <span class="dv">276</span>, <span class="fu">c</span>(<span class="st">&quot;x&quot;</span>, <span class="st">&quot;y&quot;</span>)]</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>roads[roads<span class="sc">$</span>name <span class="sc">==</span> <span class="st">&quot;Queen Street (I)&quot;</span>, <span class="st">&quot;n&quot;</span>] <span class="ot">&lt;-</span> <span class="dv">4</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>roads[roads<span class="sc">$</span>name <span class="sc">==</span> <span class="st">&quot;Marlborough Mews&quot;</span>, <span class="st">&quot;n&quot;</span>] <span class="ot">&lt;-</span> <span class="dv">3</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>roads <span class="ot">&lt;-</span> roads[<span class="fu">order</span>(roads<span class="sc">$</span>id), ]</span></code></pre></div>
 </div>
 <div id="finding-roads-by-name-street-number-or-segment-id." class="section level2">
 <h2>Finding roads by name, “street” number, or segment ID.</h2>
@@ -404,7 +240,7 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 23  Broad Street                       New Street/Husband Street    
 24  Bruton Street                      Newman Street                
 25  Bull Yard                          Noel Street                  
-26  Burlington Arcade                  Norris's Place               
+26  Burlington Arcade                  Norris&#39;s Place               
 27  Burlington Gardens                 North Coventry Street        
 28  Cambridge Street                   Old Burlington Mews          
 29  Carlisle Street                    Old Burlington Street        
@@ -451,7 +287,7 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 70  Great Windmill Street              St Anns Court                
 71  Greek Street                       St Anns Place                
 72  Green Dragon Yard                  St James Workhouse           
-73  Greens Court                       St James's Market            
+73  Greens Court                       St James&#39;s Market            
 74  Ham Yard                           Sutton Street                
 75  Hanover Street                     Swallow Place                
 76  Hanway Street                      Swallow Street               
@@ -488,11 +324,14 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <p>The original map is 14.5 x 15.5 inches with a stated nominal scale of 30 inches per mile.</p>
 <p>Dodson and Tobler write that “The scale of the source map is approx. 1:2000. Coordinate units are meters.” By my estimate, one unit on the map is approximately 177 feet or 54 meters per unit.<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a></p>
 </div>
+<div id="notes" class="section level2">
+<h2>Notes</h2>
+</div>
 <div class="footnotes">
 <hr />
 <ol>
-<li id="fn1"><p>Streets with the same name were not an unusual occurrence. See Judith Flanders. 2012. <em>The Victorian City: everyday life in Dickens’ London</em>. New York: St. Martin’s Press, 57-58.<a href="#fnref1" class="footnote-back">↩</a></p></li>
-<li id="fn2"><p>According to Dodson and Tobler’s data, the length of Carnaby Street from its intersection with Great Marlborough to its intersection with Silver Street is 2.61 units. According to Google Maps, the approximate analog of that segment is the distance along parts of Great Marlborough Street and Carnaby Street between 19-21 Great Marlborough Street and 43 Carnaby Street (at Ganton Street): 463 ft. This translates into approximately 177 feet/unit or 54 meters/unit.<a href="#fnref2" class="footnote-back">↩</a></p></li>
+<li id="fn1"><p>Streets with the same name were not an unusual occurrence. See Judith Flanders. 2012. <em>The Victorian City: everyday life in Dickens’ London</em>. New York: St. Martin’s Press, 57-58.<a href="#fnref1" class="footnote-back">↩︎</a></p></li>
+<li id="fn2"><p>According to Dodson and Tobler’s data, the length of Carnaby Street from its intersection with Great Marlborough to its intersection with Cross Street is 2.61 units. According to Google Maps, the approximate analog of that segment is the distance along parts of Great Marlborough Street and Carnaby Street between 19-21 Great Marlborough Street and 43 Carnaby Street (at Ganton Street): 463 ft. This translates into approximately 177 feet/unit or 54 meters/unit.<a href="#fnref2" class="footnote-back">↩︎</a></p></li>
 </ol>
 </div>
 

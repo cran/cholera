@@ -11,7 +11,7 @@
 #' @return R graphic elements.
 #' @export
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' streetNameLocator("marshall street", zoom = 0.5, highlight = FALSE,
 #'   add.subtitle = FALSE)
 #' addNeighborhoodEuclidean()
@@ -23,7 +23,7 @@
 
 addNeighborhoodEuclidean <- function(pump.subset = NULL, pump.select = NULL,
   vestry = FALSE, case.location = "nominal", type = "star", alpha.level = 0.5,
-  multi.core = FALSE, dev.mode = FALSE) {
+  multi.core = TRUE, dev.mode = FALSE) {
 
   if (case.location %in% c("address", "nominal") == FALSE) {
     stop('case.location must be "address" or "nominal".')

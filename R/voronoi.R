@@ -3,7 +3,8 @@
 #' Group cases into neighborhoods using Voronoi tessellation.
 #' @param pump.select Numeric. Vector of numeric pump IDs to define pump neighborhoods (i.e., the "population"). Negative selection possible. \code{NULL} selects all pumps.
 #' @param vestry Logical. \code{TRUE} uses the 14 pumps from the Vestry report. \code{FALSE} uses the 13 in the original map.
-#' @param case.location Character. For \code{observed = FALSE}: "address" or "nominal". "address" uses the x-y coordinates of \code{ortho.proj}. "nominal" uses the x-y coordinates of \code{fatalities}.
+#' @param case.location Character. "address" or "nominal". "address" uses the x-y coordinates of \code{ortho.proj}. "nominal" uses the x-y coordinates of \code{fatalities}.
+#' @param pump.location Character. "address" or "nominal". "address" uses the x-y coordinates of \code{ortho.proj.pump} or \code{ortho.proj.pump.vestry}. "nominal" uses the x-y coordinates of \code{pumps} or \code{pumps.vestry}.
 #' @param polygon.vertices Logical. \code{TRUE} returns a list of x-y coordinates of the vertices of Voronoi cells. Useful for \code{sp::point.in.polygon()} as used in \code{print.voronoi()} method.
 #' @return An R list with 12 objects.
 #' \itemize{
@@ -33,28 +34,27 @@
 #' dat$coordinates
 
 neighborhoodVoronoi <- function(pump.select = NULL, vestry = FALSE,
-  case.location = "nominal", polygon.vertices = FALSE) {
+  case.location = "address", pump.location = "nominal",
+  polygon.vertices = FALSE) {
 
   if (case.location %in% c("address", "nominal") == FALSE) {
-    stop('case.location must be "address" or "nominal".')
+    stop('case.location must be "address" or "nominal".', call. = FALSE)
   } else {
     if (case.location == "address") statistic <- "address"
     else if (case.location == "nominal") statistic <- "fatality"
   }
 
-  if (case.location == "address") {
+  if (pump.location == "address") {
     if (vestry) {
       pump.data <- cholera::ortho.proj.pump.vestry
       pump.data$street <- cholera::pumps.vestry$street
-      names(pump.data)[names(pump.data) %in%
-        c("x.proj", "y.proj", "pump.id")] <- c("x", "y", "id")
     } else {
       pump.data <- cholera::ortho.proj.pump
       pump.data$street <- cholera::pumps$street
-      names(pump.data)[names(pump.data) %in%
-        c("x.proj", "y.proj", "pump.id")] <- c("x", "y", "id")
     }
-  } else if (case.location == "nominal") {
+    sel <- names(pump.data) %in% c("x.proj", "y.proj", "pump.id")
+    names(pump.data)[sel] <- c("x", "y", "id")
+  } else if (pump.location == "nominal") {
     if (vestry) {
       pump.data <- cholera::pumps.vestry
     } else {
@@ -63,22 +63,25 @@ neighborhoodVoronoi <- function(pump.select = NULL, vestry = FALSE,
   }
 
   if (is.null(pump.select) == FALSE) {
-    if (is.numeric(pump.select) == FALSE) stop("pump.select must be numeric.")
+    if (is.numeric(pump.select) == FALSE) stop("pump.select must be numeric.",
+      call. = FALSE)
     p.count <- nrow(pump.data)
     p.ID <- seq_len(p.count)
 
     if (any(abs(pump.select) %in% p.ID == FALSE)) {
-      stop('With vestry = ', vestry, ', 1 >= |pump.select| <= ', p.count)
+      stop('With vestry = ', vestry, ', 1 >= |pump.select| <= ', p.count,
+        call. = FALSE)
     }
 
     msg1 <- 'If specified,'
     msg2 <- 'pump.select must include at least 2 different pumps.'
-    if (length(unique(p.ID[pump.select])) < 2) stop(msg1, msg2)
+    if (length(unique(p.ID[pump.select])) < 2) stop(msg1, msg2, call. = FALSE)
   }
 
   if (is.null(statistic) == FALSE) {
     if (all(statistic %in% c("address", "fatality")) == FALSE) {
-      stop('If specified, statistic must either be "address" or "fatality".')
+      stop('If specified, statistic must either be "address" or "fatality".',
+        call. = FALSE)
     }
   }
 

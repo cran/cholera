@@ -5,7 +5,7 @@
 \title{2D Profile .}
 \usage{
 profile2D(angle = 0, pump = 7, vestry = FALSE, type = "base",
-  multi.core = FALSE)
+  multi.core = TRUE)
 }
 \arguments{
 \item{angle}{Numeric. Angle of perspective axis in degrees.}
@@ -22,7 +22,7 @@ profile2D(angle = 0, pump = 7, vestry = FALSE, type = "base",
 2D Profile .
 }
 \examples{
-\donttest{
+\dontrun{
 profile2D(angle = 30)
 profile2D(angle = 30, type = "ggplot2")
 }

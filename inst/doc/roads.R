@@ -1,15 +1,15 @@
-## ---- echo = FALSE, message = FALSE--------------------------------------
+## ---- echo = FALSE, message = FALSE-------------------------------------------
 knitr::opts_chunk$set(collapse = TRUE, comment = ">")
 library(cholera)
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 head(roads)
 
 nrow(roads)
 
 length(unique(roads$street))
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 # Map Border "Streets" #
 
 top <- c(1:12, 14)
@@ -21,7 +21,7 @@ border <- sort(c(bottom, left, top, right))
 length(border)
 
 
-## ---- eval = FALSE-------------------------------------------------------
+## ---- eval = FALSE------------------------------------------------------------
 #  snow.streets <- HistData::Snow.streets
 #  snow.streets$id <- seq_len(nrow(snow.streets))
 #  
@@ -39,10 +39,10 @@ length(border)
 #  roads[roads$name == "Marlborough Mews", "n"] <- 3
 #  roads <- roads[order(roads$id), ]
 
-## ---- echo = FALSE, message = FALSE--------------------------------------
+## ---- echo = FALSE, message = FALSE-------------------------------------------
 knitr::opts_chunk$set(collapse = TRUE, comment = "")
 
-## ---- echo = FALSE-------------------------------------------------------
+## ---- echo = FALSE------------------------------------------------------------
 road.names <- sort(unique(roads$name))
 road.names <- road.names[road.names != "Map Frame"]
 road.names <- stats::setNames(data.frame(matrix(road.names, ncol = 2)), NULL)

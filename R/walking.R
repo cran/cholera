@@ -64,7 +64,7 @@ neighborhoodWalking <- function(pump.select = NULL, vestry = FALSE,
   nearest.data <- nearestPump(pump.select = pump.select,
                               vestry = vestry,
                               weighted = weighted,
-                              case.set = "observed",
+                              case.set = case.set,
                               multi.core = cores,
                               dev.mode = dev.mode)
 
@@ -75,9 +75,12 @@ neighborhoodWalking <- function(pump.select = NULL, vestry = FALSE,
     snow.anchors <- cholera::snow.neighborhood[cholera::snow.neighborhood %in%
       cholera::fatalities.address$anchor]
     nearest.pump <- data.frame(case = snow.anchors,
-                               pump = nearest.pump)
-  } else {
+                               pump = nearest.dist$pump)
+  } else if (case.set == "observed") {
     nearest.pump <- data.frame(case = cholera::fatalities.address$anchor,
+                               pump = nearest.dist$pump)
+  } else if (case.set == "expected") {
+    nearest.pump <- data.frame(case = nearest.dist$case,
                                pump = nearest.dist$pump)
   }
 
@@ -115,7 +118,7 @@ neighborhoodWalking <- function(pump.select = NULL, vestry = FALSE,
 #' Plot method for neighborhoodWalking().
 #'
 #' @param x An object of class "walking" created by \code{neighborhoodWalking()}.
-#' @param type Character. "road", "area.points" or "area.polygons". "area" flavors only valid when \code{case.set = "expected"}.
+#' @param type Character. "roads", "area.points" or "area.polygons". "area" flavors only valid when \code{case.set = "expected"}.
 #' @param msg Logical. Toggle in-progress messages.
 #' @param ... Additional plotting parameters.
 #' @return A base R plot.
@@ -129,9 +132,9 @@ neighborhoodWalking <- function(pump.select = NULL, vestry = FALSE,
 #' plot(neighborhoodWalking(case.set = "expected"), type = "area.polygons")
 #' }
 
-plot.walking <- function(x, type = "road", msg = FALSE, ...) {
-  if (type %in% c("road", "area.points", "area.polygons") == FALSE) {
-    stop('type must be "road", "area.points", "area.polygons".')
+plot.walking <- function(x, type = "roads", msg = FALSE, ...) {
+  if (type %in% c("roads", "area.points", "area.polygons") == FALSE) {
+    stop('type must be "roads", "area.points", "area.polygons".')
   }
 
   if (type %in% c("area.points", "area.polygons")) {
@@ -294,7 +297,7 @@ plot.walking <- function(x, type = "road", msg = FALSE, ...) {
     }
   }
 
-  pumpTokens(x$pump.select, x$vestry, x$case.set, x$snow.colors, type)
+  pumpTokens(x, type)
 
   if (is.null(x$pump.select)) {
     title(main = "Pump Neighborhoods: Walking")

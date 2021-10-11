@@ -24,7 +24,7 @@ names(census) <- paste0("p", cholera::pumps$id)
 vapply(census, sum, integer(1L))
 
 ## ----counting_triangles, echo = TRUE, eval = TRUE-----------------------------
-# compute vertices of Delauny triangles
+# compute vertices of Delaunay triangles
 vertices <- voronoiPolygons(sites = cholera::pumps,
   rw.data = cholera::roads, type = "triangles")
 
@@ -56,7 +56,7 @@ invisible(lapply(seq_along(vertices), function(i) {
 }))
 
 ## ----coloring_triangles, fig.align = "left", fig.width = 5, fig.height = 5, echo = TRUE, eval = TRUE----
-# compute vertices of Delauny triangles
+# compute vertices of Delaunay triangles
 vertices <- voronoiPolygons(sites = cholera::pumps,
   rw.data = cholera::roads, type = "triangles")
 

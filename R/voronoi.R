@@ -164,7 +164,7 @@ neighborhoodVoronoi <- function(pump.select = NULL, vestry = FALSE,
 #'
 #' @param x An object of class "voronoi" created by \code{neighborhoodVoronoi()}.
 #' @param voronoi.cells Logical. Plot Voronoi tessellation cells.
-#' @param delauny.triangles Logical. Plot Delauny triangles.
+#' @param delaunay.triangles Logical. Plot Delaunay triangles.
 #' @param euclidean.paths Logical. Plot all Euclidean paths (star graph).
 #' @param ... Additional plotting parameters.
 #' @return A base R graph.
@@ -178,7 +178,7 @@ neighborhoodVoronoi <- function(pump.select = NULL, vestry = FALSE,
 #' @examples
 #' plot(neighborhoodVoronoi())
 
-plot.voronoi <- function(x, voronoi.cells = TRUE, delauny.triangles = FALSE,
+plot.voronoi <- function(x, voronoi.cells = TRUE, delaunay.triangles = FALSE,
   euclidean.paths = FALSE, ...) {
 
   rd <- cholera::roads[cholera::roads$street %in% cholera::border == FALSE, ]
@@ -186,31 +186,18 @@ plot.voronoi <- function(x, voronoi.cells = TRUE, delauny.triangles = FALSE,
   roads.list <- split(rd[, c("x", "y")], rd$street)
   border.list <- split(map.frame[, c("x", "y")], map.frame$street)
 
-  if (x$vestry) {
-    pump.data <- cholera::pumps.vestry
-  } else {
-    pump.data <- cholera::pumps
-  }
-
   plot(cholera::fatalities.address[, c("x", "y")], xlim = x$x.rng,
     ylim = x$y.rng, pch = NA, asp = 1)
   invisible(lapply(roads.list, lines, col = "lightgray"))
   invisible(lapply(border.list, lines))
 
   if (is.null(x$pump.select)) {
-    points(pump.data[, c("x", "y")], pch = 2, col = x$snow.colors)
-    text(pump.data[, c("x", "y")], pos = 1, label = paste0("p", x$pump.id))
-
     if (x$case.location == "address") {
       title(main = "Pump Neighborhoods: Voronoi (address)")
     } else if (x$case.location == "nominal") {
       title(main = "Pump Neighborhoods: Voronoi (nominal)")
     }
   } else {
-    points(pump.data[x$pump.select, c("x", "y")], pch = 2, col = x$snow.colors)
-    text(pump.data[x$pump.select, c("x", "y")], label = paste0("p", x$pump.id),
-      pos = 1)
-
     if (x$case.location == "address") {
       title(main = paste0("Pump Neighborhoods: Voronoi (address)", "\n",
         "Pumps ", paste(sort(x$pump.select), collapse = ", ")))
@@ -220,12 +207,15 @@ plot.voronoi <- function(x, voronoi.cells = TRUE, delauny.triangles = FALSE,
     }
   }
 
+  pumpTokens(x, NULL)
+
   if (voronoi.cells) {
-    plot(x$voronoi, add = TRUE, wline = "tess", wpoints = "none", lty = "solid")
+    plot(x$voronoi, add = TRUE, wline = "tess", showpoints = FALSE,
+      cmpnt_lty = "solid")
   }
 
-  if (delauny.triangles) {
-    plot(x$voronoi, add = TRUE, wline = "triang", wpoints = "none")
+  if (delaunay.triangles) {
+    plot(x$voronoi, add = TRUE, wline = "triang", showpoints = FALSE)
   }
 
   voronoi.case.id <- pumpCase(x)
@@ -243,6 +233,8 @@ plot.voronoi <- function(x, voronoi.cells = TRUE, delauny.triangles = FALSE,
   }
 
   if (euclidean.paths) {
+    if (x$vestry) pump.data <- cholera::pumps.vestry
+    else pump.data <- cholera::pumps
     invisible(lapply(names(voronoi.case.id), function(nm) {
       p.data <- pump.data[paste0("p", pump.data$id) == nm, ]
       sel <- cholera::fatalities.address$anchor %in% voronoi.case.id[[nm]]

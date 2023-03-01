@@ -9,6 +9,7 @@
 #' @param distance.unit Character. Unit of distance: "meter", "yard" or "native". "native" returns the map's native scale. "unit" is meaningful only when "weighted" is TRUE. See \code{vignette("roads")} for information on unit distances.
 #' @param time.unit Character. "hour", "minute", or "second".
 #' @param walking.speed Numeric. Walking speed in km/hr.
+#' @param null.origin.landmark Logical. Consider landmarks when origin = NULL and type = "case-pump".
 #' @note The function uses a case's "address" (i.e., a stack's "anchor" case) to compute distance. Time is computed using \code{distanceTime()}. Adam and Eve Court, and Falconberg Court and Falconberg Mews, are disconnected from the larger road network; they form two isolated subgraphs. This has two consequences: first, only cases on Adam and Eve Court can reach pump 2 and those cases cannot reach any other pump; second, cases on Falconberg Court and Mews cannot reach any pump. Unreachable pumps will return distances of "Inf".
 #' @return An R list with two elements: a character vector of path nodes and a data frame summary.
 #' @export
@@ -44,11 +45,13 @@
 
 walkingPath <- function(origin = 1, destination = NULL, type = "case-pump",
   observed = TRUE, weighted = TRUE, vestry = FALSE, distance.unit = "meter",
-  time.unit = "second", walking.speed = 5) {
+  time.unit = "second", walking.speed = 5, null.origin.landmark = FALSE) {
 
   if (is.null(origin) & is.null(destination)) {
     stop("If origin = NULL, you must supply a destination.")
   }
+
+  if (length(origin) > 1) stop("Select a single origin.")
 
   if (distance.unit %in% c("meter", "yard", "native") == FALSE) {
     stop('distance.unit must be "meter", "yard" or "native".')
@@ -66,38 +69,76 @@ walkingPath <- function(origin = 1, destination = NULL, type = "case-pump",
     if (type != "cases") stop('type must be "cases".')
   }
 
-  if (type %in% c("case-pump", "pumps")) {
+  if (type == "case-pump") {
     if (is.null(destination) == FALSE) {
       if (length(destination) == 1) {
-        if (destination == 2) {
+        if (abs(destination) == 2) {
           stop('Pump 2 is a technical isolate. Choose another.')
         }
       }
       if (any(abs(destination) == 2)) {
-        message('Pump 2 is a technical isolate. Already not considered.')
+        message('Pump 2 is a technical isolate (not considered).')
       }
     }
-  }
+  
+  } else if (type == "cases") {  
+    if (is.numeric(origin) & all(is.numeric(destination))) {
+      sel <- cholera::anchor.case$case == origin
+      alpha <- cholera::anchor.case[sel, "anchor"]
 
-  if (type == "pumps") {
-    if (length(origin) == 1) {
-      if (origin == 2) stop('Pump 2 is a technical isolate. Choose another.')
-    }
+      sel <- cholera::anchor.case$case %in% destination
+      omega <- cholera::anchor.case[sel, "anchor"]
 
-    if (is.null(origin) == FALSE) {
-      if (any(abs(origin) == 2)) {
-        message('Pump 2 is a technical isolate. Already not considered.')
-      }
-    }
-  }
-
-  if (type %in% c("cases", "pumps")) {
-    if (is.null(origin) == FALSE & is.null(destination) == FALSE) {
-      alpha.omega <- c(origin, destination)
-      if (all(is.numeric(alpha.omega)) | all(is.character(alpha.omega))) {
-        if (origin == destination) {
-          stop("origin and destination are at same address!")
+      if (length(destination) > 1) {
+        if (alpha %in% omega) {
+          message("origin and destination include same address!")
+        }  
+      } else if (length(destination) == 1) {
+        if (alpha == omega) {
+          stop("origin and destination at same address!") 
         }
+      }
+    
+    } else if (is.character(origin) & any(is.character(destination))) {
+      origin <- caseAndSpace(origin)
+      destination <- caseAndSpace(destination)
+      
+      valid.origin <- origin %in% cholera::landmark.squares$name | 
+                      origin %in% cholera::landmarks$name
+      valid.destination <- destination %in% cholera::landmark.squares$name | 
+                           destination %in% cholera::landmarks$name
+       
+      if (!valid.origin) stop('Invalid origin landmark name.')
+      if (all(!valid.destination)) stop('Invalid origin landmark names.')
+
+      if (length(destination) > 1) {
+        if (any(origin %in% destination)) {
+          message("origin and destination include same address!")
+          destination <- destination[valid.destination]
+        }  
+      } else if (length(destination) == 1) {
+        if (origin == destination) {
+          stop("origin and destination are the same!") 
+        }
+      }
+    }
+
+  } else if (type == "pumps") {
+    if (origin == 2) {
+      stop('Pump 2 is an isolate (excluded). Choose another.')
+    }
+    
+    if (length(destination) > 1) {
+      if (2L %in% abs(destination)) {
+        message('Pump 2 is an isolate (excluded).')
+        destination <- destination[abs(destination) != 2L]
+      } else if (origin %in% abs(destination)) {
+        message("origin and destination include same pumps!")
+        destination <- destination[abs(destination) %in% origin]
+       } 
+    } else if (length(destination) == 1) {
+      if (identical(origin, destination)) {
+        stop("origin and destination are the same pump!")
       }
     }
   }
@@ -133,7 +174,51 @@ walkingPath <- function(origin = 1, destination = NULL, type = "case-pump",
   # ----- #
 
   if (type == "case-pump") {
-    if (!is.null(origin)) {
+    if (is.null(origin)) {
+      if (is.null(destination)) {
+        stop("You must provide a destination!")
+      } else if (length(destination) != 1) {
+        stop("If origin is NULL, select only one destination pump.")
+      } else if (destination < 0) {
+        stop("If origin is NULL, no negative selection for destination.")
+      } else {
+        if (is.numeric(destination)) {
+          if (any(abs(destination) %in% p.ID == FALSE)) {
+            txt1 <- 'With type = "case-pump" and vestry = '
+            txt2 <- ', 1 >= |destination| <= '
+            stop(txt1, vestry, txt2, p.count, ".")
+          } else {
+            if (all(destination < 0)) {
+              p.nodes <- nodes[nodes$pump != 0, ]
+              alter.node <- p.nodes[!p.nodes$pump %in% abs(destination), "node"]
+            } else if (all(destination > 0)) {
+              alter.node <- nodes[nodes$pump %in% destination, "node"]
+            }
+          }
+
+          if (null.origin.landmark) {
+            sel <- nodes$anchor > 0
+          } else {
+            sel <- nodes$anchor > 0 & nodes$anchor < 20000L
+          }
+
+          egos <- nodes[sel, "node"]
+        }
+
+        if (weighted) {
+          d <- vapply(egos, function(x) {
+            igraph::distances(g, x, alter.node, weights = edges$d)
+          }, numeric(1L))
+        } else {
+          d <- vapply(egos, function(x) {
+            igraph::distances(g, x, alter.node)
+          }, numeric(1L))
+        }
+
+        sel <- which.min(d)
+        ego.node <- nodes[nodes$node %in% names(sel), "node"]
+      }
+    } else {
       if (observed) {
         if (is.numeric(origin)) {
           if (origin %in% seq_len(ct)) {
@@ -223,47 +308,6 @@ walkingPath <- function(origin = 1, destination = NULL, type = "case-pump",
 
         alter.node <- names(sel)
       }
-
-    } else {
-      if (is.null(destination)) {
-        stop("You must provide a destination!")
-      } else if (length(destination) != 1) {
-        stop("If origin is NULL, select only one destination pump.")
-      } else if (destination < 0) {
-        stop("If origin is NULL, no negative selection for destination.")
-      } else {
-        if (is.numeric(destination)) {
-          if (any(abs(destination) %in% p.ID == FALSE)) {
-            txt1 <- 'With type = "case-pump" and vestry = '
-            txt2 <- ', 1 >= |destination| <= '
-            stop(txt1, vestry, txt2, p.count, ".")
-          } else {
-            if (all(destination < 0)) {
-              p.nodes <- nodes[nodes$pump != 0, ]
-              alter.node <- p.nodes[p.nodes$pump %in% abs(destination) == FALSE,
-                "node"]
-            } else if (all(destination > 0)) {
-              alter.node <- nodes[nodes$pump %in% destination, "node"]
-            }
-          }
-        }
-
-        egos <- nodes[nodes$anchor > 0, "node"]
-
-        if (weighted) {
-          d <- vapply(egos, function(x) {
-            igraph::distances(g, x, alter.node, weights = edges$d)
-          }, numeric(1L))
-        } else {
-          d <- vapply(egos, function(x) {
-            igraph::distances(g, x, alter.node)
-          }, numeric(1L))
-        }
-
-        sel <- which.min(d)
-        node.sel <- nodes$node %in% names(sel) & nodes$anchor != 0
-        ego.node <- nodes[node.sel, "node"]
-      }
     }
 
     if (weighted) {
@@ -274,54 +318,55 @@ walkingPath <- function(origin = 1, destination = NULL, type = "case-pump",
         alter.node)$vpath))
     }
 
-  if (is.null(origin)) {
-    case <- nodes[nodes$node == ego.node & nodes$anchor > 0, "anchor"]
-    if (case > 20000) {
-      case.nm <- cholera::landmarks[cholera::landmarks$case == case, "name"]
-      if (grepl("Square", case.nm)) {
-        case.nm <- unlist(strsplit(case.nm, "-"))[1]
-      }
+    if (is.null(origin)) {
+      # case <- nodes[nodes$node == ego.node & nodes$anchor > 0, "anchor"]
+      case <- nodes[nodes$node == ego.node, "anchor"]
+      if (case > 20000) {
+        case.nm <- cholera::landmarks[cholera::landmarks$case == case, "name"]
+        if (grepl("Square", case.nm)) {
+          case.nm <- unlist(strsplit(case.nm, "-"))[1]
+        }
 
-      out <- list(path = rev(path),
-                  data = data.frame(case = case.nm,
-                                    anchor = case,
-                                    pump.name = p.data[p.data$id ==
-                                      destination, "street"],
-                                    pump = destination,
-                                    distance = d[sel],
-                                    stringsAsFactors = FALSE,
-                                    row.names = NULL))
+        out <- list(path = rev(path),
+                    data = data.frame(case = case.nm,
+                                      anchor = case,
+                                      pump.name = p.data[p.data$id ==
+                                        destination, "street"],
+                                      pump = destination,
+                                      distance = d[sel],
+                                      stringsAsFactors = FALSE,
+                                      row.names = NULL))
+      } else {
+        out <- list(path = rev(path),
+                    data = data.frame(case = case,
+                                      anchor = case,
+                                      pump.name = p.data[p.data$id ==
+                                        destination, "street"],
+                                      pump = destination,
+                                      distance = d[sel],
+                                      stringsAsFactors = FALSE,
+                                      row.names = NULL))
+      }
     } else {
-      out <- list(path = rev(path),
-                  data = data.frame(case = case,
-                                    anchor = case,
-                                    pump.name = p.data[p.data$id ==
-                                      destination, "street"],
-                                    pump = destination,
-                                    distance = d[sel],
-                                    stringsAsFactors = FALSE,
-                                    row.names = NULL))
-    }
-  } else {
-    if (grepl("Square", origin)) {
-      out <- list(path = path,
-                  data = data.frame(case = origin,
-                                    anchor = nodes[nodes$node == ego.node &
-                                      nodes$anchor != 0, "anchor"],
-                                    pump.name = p.name,
-                                    pump = alter.id,
-                                    distance = c.square[nr.pair, "distance"],
-                                    stringsAsFactors = FALSE,
-                                    row.names = NULL))
-    } else {
-      out <- list(path = path,
-                  data = data.frame(case = origin,
-                                    anchor = ego.id,
-                                    pump.name = p.name,
-                                    pump = alter.id,
-                                    distance = d[sel],
-                                    stringsAsFactors = FALSE,
-                                    row.names = NULL))
+      if (grepl("Square", origin)) {
+        out <- list(path = path,
+                    data = data.frame(case = origin,
+                                      anchor = nodes[nodes$node == ego.node &
+                                        nodes$anchor != 0, "anchor"],
+                                      pump.name = p.name,
+                                      pump = alter.id,
+                                      distance = c.square[nr.pair, "distance"],
+                                      stringsAsFactors = FALSE,
+                                      row.names = NULL))
+      } else {
+        out <- list(path = path,
+                    data = data.frame(case = origin,
+                                      anchor = ego.id,
+                                      pump.name = p.name,
+                                      pump = alter.id,
+                                      distance = d[sel],
+                                      stringsAsFactors = FALSE,
+                                      row.names = NULL))
       }
     }
 
@@ -408,9 +453,9 @@ walkingPath <- function(origin = 1, destination = NULL, type = "case-pump",
             alter.case, "anchor"]
           stack.test <- vapply(c(ego.anchor, alter.anchor), length, numeric(1L))
 
-          if (all(stack.test== 1)) {
-            if (ego.anchor == alter.anchor) {
-              stop("origin and destination are at same address!")
+          if (all(stack.test == 1)) {
+            if (ego.anchor %in% alter.anchor) {
+              stop("origin and destination include the same address!")
             }
           }
         }
@@ -445,8 +490,8 @@ walkingPath <- function(origin = 1, destination = NULL, type = "case-pump",
 
       # post caseAndSpace()
       if (is.character(origin) & is.character(destination)) {
-        if (origin == destination) {
-          stop("origin and destination are at same address!")
+        if (origin %in% destination) {
+          stop("origin and destination include the same address!")
         }
       }
 
@@ -689,6 +734,7 @@ walkingPath <- function(origin = 1, destination = NULL, type = "case-pump",
 #'
 #' @param x An object of class "walking_path" created by walkingPath().
 #' @param zoom Logical or Numeric. A numeric value >= 0 controls the degree of zoom. The default is 0.5.
+#' @param stacked Logical. Use stacked fatalities.
 #' @param unit.posts Character. "distance" for mileposts; "time" for timeposts; NULL for no posts.
 #' @param unit.interval Numeric. Set interval between posts. When \code{unit.posts = "distance"}, \code{unit.interval} defaults to 50 meters. When \code{unit.posts = "time"}, \code{unit.interval} defaults to 60 seconds.
 #' @param alpha.level Numeric. Alpha level transparency for path: a value in [0, 1].
@@ -702,10 +748,10 @@ walkingPath <- function(origin = 1, destination = NULL, type = "case-pump",
 #' plot(walkingPath(15), unit.posts = "time")
 #' }
 
-plot.walking_path <- function(x, zoom = 0.5, unit.posts = "distance",
-  unit.interval = NULL, alpha.level = 1, ...) {
+plot.walking_path <- function(x, zoom = 0.5, stacked = TRUE,
+  unit.posts = "distance", unit.interval = NULL, alpha.level = 1, ...) {
 
-  if (class(x) != "walking_path") {
+  if (!inherits(x, "walking_path")) {
     stop('x\'s class must be "walking_path".')
   }
 
@@ -738,7 +784,11 @@ plot.walking_path <- function(x, zoom = 0.5, unit.posts = "distance",
   # St James Workhouse fix
   if (x$type == "case-pump") {
     if (nrow(ego.data) > 1) {
-      ego.data <- ego.data[ego.data$anchor > 20000, ]
+      if (is.numeric(x$origin)) {
+        ego.data <- ego.data[ego.data$anchor < 20000, ]
+      } else if (is.character(x$origin)) {
+        ego.data <- ego.data[ego.data$anchor > 20000, ]
+      }
     }
   } else if (x$type == "cases") {
     if (nrow(ego.data) > 1) {
@@ -906,7 +956,14 @@ plot.walking_path <- function(x, zoom = 0.5, unit.posts = "distance",
     } else stop("If numeric, zoom must be >= 0.")
   } else stop("zoom must either be logical or numeric.")
 
-  plot(cholera::fatalities[, c("x", "y")], xlim = x.rng, ylim = y.rng,
+
+  if (stacked) {
+    plot.data <- cholera::fatalities[, c("x", "y")]
+  } else {
+    plot.data <- cholera::fatalities.address[, c("x", "y")]
+  }
+
+  plot(plot.data, xlim = x.rng, ylim = y.rng,
     xlab = "x", ylab = "y", pch = 15, cex = 0.5, col = "lightgray", asp = 1)
   invisible(lapply(roads.list, lines, col = "lightgray"))
   invisible(lapply(border.list, lines))
@@ -998,21 +1055,8 @@ plot.walking_path <- function(x, zoom = 0.5, unit.posts = "distance",
 
   drawPath(dat, case.color, compute.coords = FALSE)
 
-  if (x$time.unit == "hour") {
-    nominal.time <- paste(round(x$data$time, 1), "hr")
-  } else if (x$time.unit == "minute") {
-    nominal.time <- paste(round(x$data$time, 1), "min")
-  } else if (x$time.unit == "second") {
-    nominal.time <- paste(round(x$data$time), "sec")
-  }
-
-  if (x$distance.unit == "native") {
-    d.unit <- "units;"
-  } else if (x$distance.unit == "meter") {
-    d.unit <- "m;"
-  } else if (x$distance.unit == "yard") {
-    d.unit <- "yd;"
-  }
+  d.unit <- distanceUnit(x$distance.unit)
+  nominal.time <- nominalTime(x$data$time, x$time.unit)
 
   # mileposts #
 
@@ -1163,7 +1207,7 @@ plot.walking_path <- function(x, zoom = 0.5, unit.posts = "distance",
 #' }
 
 print.walking_path <- function(x, ...) {
-  if (class(x) != "walking_path") {
+  if (!inherits(x, "walking_path")) {
     stop('"x"\'s class must be "walking_path".')
   }
 

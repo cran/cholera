@@ -7,10 +7,11 @@
 #' @param label Logical. TRUE adds text label.
 #' @param pos Numeric. Position of label.
 #' @param cex Numeric. point cex.
+#' @param latlong Logical. Use c("lon". "lat") or c("x", "y").
 #' @export
 
 addPump <- function(pump.select = NULL, vestry = FALSE, col = NULL, pch = 24,
-  label = TRUE, pos = 1, cex = 1) {
+  label = TRUE, pos = 1, cex = 1, latlong = FALSE) {
 
   if (vestry) {
     p.data <- cholera::pumps.vestry
@@ -18,17 +19,23 @@ addPump <- function(pump.select = NULL, vestry = FALSE, col = NULL, pch = 24,
     p.data <- cholera::pumps
   }
 
+  if (latlong) {
+    vars <- c("lon", "lat")
+  } else {
+    vars <- c("x", "y")
+  }
+
   p.count <- nrow(p.data)
   p.ID <- seq_len(p.count)
 
   if (is.null(pump.select) == FALSE) {
     if (is.numeric(pump.select) == FALSE) {
-      stop('pump.select must be numeric.')
+      stop('pump.select must be numeric.', call. = FALSE)
     }
 
     if (any(abs(pump.select) %in% p.ID == FALSE)) {
       stop("With vestry = ", vestry, ", ", "1 >= |pump.select| <= ", p.count,
-        ".")
+        ".", call. = FALSE)
     }
 
     if (all(pump.select > 0)) {
@@ -39,32 +46,30 @@ addPump <- function(pump.select = NULL, vestry = FALSE, col = NULL, pch = 24,
 
     if (is.null(col)) {
       sel.col <- snowColors(vestry)[paste0("p", p.ID[sel])]
-      points(p.data[sel, c("x", "y")], pch = pch, col = sel.col, cex = cex)
+      points(p.data[sel, vars], pch = pch, col = sel.col, cex = cex)
 
       if (label) {
-        text(p.data[sel, c("x", "y")], pos = pos,
-          labels = paste0("p", p.ID[sel]), col = sel.col)
+        text(p.data[sel, vars], pos = pos, labels = paste0("p", p.ID[sel]))
       }
     } else {
-      points(p.data[sel, c("x", "y")], pch = pch, col = col, cex = cex)
+      points(p.data[sel, vars], pch = pch, col = col, cex = cex)
 
       if (label) {
-        text(p.data[sel, c("x", "y")], pos = pos,
-          labels = paste0("p", p.ID[sel]), col = col)
+        text(p.data[sel, vars], pos = pos, labels = paste0("p", p.ID[sel]),
+          col = col)
       }
     }
 
   } else {
     if (is.null(col)) {
       sel.col <- snowColors(vestry)[paste0("p", p.ID)]
-      points(p.data[, c("x", "y")], pch = pch, col = sel.col, cex = cex)
+      points(p.data[, vars], pch = pch, col = sel.col, cex = cex)
     } else {
-      points(p.data[, c("x", "y")], pch = pch, col = col, cex = cex)
+      points(p.data[, vars], pch = pch, col = col, cex = cex)
     }
 
     if (label) {
-      text(p.data[, c("x", "y")], pos = pos, labels = paste0("p", p.ID),
-        col = col)
+      text(p.data[, vars], pos = pos, labels = paste0("p", p.ID), col = col)
     }
   }
 }

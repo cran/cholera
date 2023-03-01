@@ -1,7 +1,7 @@
 #' Compute shortest distances or paths to selected pumps.
 #'
 #' @param pump.select Numeric. Pump candidates to consider. Default is \code{NULL}: all pumps are used. Otherwise, selection by a vector of numeric IDs: 1 to 13 for \code{pumps}; 1 to 14 for \code{pumps.vestry}. Negative selection allowed.
-#' @param metric Character. "eucldidean" or "walking".
+#' @param metric Character. "euclidean" or "walking".
 #' @param vestry Logical. \code{TRUE} uses the 14 pumps from the Vestry Report. \code{FALSE} uses the 13 in the original map.
 #' @param weighted Logical. \code{TRUE} computes shortest path in terms of road length. \code{FALSE} computes shortest path in terms of the number of nodes.
 #' @param case.set Character. "observed", "expected", or "snow".
@@ -19,17 +19,14 @@ nearestPump <- function(pump.select = NULL, metric = "walking", vestry = FALSE,
   time.unit = "second", walking.speed = 5, multi.core = TRUE,
   dev.mode = FALSE) {
 
-  if (vestry) p.id <- cholera::pumps.vestry$id else p.id <- cholera::pumps$id
+  if (vestry) {
+    pump.data <- cholera::pumps.vestry
+  } else {
+    pump.data <- cholera::pumps
+  }
 
-  p.count <- max(p.id)
-
-  if (is.null(pump.select) == FALSE) {
-    if (any(abs(pump.select) %in% p.id == FALSE)) {
-      stop('With vestry = ', vestry, ', 1 >= |pump.select| <= ', p.count, ".")
-    } else if (all(pump.select < 0)) {
-      p.sel <- p.id[p.id %in% abs(pump.select) == FALSE]
-    } else if (all(pump.select > 0)) p.sel <- pump.select
-  } else p.sel <- p.id
+  p.sel <- selectPump(pump.data, pump.select = pump.select, metric = metric, 
+    vestry = vestry)
 
   if (case.set %in% c("observed", "expected", "snow") == FALSE) {
     stop('case.set must be "observed", "expected" or "snow".')
@@ -67,14 +64,17 @@ nearestPump <- function(pump.select = NULL, metric = "walking", vestry = FALSE,
 
     if (dev.mode | win.exception) {
       cl <- parallel::makeCluster(cores)
-      parallel::clusterExport(cl = cl, envir = environment(), varlist = "obs")
+      parallel::clusterExport(cl = cl, envir = environment(), 
+        varlist = c("p.sel", "obs", "vestry"))
       distance.data <- parallel::parLapply(cl, anchors, function(x) {
-        cholera::euclideanPath(x, destination = p.sel, observed = obs)$data
+        cholera::euclideanPath(x, destination = p.sel, observed = obs,
+          vestry = vestry)$data
       })
       parallel::stopCluster(cl)
     } else {
       distance.data <- parallel::mclapply(anchors, function(x) {
-        cholera::euclideanPath(x, destination = p.sel, observed = obs)$data
+        cholera::euclideanPath(x, destination = p.sel, observed = obs,
+          vestry = vestry)$data
       }, mc.cores = cores)
     }
 

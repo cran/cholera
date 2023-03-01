@@ -67,9 +67,9 @@ profile2D <- function(angle = 0, pump = 7, vestry = FALSE, type = "base",
     profile.data <- rbind(profileA, profileB, profileAB)
     facet <- c("Inside", "Outside", "In & Out")
     profile.data$facet <- factor(profile.data$facet, levels = facet)
-    p <- ggplot(data = profile.data, aes(x = axis, xend = axis, y = 0,
-                yend = profile.data$count)) +
-      geom_segment(aes(color = profile.data$Location)) +
+      p <- ggplot(data = profile.data, aes_string(x = "axis", y = 0,
+        xend = "axis", yend = "count")) +
+      geom_segment(aes_string(color = "Location")) +
       scale_colour_manual(values = c("red", "blue"),
                           guide = guide_legend(title = "Location")) +
       facet_wrap(~ facet, nrow = 3) +
@@ -204,8 +204,10 @@ profilePerspective <- function(output = "inside", pump = 7, angle = 0,
   coords <- lapply(cases, function(x) orthogonalCoordinates(x, angle = angle))
   coords <- stats::setNames(do.call(rbind, coords), vars)
 
-  dat <- cholera::fatalities.address[cholera::fatalities.address$anchor %in%
-    cases, ]
+  sel <- cholera::fatalities.address$anchor %in% cases
+  dat <- cholera::fatalities.address[sel, ]
+  dat <- dat[, setdiff(names(dat), c("lon", "lat"))]
+
   dat <- cbind(dat, coords)
 
   pump.data <- cholera::pumps[cholera::pumps$id == pump, c("x", "y")]
@@ -213,7 +215,7 @@ profilePerspective <- function(output = "inside", pump = 7, angle = 0,
   pump.data$ortho.y <- pump.data$y
   pump.data$anchor <- 0
   pump.data$case.count <- 0
-  pump.data <- pump.data[, names(dat)]
+  pump.data <- pump.data[, setdiff(names(dat), c("lon", "lat"))]
 
   dat <- rbind(pump.data, dat)
   dat <- dat[order(dat$ortho.x, dat$ortho.y), ]
@@ -239,7 +241,7 @@ profilePerspective <- function(output = "inside", pump = 7, angle = 0,
 #' @export
 
 plot.profile_perspective <- function(x, ...) {
-  if (class(x) != "profile_perspective") {
+  if (!inherits(x, "profile_perspective")) {
     stop('"x"\'s class needs to be "profile_perspective".')
   }
 

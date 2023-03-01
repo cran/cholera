@@ -51,16 +51,15 @@ simulateFatalities <- function(compute = FALSE, multi.core = TRUE,
 
         within.radius <- lapply(cholera::road.segments$id, function(x) {
           dat <- cholera::road.segments[cholera::road.segments$id == x, ]
-          test1 <- cholera::withinRadius(case, dat[, c("x1", "y1")])
-          test2 <- cholera::withinRadius(case, dat[, c("x2", "y2")])
+          test1 <- withinRadius(case, dat[, c("x1", "y1")])
+          test2 <- withinRadius(case, dat[, c("x2", "y2")])
           if (any(test1, test2)) unique(dat$id)
         })
 
         within.radius <- unlist(within.radius)
 
         ortho.proj.test <- lapply(within.radius, function(seg.id) {
-          ortho.data <-
-            cholera::orthogonalProjection(as.numeric(row.names(case)),
+          ortho.data <- orthogonalProjection(as.numeric(row.names(case)),
             seg.id, observed = FALSE, case.data = case)
           x.proj <- ortho.data$x.proj
           y.proj <- ortho.data$y.proj
@@ -147,16 +146,15 @@ simulateFatalities <- function(compute = FALSE, multi.core = TRUE,
 
         within.radius <- lapply(cholera::road.segments$id, function(x) {
           dat <- cholera::road.segments[cholera::road.segments$id == x, ]
-          test1 <- cholera::withinRadius(case, dat[, c("x1", "y1")])
-          test2 <- cholera::withinRadius(case, dat[, c("x2", "y2")])
+          test1 <- withinRadius(case, dat[, c("x1", "y1")])
+          test2 <- withinRadius(case, dat[, c("x2", "y2")])
           if (any(test1, test2)) unique(dat$id)
         })
 
         within.radius <- unlist(within.radius)
 
         ortho.proj.test <- lapply(within.radius, function(seg.id) {
-          ortho.data <-
-            cholera::orthogonalProjection(as.numeric(row.names(case)),
+          ortho.data <- orthogonalProjection(as.numeric(row.names(case)),
             seg.id, observed = FALSE, case.data = case)
           x.proj <- ortho.data$x.proj
           y.proj <- ortho.data$y.proj

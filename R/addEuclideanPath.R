@@ -52,21 +52,8 @@ addEuclideanPath <- function(origin, destination = NULL, type = "case-pump",
     text(alter.xy, labels = destination.case, pos = 1, col = case.color)
   }
 
-  if (x$time.unit == "hour") {
-    nominal.time <- paste(round(x$t, 1), "hr")
-  } else if (x$time.unit == "minute") {
-    nominal.time <- paste(round(x$t, 1), "min")
-  } else if (x$time.unit == "second") {
-    nominal.time <- paste(round(x$t, 1), "sec")
-  }
-
-  if (x$distance.unit == "native") {
-    d.unit <- "units;"
-  } else if (x$distance.unit == "meter") {
-    d.unit <- "m;"
-  } else if (x$distance.unit == "yard") {
-    d.unit <- "yd;"
-  }
+  d.unit <- distanceUnit(x$distance.unit)
+  nominal.time <- nominalTime(x$t, x$time.unit)
 
   # mileposts #
 
@@ -95,7 +82,7 @@ addEuclideanPath <- function(origin, destination = NULL, type = "case-pump",
         h <- seq(0, tot, unit.interval) / unitMeter(1)
       } else if (unit.posts == "time") {
         tot <- distanceTime(unitMeter(stats::dist(dat),
-          output.unit = "nominal"), walking.speed = x$walking.speed)
+          distance.unit = "nominal"), walking.speed = x$walking.speed)
         h <- seq(0, tot, unit.interval) * 1000 * x$walking.speed / 60^2 /
           unitMeter(1)
       } else {

@@ -9,15 +9,15 @@ orthoProj <- function(fatalities, case.id, cores, dev.mode) {
 
     within.radius <- lapply(cholera::road.segments$id, function(id) {
       seg.data <- cholera::road.segments[cholera::road.segments$id == id, ]
-      test1 <- cholera::withinRadius(case.data, seg.data[, c("x1", "y1")])
-      test2 <- cholera::withinRadius(case.data, seg.data[, c("x2", "y2")])
+      test1 <- withinRadius(case.data, seg.data[, c("x1", "y1")])
+      test2 <- withinRadius(case.data, seg.data[, c("x2", "y2")])
       if (any(test1, test2)) unique(seg.data$id)
     })
 
     within.radius <- unlist(within.radius)
 
     ortho.proj.test <- lapply(within.radius, function(seg.id) {
-      ortho.data <- cholera::orthogonalProjection(case, seg.id)
+      ortho.data <- orthogonalProjection(case, seg.id)
       x.proj <- ortho.data$x.proj
       y.proj <- ortho.data$y.proj
 
@@ -80,7 +80,7 @@ orthoProjB <- function(fatalities, road.segment.fix, cores, dev.mode) {
     seg.id <- names(road.segment.fix[i])
 
     ortho.data <- lapply(case.data$case, function(x) {
-      cholera::orthogonalProjection(x, seg.id)
+      orthogonalProjection(x, seg.id)
     })
 
     ortho.data <- do.call(rbind, ortho.data)

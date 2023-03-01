@@ -5,10 +5,10 @@
 \title{Add observed case(s) to plot.}
 \usage{
 addCase(case = 1, type = "observed", token = "both", text.size = 0.5,
-  col = "red", pos = 1)
+  pch = 1, cex = 1, point.lwd = 2, col = "black", pos = 1)
 }
 \arguments{
-\item{case}{Numeric. Vector of case ID(s). NULL plots all cases.}
+\item{case}{Numeric or Character. Vector of case ID(s). "all" plots all cases. "anchor" plots anchor cases.}
 
 \item{type}{Character. Type of case: "observed" or "expected".}
 
@@ -16,12 +16,21 @@ addCase(case = 1, type = "observed", token = "both", text.size = 0.5,
 
 \item{text.size}{Numeric. Size of case ID text.}
 
+\item{pch}{Numeric. pch.}
+
+\item{cex}{Numeric. cex.}
+
+\item{point.lwd}{Numeric. Point lwd.}
+
 \item{col}{Character. Color.}
 
 \item{pos}{Numeric. Text position.}
 }
 \description{
 Add case(s), as "address" or "fatalities" as points or IDs, to a plot.
+}
+\note{
+type, token, text.size, pch, cex, point.lwd and pos relevant only when case is numeric.
 }
 \examples{
 snowMap(add.cases = FALSE)

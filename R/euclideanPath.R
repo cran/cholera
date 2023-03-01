@@ -625,7 +625,7 @@ euclideanPath <- function(origin = 1, destination = NULL, type = "case-pump",
 plot.euclidean_path <- function(x, zoom = 0.5, unit.posts = "distance",
   unit.interval = NULL, ...) {
 
-  if (class(x) != "euclidean_path") {
+  if (!inherits(x, "euclidean_path")) {
     stop('"x"\'s class must be "euclidean_path".', call. = FALSE)
   }
 
@@ -805,22 +805,9 @@ plot.euclidean_path <- function(x, zoom = 0.5, unit.posts = "distance",
     title(main = paste("Pump", x$data$pumpA, "to Pump", x$data$pumpB))
   }
 
-  if (x$time.unit == "hour") {
-    nominal.time <- paste(round(x$t, 1), "hr")
-  } else if (x$time.unit == "minute") {
-    nominal.time <- paste(round(x$t, 1), "min")
-  } else if (x$time.unit == "second") {
-    nominal.time <- paste(round(x$t, 1), "sec")
-  }
-
-  if (x$distance.unit == "native") {
-    d.unit <- "units;"
-  } else if (x$distance.unit == "meter") {
-    d.unit <- "m;"
-  } else if (x$distance.unit == "yard") {
-    d.unit <- "yd;"
-  }
-
+  d.unit <- distanceUnit(x$distance.unit)
+  nominal.time <- nominalTime(x$t, x$time.unit)
+  
   # mileposts #
 
   if (is.null(unit.posts)) {
@@ -910,7 +897,7 @@ plot.euclidean_path <- function(x, zoom = 0.5, unit.posts = "distance",
 #' print(euclideanPath(1))
 
 print.euclidean_path <- function(x, ...) {
-  if (class(x) != "euclidean_path") {
+  if (!inherits(x, "euclidean_path")) {
     stop('"x"\'s class must be "euclidean_path".')
   }
 

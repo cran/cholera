@@ -5,7 +5,8 @@
 \title{Add Voronoi cells.}
 \usage{
 addVoronoi(pump.select = NULL, vestry = FALSE, case.location = "nominal",
-  color = "black", line.type = "solid", line.width = 1)
+  color = "black", line.type = "solid", line.width = 1,
+  latlong = FALSE)
 }
 \arguments{
 \item{pump.select}{Numeric. Default is NULL; all pumps are used. Otherwise, selection by a vector of numeric IDs: 1 to 13 for \code{pumps}; 1 to 14 for \code{pumps.vestry}. Exclusion (negative selection) is possible (e.g., -6).}
@@ -19,6 +20,8 @@ addVoronoi(pump.select = NULL, vestry = FALSE, case.location = "nominal",
 \item{line.type}{Character. Type of line for cell edges: lty.}
 
 \item{line.width}{Numeric. Width of cell edges: lwd.}
+
+\item{latlong}{Logical. Use estimated longitude and latitude.}
 }
 \description{
 Add Voronoi cells.
@@ -28,5 +31,5 @@ This function uses \code{deldir::deldir()}.
 }
 \examples{
 snowMap()
-addVoronoi()
+# addVoronoi()
 }

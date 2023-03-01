@@ -4,7 +4,8 @@
 \alias{plot.euclidean}
 \title{Plot method for neighborhoodEuclidean().}
 \usage{
-\method{plot}{euclidean}(x, type = "star", add.observed.points = TRUE, msg = FALSE, ...)
+\method{plot}{euclidean}(x, type = "star", add.observed.points = TRUE,
+  add.title = TRUE, msg = FALSE, ...)
 }
 \arguments{
 \item{x}{An object of class "euclidean" created by \code{neighborhoodEuclidean()}.}
@@ -12,6 +13,8 @@
 \item{type}{Character. "star", "area.points" or "area.polygons". "area" flavors only valid when \code{case.set = "expected"}.}
 
 \item{add.observed.points}{Logical. Add observed fatality "addresses".}
+
+\item{add.title}{Logical. Add title.}
 
 \item{msg}{Logical. Toggle in-progress messages.}
 

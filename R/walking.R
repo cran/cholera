@@ -28,31 +28,13 @@ neighborhoodWalking <- function(pump.select = NULL, vestry = FALSE,
   weighted = TRUE, case.set = "observed", multi.core = TRUE,
   dev.mode = FALSE) {
 
-  if (is.null(pump.select) == FALSE) {
-    if (is.numeric(pump.select) == FALSE) {
-      stop("pump.select must be numeric.", call. = FALSE)
-    }
-    if (length(pump.select) == 1) {
-      if (pump.select == 2) {
-        msg1 <- "You can't just select the pump on Adam and Eve Court (#2).\n"
-        msg2 <- " It's an isolate, unreachable for observed fatalities."
-        stop(msg1, msg2, call. = FALSE)
-      }
-    }
-
-    if (vestry) {
-      p.count <- nrow(cholera::pumps.vestry)
-    } else {
-      p.count <- nrow(cholera::pumps)
-    }
-
-    p.ID <- seq_len(p.count)
-
-    if (any(abs(pump.select) %in% p.ID == FALSE)) {
-      stop('With vestry = ', vestry, ', 1 >= |pump.select| <= ', p.count,
-        call. = FALSE)
-    }
+  if (vestry) {
+    pump.data <- cholera::pumps.vestry
+  } else {
+    pump.data <- cholera::pumps
   }
+
+  pump.id <- selectPump(pump.data, pump.select = pump.select, vestry = vestry)
 
   if (case.set %in% c("observed", "expected", "snow") == FALSE) {
     stop('case.set must be "observed", "expected" or "snow".', call. = FALSE)
@@ -72,10 +54,9 @@ neighborhoodWalking <- function(pump.select = NULL, vestry = FALSE,
   nearest.path <- nearest.data$path
 
   if (case.set == "snow") {
-    snow.anchors <- cholera::snow.neighborhood[cholera::snow.neighborhood %in%
-      cholera::fatalities.address$anchor]
-    nearest.pump <- data.frame(case = snow.anchors,
-                               pump = nearest.dist$pump)
+    sel <- cholera::snow.neighborhood %in% cholera::fatalities.address$anchor
+    snow.anchors <- cholera::snow.neighborhood[sel]
+    nearest.pump <- data.frame(case = snow.anchors, pump = nearest.dist$pump)
   } else if (case.set == "observed") {
     nearest.pump <- data.frame(case = cholera::fatalities.address$anchor,
                                pump = nearest.dist$pump)
@@ -120,6 +101,7 @@ neighborhoodWalking <- function(pump.select = NULL, vestry = FALSE,
 #' @param x An object of class "walking" created by \code{neighborhoodWalking()}.
 #' @param type Character. "roads", "area.points" or "area.polygons". "area" flavors only valid when \code{case.set = "expected"}.
 #' @param msg Logical. Toggle in-progress messages.
+#' @param tsp.method Character. Traveling salesperson problem algorithm.
 #' @param ... Additional plotting parameters.
 #' @return A base R plot.
 #' @note When plotting area graphs with simulated data (i.e., \code{case.set = "expected"}), there may be discrepancies between observed cases and expected neighborhoods, particularly between neighborhoods.
@@ -132,7 +114,9 @@ neighborhoodWalking <- function(pump.select = NULL, vestry = FALSE,
 #' plot(neighborhoodWalking(case.set = "expected"), type = "area.polygons")
 #' }
 
-plot.walking <- function(x, type = "roads", msg = FALSE, ...) {
+plot.walking <- function(x, type = "roads", msg = FALSE,
+  tsp.method = "repetitive_nn", ...) {
+
   if (type %in% c("roads", "area.points", "area.polygons") == FALSE) {
     stop('type must be "roads", "area.points", "area.polygons".')
   }
@@ -251,6 +235,32 @@ plot.walking <- function(x, type = "roads", msg = FALSE, ...) {
 
       names(neighborhood.cases) <- pearl.neighborhood
 
+      # plot(neighborhoodWalking(-(7:8), case.set = "expected"),
+      #   type = "area.polygons")
+      neg78 <- identical(as.integer(x$pumpID), c(1:6, 9:13)) |
+               identical(as.integer(x$pumpID), c(1:6, 9:14))
+
+      if (neg78) {
+        # Air Street: 2344, 2346
+        # Chapel Place: 7302
+        # Queen Street (III): 3390
+        sel <- !neighborhood.cases$`9` %in% c(2344, 2346, 3390, 7302)
+        neighborhood.cases$`9` <- neighborhood.cases$`9`[sel]
+      }
+
+      # plot(neighborhoodWalking( case.set = "expected"), "area.polygons")
+      all.pumps <- identical(as.integer(x$pumpID), c(1:13)) |
+                   identical(as.integer(x$pumpID), c(1:14))
+
+     if (all.pumps) {
+        # Air Street: 2344, 2346
+        # Queen Street (III): 3390
+        sel <- !neighborhood.cases$`8` %in% c(2344, 2346)
+        neighborhood.cases$`8` <- neighborhood.cases$`8`[sel]
+        sel <- !neighborhood.cases$`9` %in% 3390
+        neighborhood.cases$`9` <- neighborhood.cases$`9`[sel]
+      }
+
       if ((.Platform$OS.type == "windows" & x$cores > 1) | x$dev.mode) {
         cl <- parallel::makeCluster(x$cores)
         parallel::clusterExport(cl = cl, envir = environment(),
@@ -259,13 +269,13 @@ plot.walking <- function(x, type = "roads", msg = FALSE, ...) {
         periphery.cases <- parallel::parLapply(cl, neighborhood.cases,
           peripheryCases)
         pearl.string <- parallel::parLapply(cl, periphery.cases,
-          travelingSalesman)
+          travelingSalesman, tsp.method = tsp.method)
         parallel::stopCluster(cl)
       } else {
         periphery.cases <- parallel::mclapply(neighborhood.cases,
           peripheryCases, mc.cores = x$core)
         pearl.string <- parallel::mclapply(periphery.cases, travelingSalesman,
-          mc.cores = x$cores)
+          tsp.method = tsp.method, mc.cores = x$cores)
       }
 
       invisible(lapply(names(pearl.string), function(nm) {

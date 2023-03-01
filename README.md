@@ -1,29 +1,32 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
+
 ## cholera: amend, augment and aid analysis of Snow’s cholera map
 
 #### package features
 
--   Fixes three apparent coding errors in Dodson and Tobler’s 1992
-    digitization of Snow’s map.
--   “Unstacks” the data in two ways to make analysis and visualization
-    easier and more meaningful.
--   Computes and visualizes “pump neighborhoods” based on Euclidean
-    distance (Voronoi tessellation) and walking distance.
--   Overlay graphical elements and features like kernel density
-    estimates, Voronoi diagrams, Snow’s Broad Street neighborhood, and
-    notable landmarks (John Snow’s residence, the Lion Brewery, etc.)
-    via `add*()` functions.
--   Includes a variety of functions to find and highlight cases, roads,
-    pumps and paths.
--   Appends street names to the `roads` data set.
--   Includes the revised pump data used in the second version of Snow’s
-    map from the Vestry report, which also includes the “correct”
-    location of the Broad Street pump.
--   Adds two aggregate time series fatalities data sets, taken from the
-    Vestry report.
--   With ‘cholera’ version >= 0.7.0, support for parallel computation
-    now includes Windows in addition to Linux and macOS.
+- Fixes three apparent coding errors in Dodson and Tobler’s 1992
+  digitization of Snow’s map.
+- “Unstacks” the data in two ways to make analysis and visualization
+  easier and more meaningful.
+- Computes and visualizes “pump neighborhoods” based on Euclidean
+  distance (Voronoi tessellation) and walking distance.
+- Overlay graphical elements and features like kernel density estimates,
+  Voronoi diagrams, Snow’s Broad Street neighborhood, and notable
+  landmarks (John Snow’s residence, the Lion Brewery, etc.) via `add*()`
+  functions.
+- Includes a variety of functions to find and highlight cases, roads,
+  pumps and paths.
+- Appends street names to the `roads` data set.
+- Includes the revised pump data used in the second version of Snow’s
+  map from the Vestry report, which also includes the “correct” location
+  of the Broad Street pump.
+- Adds two aggregate time series fatalities data sets, taken from the
+  Vestry report.
+- Support for parallel computation on Linux, macOS and Windows.
+- With ‘cholera’ version \>= 0.8.0, preliminary and provisional support
+  for georeferenced (longitude and latitude) versions of data and
+  functions. [Details below](#longitude-and-latitude).
 
 #### getting started
 
@@ -179,7 +182,7 @@ To explore “expected” walking neighborhoods, add the case.set =
 “expected” argument:
 
 ``` r
-plot(neighborhoodWalking(pump.select =  6:7, case.set = "expected"), type = "area.polygons")
+plot(neighborhoodWalking(pump.select = 6:7, case.set = "expected"), type = "area.polygons")
 plot(neighborhoodWalking(pump.select = -7, case.set = "expected"), type = "area.polygons")
 ```
 
@@ -207,14 +210,61 @@ plot(neighborhoodVoronoi(pump.select = -7))
 
 <img src="man/figures/README-unnamed-chunk-11-1.png" width="50%" /><img src="man/figures/README-unnamed-chunk-11-2.png" width="50%" />
 
-#### note on computational performance
+#### parallelization
 
-Parallel computation is implemented using the ‘parallel’ package, which
-is part of the base R distribution. To enable parallelization, set
-`multi.core = TRUE` where available. Note that although some precautions
-are taken in R.app on macOS, the developers of the ‘parallel’ package
-strongly discourage against using parallelization within a GUI or
-embedded environment. See `vignette("Parallelization")` for details.
+Parallelization is implemented using the ‘parallel’ package, which is
+part of the base R distribution. Where applicable, parallelization is
+enabled by default via `multi.core = TRUE` (you can also set or limit
+the number of cores by passing an integer or by setting
+`multi.core = FALSE`. Note that although some precautions are taken in
+the R application, the developers of the ‘parallel’ package strongly
+discourage against using parallelization within a GUI or embedded
+environment. See `vignette("Parallelization")` for details. That said,
+I’ve had few, if any, problems with using the package in parallel on
+macOS with either the [R application](https://www.r-project.org/) or the
+[RStudio IDE](https://posit.co/products/open-source/rstudio/).
+
+#### longitude and latitude
+
+[‘cholera’](https://cran.r-project.org/package=cholera) now has
+preliminary, limited support for georeferenced (longitude and latitude)
+versions of some data and functions. This support goes beyond a proof of
+concept but is currently less than a complete re-implementation of the
+package’s native (non-georeferenced) functionality. The georeferencing
+was done manually using [QGIS](https://qgis.org/en/site/); specifically
+its Georeferencer tool and its interface to
+[OpenStreetMap](https://www.openstreetmap.org). The target coordinate
+reference system (CRS) of these data is EPSG:4326. What makes this
+effort preliminary is that the choice of ground control points,
+transformation type (e.g., thin plate spine), and resampling method
+(e.g., nearest neighbor) are still in flux. Thus, results and
+coordinates may change in the future.
+
+Four functions are available:
+
+``` r
+snowMap(latlong = TRUE)
+```
+
+<img src="man/figures/README-latlong-1.png" width="50%" />
+
+``` r
+plot(latlongNeighborhoodVoronoi(), euclidean.paths = TRUE)
+```
+
+<img src="man/figures/README-latlong_voronoi-1.png" width="50%" />
+
+``` r
+plot(latlongWalkingPath())
+```
+
+<img src="man/figures/README-latlong_walking_path-1.png" width="50%" />
+
+``` r
+plot(latlongNeighborhoodWalking())
+```
+
+<img src="man/figures/README-latlong_walking-1.png" width="50%" />
 
 #### vignettes
 
@@ -235,7 +285,7 @@ using “addresses” as the unit of observation.
 
 [Roads](https://github.com/lindbrook/cholera/blob/master/docs/vignettes/roads.md)
 covers issues related to roads. This includes discussion of how and why
-I move pump #5 from Queen Street (I) to Marlborough Mews, the overall
+I move pump \#5 from Queen Street (I) to Marlborough Mews, the overall
 structure of the `roads` data set, “valid” road names, and my
 back-of-the-envelope translation from the map’s nominal scale to meters
 (and yards).
@@ -288,6 +338,11 @@ polygons](https://github.com/lindbrook/cholera/blob/master/docs/notes/pump.neigh
 discusses the tradeoff between using points() and polygon() to plot
 “expected” neighborhood using area plots and the computation of polygon
 vertices.
+
+[computing Voronoi diagrams with geographic
+data](https://github.com/lindbrook/cholera/blob/master/docs/notes/latlongVoronoi.md)
+describes the problems and a working solution for computing Voronoi
+diagrams with data that use latitude and longitude.
 
 [references](https://github.com/lindbrook/cholera/blob/master/docs/notes/references.md)
 is an informal list of articles and books about cholera, John Snow and

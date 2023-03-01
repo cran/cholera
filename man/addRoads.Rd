@@ -4,9 +4,11 @@
 \alias{addRoads}
 \title{Add all streets and roads to plot.}
 \usage{
-addRoads(col = "gray")
+addRoads(latlong = FALSE, col = "gray")
 }
 \arguments{
+\item{latlong}{Logical. Use estimated longitude and latitude.}
+
 \item{col}{Character. Color}
 }
 \description{

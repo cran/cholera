@@ -29,6 +29,7 @@ neighborhoodEuclidean <- function(pump.select = NULL, vestry = FALSE,
   }
 
   cores <- multiCore(multi.core)
+  snow.colors <- snowColors(vestry = vestry)
 
   if (vestry) {
     pump.data <- cholera::pumps.vestry
@@ -36,31 +37,8 @@ neighborhoodEuclidean <- function(pump.select = NULL, vestry = FALSE,
     pump.data <- cholera::pumps
   }
 
-  p.count <- nrow(pump.data)
-  p.ID <- seq_len(p.count)
-  snow.colors <- snowColors(vestry = vestry)
-
-  if (is.null(pump.select)) {
-    pump.id <- pump.data$id
-  } else {
-    if (is.numeric(pump.select) == FALSE) {
-      stop("pump.select must be numeric.", call. = FALSE)
-    }
-    if (any(abs(pump.select) %in% p.ID) == FALSE) {
-      stop('With vestry = ', vestry, ', 1 >= |pump.select| <= ', p.count, ".",
-        call. = FALSE)
-    }
-
-    if (all(pump.select > 0)) {
-      pump.id <- pump.data$id[pump.select]
-    } else if (all(pump.select < 0)) {
-      sel <- pump.data$id %in% abs(pump.select) == FALSE
-      pump.id <- pump.data$id[pump.select]
-    } else {
-      stop("Use all positive or all negative numbers for pump.select.",
-        call. = FALSE)
-    }
-  }
+  pump.id <- selectPump(pump.data, pump.select = pump.select, 
+    metric = "euclidean", vestry = vestry)
 
   if (case.set == "observed") {
     anchors <- cholera::fatalities.address$anchor
@@ -108,6 +86,7 @@ neighborhoodEuclidean <- function(pump.select = NULL, vestry = FALSE,
 #' @param x An object of class "euclidean" created by \code{neighborhoodEuclidean()}.
 #' @param type Character. "star", "area.points" or "area.polygons". "area" flavors only valid when \code{case.set = "expected"}.
 #' @param add.observed.points Logical. Add observed fatality "addresses".
+#' @param add.title Logical. Add title.
 #' @param msg Logical. Toggle in-progress messages.
 #' @param ... Additional plotting parameters.
 #' @return A base R plot.
@@ -123,7 +102,7 @@ neighborhoodEuclidean <- function(pump.select = NULL, vestry = FALSE,
 #' }
 
 plot.euclidean <- function(x, type = "star", add.observed.points = TRUE,
-  msg = FALSE, ...) {
+  add.title = TRUE, msg = FALSE, ...) {
 
   if (type %in% c("area.points", "area.polygons")) {
     if (x$case.set != "expected") {
@@ -217,15 +196,17 @@ plot.euclidean <- function(x, type = "star", add.observed.points = TRUE,
 
   pumpTokens(x, type)
 
-  if (is.null(x$pump.select)) {
-    title(main = "Pump Neighborhoods: Euclidean")
-  } else {
-    title(main = paste0("Pump Neighborhoods: Euclidean", "\n", "Pumps ",
-      paste(sort(x$pump.select), collapse = ", ")))
-  }
+  if (add.title) {
+    if (is.null(x$pump.select)) {
+      title(main = "Pump Neighborhoods: Euclidean")
+    } else {
+      title(main = paste0("Pump Neighborhoods: Euclidean", "\n", "Pumps ",
+        paste(sort(x$pump.select), collapse = ", ")))
+    }
 
-  if (msg) {
-    if (x$case.set == "expected") message("Done!")
+    if (msg) {
+      if (x$case.set == "expected") message("Done!")
+    }
   }
 }
 

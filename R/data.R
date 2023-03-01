@@ -32,6 +32,8 @@
 #'     \item{\code{case}}{numeric case ID}
 #'     \item{\code{x}}{x-coordinate}
 #'     \item{\code{y}}{y-coordinate}
+#'     \item{\code{lon}}{longitude}
+#'     \item{\code{lat}}{latitude}
 #' }
 #' @seealso \code{\link{caseLocator}}
 #'
@@ -58,6 +60,8 @@
 #'     \item{\code{x}}{x-coordinate}
 #'     \item{\code{y}}{y-coordinate}
 #'     \item{\code{case.count}}{number of fatalities at address}
+#'     \item{\code{lon}}{longitude}
+#'     \item{\code{lat}}{latitude}
 #' }
 #' @seealso
 #' \code{\link{caseLocator}}
@@ -80,6 +84,8 @@
 #'     \item{\code{case}}{numerical case ID}
 #'     \item{\code{x}}{x-coordinate}
 #'     \item{\code{y}}{y-coordinate}
+#'     \item{\code{lon}}{longitude}
+#'     \item{\code{lat}}{latitude}
 #' }
 #' @seealso \code{\link{caseLocator}}
 #'
@@ -103,8 +109,10 @@
 #'     \item{\code{y}}{nominal y-coordinate}
 #'     \item{\code{name}}{landmark name}
 #'     \item{\code{case}}{numeric case ID}
+#'     \item{\code{lon}}{longitude}
+#'     \item{\code{lat}}{latitude}
 #'  }
-#' @note \code{\link{landmarkData}} documents the code for these data.
+#' @note \code{\link{landmarkData}} and \code{\link{latlongLandmarks}} document the code for these data.
 #' @docType data
 "landmarks"
 
@@ -134,6 +142,41 @@
 #' @docType data
 "ortho.proj"
 
+#' Sample of road intersections (segment endpoints).
+#'
+#' @format A list with 2 variables that list randomly re-arranges unique road intersections (segment endpoints).
+#'  \describe{
+#'     \item{\code{one}}{endpoints with 1 intersection}
+#'     \item{\code{three}}{endpoints with 3 intersections}
+#'  }
+#' @docType data
+"rd.sample"
+
+#' Partitioned map frame points (segment endpoints).
+#'
+#' @format A list of 3 vectors length 19, 19 and 18 from cholera::roads$id.
+#'  \describe{
+#'     \item{\code{frame.sample}}{cholera::roads$id}
+#'  }
+#' @docType data
+"frame.sample"
+
+#' Map frame data c("x", "y") and c("lon", "lat").
+#'
+#' @format A data frame with 106 observations (points) and 8 variables.
+#'  \describe{
+#'     \item{\code{street}}{street number}
+#'     \item{\code{n}}{street street component number}
+#'     \item{\code{x}}{native x-coordinate}
+#'     \item{\code{y}}{native y-coordinate}
+#'     \item{\code{id}}{segment numeric ID}
+#'     \item{\code{name}}{street name}
+#'     \item{\code{lon}}{longitude}
+#'     \item{\code{lat}}{latitude}
+#'  }
+#' @docType data
+"frame.data"
+
 #' Road "address" of simulated (i.e., "expected") cases.
 #'
 #' @format A data frame with 6 variables that records the "address" of 19,993 simulate cases along the network of roads.
@@ -153,12 +196,14 @@
 #'
 #' @format A data frame with 6 variables that records the position of the orthogonal projection of the 13 original pumps onto the network of roads.
 #'  \describe{
+#'     \item{\code{pump.id}}{numeric ID}
 #'     \item{\code{road.segment}}{"address" road segment}
 #'     \item{\code{x.proj}}{x-coordinate}
 #'     \item{\code{y.proj}}{y-coordinate}
 #'     \item{\code{ortho.dist}}{orthogonal distance to home road segment}
 #'     \item{\code{node}}{node ID}
-#'     \item{\code{pump.id}}{numeric ID}
+#'     \item{\code{lon}}{longitude}
+#'     \item{\code{lat}}{latitude}
 #'  }
 #' @note \code{\link{pumpData}} documents the code for these data.
 #' @docType data
@@ -168,16 +213,29 @@
 #'
 #' @format A data frame with 6 variables that records the position of the orthogonal projection of the 14 pumps onto the network of roads.
 #'  \describe{
+#'     \item{\code{pump.id}}{numeric ID}
 #'     \item{\code{road.segment}}{"address" road segment}
 #'     \item{\code{x.proj}}{x-coordinate}
 #'     \item{\code{y.proj}}{y-coordinate}
 #'     \item{\code{ortho.dist}}{orthogonal distance to home road segment}
 #'     \item{\code{node}}{node ID}
-#'     \item{\code{pump.id}}{numeric ID}
+#'     \item{\code{lon}}{longitude}
+#'     \item{\code{lat}}{latitude}
 #'  }
 #' @note \code{\link{pumpData}} documents the code for these data.
 #' @docType data
 "ortho.proj.pump.vestry"
+
+#' Rectangular filter data.
+#'
+#' Coordinates to filter out frame shadow using sp::point.in.polygon().
+#' @format A data frame with 2 variables and 4 observations.
+#'  \describe{
+#'     \item{\code{x}}{longitude}
+#'     \item{\code{y}}{latitude}
+#'  }
+#' @docType data
+"rectangle.filter"
 
 #' Oxford monthly weather data, January 1853 - December 2019.
 #'
@@ -218,6 +276,8 @@
 #'   \item{\code{street}}{nearest street}
 #'   \item{\code{x}}{x-coordinate}
 #'   \item{\code{y}}{y-coordinate}
+#'   \item{\code{lon}}{longitude}
+#'   \item{\code{lat}}{latitude}
 #' }
 #' @seealso \code{\link{pumpLocator}}
 #' @note \code{\link{pumpData}} documents the code for these data.
@@ -234,6 +294,8 @@
 #'   \item{\code{street}}{nearest street}
 #'   \item{\code{x}}{x-coordinate}
 #'   \item{\code{y}}{y-coordinate}
+#'   \item{\code{lon}}{longitude}
+#'   \item{\code{lat}}{latitude}
 #' }
 #' @seealso \code{\link{pumpLocator}}
 #' @note \code{\link{pumpData}} documents the code for these data.
@@ -292,6 +354,8 @@
 #'   \item{\code{y}}{y-coordinate}
 #'   \item{\code{id}}{unique numeric ID}
 #'   \item{\code{name}}{road name}
+#'   \item{\code{lon}}{longitude}
+#'   \item{\code{lat}}{latitude}
 #' }
 #' @docType data
 #' @seealso \code{\link{road.segments}}
@@ -342,3 +406,77 @@
 #' }
 #' @docType data
 "snow.neighborhood"
+
+#' Coordinates of Voronoi polygon vertices for original map.
+#'
+#' @format A list of 13 data frames frames with 5 variables.
+#' \describe{
+#'   \item{\code{vertex}}{vertex ID}
+#'   \item{\code{x}}{x-coordinate}
+#'   \item{\code{y}}{y-coordinate}
+#'   \item{\code{lon}}{longitude}
+#'   \item{\code{lat}}{latitude}
+#' }
+#' @docType data
+"voronoi.polygons"
+
+#' Coordinates of Voronoi polygon vertices for Vestry Report map.
+#'
+#' @format A list of 14 data frames frames with 5 variables.
+#' \describe{
+#'   \item{\code{vertex}}{vertex ID}
+#'   \item{\code{x}}{x-coordinate}
+#'   \item{\code{y}}{y-coordinate}
+#'   \item{\code{lon}}{longitude}
+#'   \item{\code{lat}}{latitude}
+#' }
+#' @docType data
+"voronoi.polygons.vestry"
+
+#' Orthogonal projection of observed address (latlong) cases onto road network.
+#'
+#' @format A data frame with 7 variables that records the position of the orthogonal projection of the 321 cases onto the network of roads.
+#'  \describe{
+#'     \item{\code{road.segment}}{"address" road segment}
+#'     \item{\code{x.proj}}{x-coordinate}
+#'     \item{\code{y.proj}}{y-coordinate}
+#'     \item{\code{ortho.dist}}{orthogonal distance to home road segment}
+#'     \item{\code{case}}{numeric case ID}
+#'     \item{\code{lon}}{longitude}
+#'     \item{\code{lat}}{latitude}
+#'  }
+#' @note \code{\link{unstackFatalities}} documents the code for these data.
+#' @docType data
+"latlong.ortho.addr"
+
+#' Orthogonal projection of 13 original pumps (latlong).
+#'
+#' @format A data frame with 7 variables that records the position of the orthogonal projection of the 13 original pumps onto the network of roads.
+#'  \describe{
+#'     \item{\code{road.segment}}{"address" road segment}
+#'     \item{\code{x.proj}}{x-coordinate}
+#'     \item{\code{y.proj}}{y-coordinate}
+#'     \item{\code{ortho.dist}}{orthogonal distance to home road segment}
+#'     \item{\code{pump.id}}{numeric ID}
+#'     \item{\code{lon}}{longitude}
+#'     \item{\code{lat}}{latitude}
+#'  }
+#' @note \code{\link{pumpData}} documents the code for these data.
+#' @docType data
+"latlong.ortho.pump"
+
+#' Orthogonal projection of the 14 pumps from the Vestry Report (latlong).
+#'
+#' @format A data frame with 7 variables that records the position of the orthogonal projection of the 14 pumps onto the network of roads.
+#'  \describe{
+#'     \item{\code{road.segment}}{"address" road segment}
+#'     \item{\code{x.proj}}{x-coordinate}
+#'     \item{\code{y.proj}}{y-coordinate}
+#'     \item{\code{ortho.dist}}{orthogonal distance to home road segment}
+#'     \item{\code{pump.id}}{numeric ID}
+#'     \item{\code{lon}}{longitude}
+#'     \item{\code{lat}}{latitude}
+#'  }
+#' @note \code{\link{pumpData}} documents the code for these data.
+#' @docType data
+"latlong.ortho.pump.vestry"

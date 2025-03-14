@@ -4,6 +4,7 @@
 # #' @param cutpoint Numeric. Cutpoint for hierarchical cluster analysis.
 #' @param k Numeric. Number of clusters, k, to identify.
 #' @param path Character. e.g., "~/Documents/Data/".
+#' @importFrom sp point.in.polygon
 #' @noRd
 
 latlongCoordinates <- function(tif, k, path) {
@@ -99,25 +100,4 @@ latlongCoordinates <- function(tif, k, path) {
   out <- do.call(rbind, coords)
   row.names(out) <- NULL
   out
-}
-
-deltaRank <- function(vals) {
-  idx <- seq_along(vals$coord)[-length(vals$coord)]
-  delta <- vapply(idx, function(i) {
-    abs(vals$coord[i] - vals$coord[i + 1])
-  }, numeric(1L))
-  delta.rank <- data.frame(delta = sort(unique(delta)))
-  delta.rank$rank <- order(delta.rank$delta)
-  delta.rank
-}
-
-coordsByDelta <- function(vals, delta.rank) {
-  idx <- seq_along(vals$coord)[-length(vals$coord)]
-  delta <- vapply(idx, function(i) {
-    abs(vals$coord[i] - vals$coord[i + 1])
-  }, numeric(1L))
-  dat <- data.frame(coordA = vals$coord[-length(vals$coord)], delta = delta)
-  lapply(rev(delta.rank$delta), function(d) {
-    dat[dat$delta == d, ]
-  })
 }

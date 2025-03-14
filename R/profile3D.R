@@ -5,6 +5,7 @@
 #' @param vestry Logical. \code{TRUE} uses the 14 pumps from the Vestry Report. \code{FALSE} uses the 13 in the original map.
 #' @param drop.neg.subset Logical. Drop negative subset selection
 #' @param multi.core Logical or Numeric. \code{TRUE} uses \code{parallel::detectCores()}. \code{FALSE} uses one, single core. You can also specify the number logical cores. See \code{vignette("Parallelization")} for details.
+#' @importFrom threejs scatterplot3js
 #' @export
 #' @examples
 #' \dontrun{
@@ -14,7 +15,7 @@
 #' }
 
 profile3D <- function(pump.select = NULL, pump.subset = NULL, vestry = FALSE,
-  drop.neg.subset = FALSE, multi.core = TRUE) {
+  drop.neg.subset = FALSE, multi.core = FALSE) {
 
   cores <- multiCore(multi.core)
 
@@ -24,10 +25,8 @@ profile3D <- function(pump.select = NULL, pump.subset = NULL, vestry = FALSE,
     pump.data <- cholera::pumps
   }
 
-  pump.id <- selectPump(pump.data, pump.select = NULL, metric = "euclidean",
-    vestry = FALSE) 
-  
-  nearest.pump <- nearestPump(pump.id, multi.core = cores)$distance
+  pump.id <- selectPump(pump.data, pump.select = NULL, vestry = FALSE)
+  nearest.pump <- nearestPump(pump.id)
 
   x <- cholera::fatalities.address$x
   y <- cholera::fatalities.address$y

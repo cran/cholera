@@ -3,26 +3,24 @@
 #' @param angle Numeric. Angle of perspective axis in degrees.
 #' @param pump Numeric. Select pump as focal point.
 #' @param vestry Logical. \code{TRUE} uses the 14 pumps from the Vestry Report. \code{FALSE} uses the 13 in the original map.
-#' @param type Character. Type of graphic: "base" or "ggplot2".
+#' @param graphics Character. Type of graphic: "base" or "ggplot2".
 #' @param multi.core Logical or Numeric. \code{TRUE} uses \code{parallel::detectCores()}. \code{FALSE} uses one, single core. You can also specify the number logical cores. See \code{vignette("Parallelization")} for details.
-#' @import ggplot2
+#' @importFrom rlang .data
 #' @export
 #' @examples
 #' \dontrun{
 #' profile2D(angle = 30)
-#' profile2D(angle = 30, type = "ggplot2")
+#' profile2D(angle = 30, graphics = "ggplot2")
 #' }
 
-profile2D <- function(angle = 0, pump = 7, vestry = FALSE, type = "base",
-  multi.core = TRUE) {
+profile2D <- function(angle = 0, pump = 7, vestry = FALSE, graphics = "base",
+  multi.core = FALSE) {
 
+  if (length(pump) != 1) stop('Select one pump.', call. = FALSE)
   if (angle < 0 | angle > 360) stop("Use 0 >= angle <= 360.", call. = FALSE)
 
-  if (vestry) {
-    pump.id <- cholera::pumps.vestry$id
-  } else {
-    pump.id <- cholera::pumps$id
-  }
+  if (vestry) pump.id <- cholera::pumps.vestry$id
+  else pump.id <- cholera::pumps$id
 
   if (is.null(pump) == FALSE) {
     if (any(abs(pump) %in% pump.id == FALSE)) {
@@ -33,14 +31,12 @@ profile2D <- function(angle = 0, pump = 7, vestry = FALSE, type = "base",
 
   cores <- multiCore(multi.core)
 
-  if (length(pump) != 1) stop('Select one pump.', call. = FALSE)
-
   inside <- profilePerspective("inside", pump = pump, angle = angle,
     vestry = vestry, multi.core = cores)
   outside <- profilePerspective("outside", pump = pump, angle = angle,
     vestry = vestry, multi.core = cores)
 
-  if (type == "base") {
+  if (graphics == "base") {
     par(mfrow = c(3, 1))
     x.rng <- range(inside$axis, outside$axis)
     y.rng <- range(inside$count, outside$count)
@@ -54,8 +50,7 @@ profile2D <- function(angle = 0, pump = 7, vestry = FALSE, type = "base",
     points(inside$axis, inside$count, type = "h",
       col = grDevices::adjustcolor("red", alpha.f = 1/2))
     par(mfrow = c(1, 1))
-
-  } else if (type == "ggplot2") {
+  } else if (graphics == "ggplot2") {
     profileA <- data.frame(axis = inside$axis, count = inside$count)
     profileB <- data.frame(axis = outside$axis, count = outside$count)
     profileA$Location <- "Inside"
@@ -66,24 +61,19 @@ profile2D <- function(angle = 0, pump = 7, vestry = FALSE, type = "base",
     profileAB$facet <- "In & Out"
     profile.data <- rbind(profileA, profileB, profileAB)
     facet <- c("Inside", "Outside", "In & Out")
-    profile.data$facet <- factor(profile.data$facet, levels = facet)
-      p <- ggplot(data = profile.data, aes_string(x = "axis", y = 0,
-        xend = "axis", yend = "count")) +
-      geom_segment(aes_string(color = "Location")) +
-      scale_colour_manual(values = c("red", "blue"),
-                          guide = guide_legend(title = "Location")) +
-      facet_wrap(~ facet, nrow = 3) +
-      ggtitle(paste("Axis angle =", angle)) +
-      theme_bw() +
-      theme(panel.grid.major = element_blank(),
-            panel.grid.minor = element_blank(),
-            plot.title = element_text(hjust = 0.5))
-    p
-
+    ggplot2::ggplot(data = profile.data,
+                    ggplot2::aes(x = .data$axis, xend = .data$axis, 
+                                 y = 0, yend = .data$count)) +
+      ggplot2::geom_segment(ggplot2::aes(color = .data$Location)) +
+      ggplot2::scale_colour_manual(values = c("red", "blue")) +
+      ggplot2::facet_wrap(ggplot2::vars(facet), nrow = 3) +
+      ggplot2::ggtitle(paste("Axis angle =", angle)) +
+      ggplot2::theme_bw() +
+      ggplot2::theme(panel.grid.major = ggplot2::element_blank(),
+                     panel.grid.minor = ggplot2::element_blank(),
+                     plot.title = ggplot2::element_text(hjust = 0.5))
   } else {
-    if (type %in% c("base", "ggplot2") == FALSE) {
-      stop('type must be "base" or "ggplot2".', call. = FALSE)
-    }
+    stop("'graphics' must be 'base' or 'ggplot2'.", call. = FALSE)
   }
 }
 
@@ -185,9 +175,9 @@ orthogonalCoordinates <- function(case, pump = 7, angle = 0, vestry = FALSE,
 #' @noRd
 
 profilePerspective <- function(output = "inside", pump = 7, angle = 0,
-  vestry = FALSE, multi.core = TRUE) {
+  vestry = FALSE, multi.core = FALSE) {
 
-  walk <- nearestPump(vestry = vestry, multi.core = multi.core)$distance
+  walk <- nearestPump(vestry = vestry)
   neighborhood.select <- walk[walk$pump == pump, ]
   neighborhood.others <- walk[walk$pump != pump, ]
 

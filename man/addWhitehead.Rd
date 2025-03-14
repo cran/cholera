@@ -5,8 +5,9 @@
 \title{Add Rev. Henry Whitehead's Broad Street pump neighborhood.}
 \usage{
 addWhitehead(pump = "Broad Street", radius = 210, distance.unit = "yard",
-  color = "black", line.type = "solid", vestry = FALSE,
-  add.subtitle = FALSE, walking.speed = 5)
+  latlong = FALSE, color = "black", line.type = "solid",
+  vestry = FALSE, add.title = FALSE, add.subtitle = FALSE,
+  walking.speed = 5)
 }
 \arguments{
 \item{pump}{Character or Numeric. Name (road name) or numerical ID of selected pump. See \code{pumps} or \code{pumps.vestry}.}
@@ -15,11 +16,15 @@ addWhitehead(pump = "Broad Street", radius = 210, distance.unit = "yard",
 
 \item{distance.unit}{Character. Unit of distance: "meter", "yard" or "native". "native" returns the map's native scale. See \code{vignette("roads")} for information on conversion.}
 
+\item{latlong}{Logical. Longitude-Latitude coordinates.}
+
 \item{color}{Character. Color of circle.}
 
 \item{line.type}{Character. Circle line type.}
 
 \item{vestry}{Logical. \code{TRUE} uses the 14 pumps and locations from Vestry report. \code{FALSE} uses original 13 pumps.}
+
+\item{add.title}{Logical. Add title.}
 
 \item{add.subtitle}{Logical. Add subtitle with estimated "walking" time in seconds.}
 
@@ -32,6 +37,6 @@ Adds a circle (polygon) to a graphics plot.
 A circle (polygon), centered around a desired pump with a radius of 210 yards. The Broad Street pump is the default.
 }
 \examples{
-snowMap(add.landmarks = FALSE)
+snowMap()
 addWhitehead()
 }

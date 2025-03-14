@@ -4,19 +4,24 @@
 \alias{plot.walking_path}
 \title{Plot the walking path between selected cases and/or pumps.}
 \usage{
-\method{plot}{walking_path}(x, zoom = 0.5, stacked = TRUE,
-  unit.posts = "distance", unit.interval = NULL, alpha.level = 1, ...)
+\method{plot}{walking_path}(x, zoom = TRUE, add = FALSE,
+  long.title = TRUE, mileposts = TRUE, milepost.unit = "distance",
+  milepost.interval = NULL, alpha.level = 1, ...)
 }
 \arguments{
 \item{x}{An object of class "walking_path" created by walkingPath().}
 
-\item{zoom}{Logical or Numeric. A numeric value >= 0 controls the degree of zoom. The default is 0.5.}
+\item{zoom}{Logical or Numeric. Positive numbers zoom in; negative numbers zoom out.}
 
-\item{stacked}{Logical. Use stacked fatalities.}
+\item{add}{Logical. Add graphic to plot.}
 
-\item{unit.posts}{Character. "distance" for mileposts; "time" for timeposts; NULL for no posts.}
+\item{long.title}{Logical. Tile with names.}
 
-\item{unit.interval}{Numeric. Set interval between posts. When \code{unit.posts = "distance"}, \code{unit.interval} defaults to 50 meters. When \code{unit.posts = "time"}, \code{unit.interval} defaults to 60 seconds.}
+\item{mileposts}{Logical. Plot mile/time posts.}
+
+\item{milepost.unit}{Character. "distance" or "time".}
+
+\item{milepost.interval}{Numeric. Mile post interval unit of distance (yard or meter) or unit of time (seconds).}
 
 \item{alpha.level}{Numeric. Alpha level transparency for path: a value in [0, 1].}
 
@@ -27,14 +32,4 @@ A base R plot.
 }
 \description{
 Plot the walking path between selected cases and/or pumps.
-}
-\section{Note}{
- Arrows represent mileposts or timeposts to the destination.
-}
-
-\examples{
-\dontrun{
-plot(walkingPath(15))
-plot(walkingPath(15), unit.posts = "time")
-}
 }

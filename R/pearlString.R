@@ -1,13 +1,25 @@
 #' String of pearls functions.
 #'
+#' @param latlong Logical. Use estimated longitude and latitude.
 #' @noRd
 
-pearlStringRadius <- function() {
-  c(stats::dist(cholera::regular.cases[c(1, 2), ]))
+pearlStringRadius <- function(latlong = FALSE) {
+  if (latlong) {
+    dat <- cholera::latlong.regular.cases[, c("x", "y")]
+  } else {
+    dat <- cholera::regular.cases
+  }
+  c(stats::dist(dat[c(1, 2), ]))
 }
 
-peripheryCases <- function(n.points, radius = pearlStringRadius()) {
-  n.area <- cholera::regular.cases[n.points, ]
+peripheryCases <- function(n.points, latlong = FALSE) {
+  radius <- pearlStringRadius(latlong = latlong)
+
+  if (latlong) {
+    n.area <- cholera::latlong.regular.cases[n.points, c("x", "y")]
+  } else {
+    n.area <- cholera::regular.cases[n.points, ]
+  }
 
   periphery.test <- vapply(seq_len(nrow(n.area)), function(i) {
     case.point <- n.area[i, ]
@@ -28,13 +40,18 @@ peripheryCases <- function(n.points, radius = pearlStringRadius()) {
 #' Compute polygon vertices via 'TSP' package.
 #'
 #' @param vertices Object. Polygon vertices candidates.
+#' @param latlong Logical. Use estimated longitude and latitude.
 #' @param tsp.method Character. Traveling saleman algorithm. See TSP::solve_TSP() for details. Default method is repetitive nearest neighbor: "repetitive_nn".
+#' @importFrom TSP TSP
+#' @importFrom TSP solve_TSP
 #' @noRd
 
-travelingSalesman <- function(vertices, tsp.method = "repetitive_nn") {
+travelingSalesman <- function(vertices, latlong = FALSE,
+  tsp.method = "repetitive_nn") {
+
   methods <- c("identity", "random", "nearest_insertion", "farthest_insertion",
     "cheapest_insertion", "arbitrary_insertion", "nn", "repetitive_nn")
-    # "two_opt", "concorde", "linkern") # don't work in `parallel` implementation.
+    # "two_opt", "concorde", "linkern") # parallelization doesn't work.
 
   if (tsp.method %in% methods == FALSE) {
     stop('tsp.method must be "identity", "random", "nearest_insertion",
@@ -42,18 +59,17 @@ travelingSalesman <- function(vertices, tsp.method = "repetitive_nn") {
          "nn", or "repetitive_nn".')
   }
 
-  d <- stats::dist(cholera::regular.cases[vertices, ])
-  distances <- data.frame(t(utils::combn(vertices, 2)), c(d),
-    stringsAsFactors = FALSE)
-  names(distances) <- c("a", "b", "dist")
-  distances$pathID <- paste0(distances$a, "-", distances$b)
-  distances$rev.pathID <- paste0(distances$b, "-", distances$a)
+  if (latlong) {
+    dat <- cholera::latlong.regular.cases[, c("x", "y")]
+  } else {
+    dat <- cholera::regular.cases
+  }
+
+  d <- stats::dist(dat[vertices, ])
   tsp <- TSP::TSP(d, labels = vertices)
   soln <- TSP::solve_TSP(tsp, method = tsp.method)
   names(soln)
 }
-
-index0 <- function(x) as.data.frame(t(utils::combn(length(x), 2)))
 
 ## diagnostic plots ##
 

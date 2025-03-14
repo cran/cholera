@@ -3,11 +3,11 @@
 #' @param path Character. e.g., "~/Documents/Data/"
 #' @param multi.core Logical or Numeric. \code{TRUE} uses \code{parallel::detectCores()}. \code{FALSE} uses one, single core. You can also specify the number logical cores. See \code{vignette("Parallelization")} for details.
 #' @return An R data frame.
-#' @export
+#' @noRd
 #' @note This documents the computation of the latlong version of the fatalities.address data frame.
 
-latlongAddress <- function(path, multi.core = TRUE) {
-  # recreate original fatalities and fatalities.address
+latlongAddress <- function(path, multi.core = FALSE) {
+  # reset (delete) lon-lat for recomputation
   sel <- !names(cholera::fatalities) %in% c("lon", "lat")
   fatalities.original <- cholera::fatalities[, sel]
   sel <- !names(cholera::fatalities.address) %in% c("lon", "lat")
@@ -106,3 +106,27 @@ latlongFatalitiesUnstacked <- function() {
   row.names(out) <- NULL
   out
 }
+
+fatalitiesUnstack <- function() {
+  census <- table(cholera::anchor.case$anchor)
+  multiple <- names(census[census != 1])
+  single <- names(census[census == 1])
+  vars <- c("x", "y", "lon", "lat")
+
+  multi.data <- lapply(multiple, function(anchor) {
+    stack <- cholera::anchor.case[cholera::anchor.case$anchor == anchor, "case"]
+    others <- setdiff(stack, anchor)
+    coords <- cholera::fatalities[cholera::fatalities$case == anchor, vars]
+    tmp <- cholera::fatalities[cholera::fatalities$case %in% stack, ]
+    tmp[tmp$case %in% others, vars] <- coords
+    tmp
+  })
+
+  multi.data <- do.call(rbind, multi.data)
+  single.data <- cholera::fatalities[cholera::fatalities$case %in% single, ]
+  out <- rbind(multi.data, single.data)
+  out[order(out$case), ]
+}
+
+# fatalities.unstacked <- fatalitiesUnstack()
+

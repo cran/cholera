@@ -4,18 +4,17 @@
 \alias{neighborhoodVoronoi}
 \title{Compute Voronoi pump neighborhoods.}
 \usage{
-neighborhoodVoronoi(pump.select = NULL, vestry = FALSE,
-  case.location = "address", pump.location = "nominal",
-  polygon.vertices = FALSE)
+neighborhoodVoronoi(pump.select = NULL, vestry = FALSE, latlong = FALSE,
+  location = "nominal", polygon.vertices = FALSE)
 }
 \arguments{
 \item{pump.select}{Numeric. Vector of numeric pump IDs to define pump neighborhoods (i.e., the "population"). Negative selection possible. \code{NULL} selects all pumps.}
 
 \item{vestry}{Logical. \code{TRUE} uses the 14 pumps from the Vestry report. \code{FALSE} uses the 13 in the original map.}
 
-\item{case.location}{Character. "address" or "nominal". "address" uses the x-y coordinates of \code{ortho.proj}. "nominal" uses the x-y coordinates of \code{fatalities}.}
+\item{latlong}{Logical. Longitude and latitude coordinates}
 
-\item{pump.location}{Character. "address" or "nominal". "address" uses the x-y coordinates of \code{ortho.proj.pump} or \code{ortho.proj.pump.vestry}. "nominal" uses the x-y coordinates of \code{pumps} or \code{pumps.vestry}.}
+\item{location}{Character. "nominal" or "orthogonal". "nominal" uses the x-y coordinates of \code{fatalities.address}. "orthogonal"uses the x-y coordinates of \code{ortho.proj}.}
 
 \item{polygon.vertices}{Logical. \code{TRUE} returns a list of x-y coordinates of the vertices of Voronoi cells. Useful for \code{sp::point.in.polygon()} as used in \code{print.voronoi()} method.}
 }
@@ -40,6 +39,7 @@ An R list with 12 objects.
 Group cases into neighborhoods using Voronoi tessellation.
 }
 \examples{
+\dontrun{
 neighborhoodVoronoi()
 neighborhoodVoronoi(vestry = TRUE)
 neighborhoodVoronoi(pump.select = 6:7)
@@ -49,4 +49,5 @@ neighborhoodVoronoi(pump.select = -6, polygon.vertices = TRUE)
 # coordinates for vertices also available in the returned object.
 dat <- neighborhoodVoronoi(pump.select = -6)
 dat$coordinates
+}
 }

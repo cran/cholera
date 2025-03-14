@@ -2,19 +2,24 @@
 % Please edit documentation in R/neighborhoodData.R
 \name{neighborhoodData}
 \alias{neighborhoodData}
-\title{Compute network graph of roads, cases and pumps.}
+\title{Compute network graph of roads, cases and pumps (prototype).}
 \usage{
-neighborhoodData(vestry = FALSE, case.set = "observed", embed = TRUE,
-  embed.landmarks = TRUE)
+neighborhoodData(vestry = FALSE, case.set = "observed",
+  embed.addr = TRUE, embed.landmarks = TRUE, embed.pumps = TRUE,
+  latlong = FALSE)
 }
 \arguments{
 \item{vestry}{Logical. Use Vestry Report pump data.}
 
-\item{case.set}{Character. "observed" or "expected", or "snow". "snow" captures John Snow's annotation of the Broad Street pump neighborhood printed in the Vestry report version of the map.}
+\item{case.set}{Character. "observed", "expected", or "snow". "snow" captures John Snow's annotation of the Broad Street pump neighborhood printed in the Vestry report version of the map.}
 
-\item{embed}{Logical. Embed cases and pumps into road network.}
+\item{embed.addr}{Logical. Embed cases into road network.}
 
 \item{embed.landmarks}{Logical. Embed landmarks into road network.}
+
+\item{embed.pumps}{Logical. Embed pumps into road network.}
+
+\item{latlong}{Logical. Use estimated longitude and latitude.}
 }
 \value{
 An R list of nodes, edges and an 'igraph' network graph.

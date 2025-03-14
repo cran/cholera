@@ -5,7 +5,7 @@
 #' @param multi.core Logical or Numeric. \code{TRUE} uses \code{parallel::detectCores()}. \code{FALSE} uses one, single core. With Numeric, you specify the number logical cores (rounds with \code{as.integer()}). See \code{vignette("Parallelization")} for details.
 #' @noRd
 
-latlongOrthoPump <- function(vestry = FALSE, multi.core = TRUE) {
+latlongOrthoPump <- function(vestry = FALSE, multi.core = FALSE) {
   cores <- multiCore(multi.core)
 
   if (vestry) {
@@ -14,10 +14,10 @@ latlongOrthoPump <- function(vestry = FALSE, multi.core = TRUE) {
     pmp <- cholera::pumps
   }
 
-  geo.pmp <- geodesicMeters(pmp)
+  geo.pmp <- geoCartesian(pmp)
 
   rd <- cholera::roads[cholera::roads$street %in% cholera::border == FALSE, ]
-  geo.rd <- data.frame(street = rd$street, geodesicMeters(rd))
+  geo.rd <- data.frame(street = rd$street, geoCartesian(rd))
 
   geo.rd.segs <- lapply(unique(geo.rd$street), function(st) {
     dat <- geo.rd[geo.rd$street == st, ]
@@ -102,26 +102,18 @@ latlongOrthoPump <- function(vestry = FALSE, multi.core = TRUE) {
       out <- out[1, ]
     }
 
-    out$pump.id <- p
+    out$id <- p
     row.names(out) <- NULL
     out
   }, mc.cores = cores)
 
   coords <- do.call(rbind, orthogonal.projection)
-
-  origin <- data.frame(lon = min(cholera::roads$lon),
-                       lat = min(cholera::roads$lat))
-  topleft <- data.frame(lon = min(cholera::roads$lon),
-                        lat = max(cholera::roads$lat))
-  bottomright <- data.frame(lon = max(cholera::roads$lon),
-                            lat = min(cholera::roads$lat))
-
-  est.lonlat <- meterLatLong(coords, origin, topleft, bottomright)
-  est.lonlat[order(est.lonlat$pump.id), ]
+  est.lonlat <- meterLatLong(coords)
+  est.lonlat[order(est.lonlat$id), ]
 }
 
 # latlong.ortho.pump <- cholera:::latlongOrthoPump(vestry = FALSE, multi.core = TRUE)
 # latlong.ortho.pump.vestry <- cholera:::latlongOrthoPump(vestry = TRUE, multi.core = TRUE)
 
-# usethis::use_data(latlong.ortho.pump)
-# usethis::use_data(latlong.ortho.pump.vestry)
+# usethis::use_data(latlong.ortho.pump, overwrite = TRUE)
+# usethis::use_data(latlong.ortho.pump.vestry, overwrite = TRUE)

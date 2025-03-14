@@ -5,8 +5,12 @@
 
 #### package features
 
-- Fixes three apparent coding errors in Dodson and Tobler’s 1992
-  digitization of Snow’s map.
+- Fixes two sets of errors in Dodson and Tobler’s 1992 digitization of
+  Snow’s map: 1) [three misplaced
+  cases/fatalities](https://github.com/lindbrook/cholera/blob/master/docs/notes/duplicate.missing.cases.notes.md)
+  and 2) [one missing road
+  segment](https://github.com/lindbrook/cholera/blob/master/docs/notes/clifford.md)
+  (part of Clifford Street).
 - “Unstacks” the data in two ways to make analysis and visualization
   easier and more meaningful.
 - Computes and visualizes “pump neighborhoods” based on Euclidean
@@ -23,10 +27,11 @@
   of the Broad Street pump.
 - Adds two aggregate time series fatalities data sets, taken from the
   Vestry report.
-- Support for parallel computation on Linux, macOS and Windows.
-- With ‘cholera’ version \>= 0.8.0, preliminary and provisional support
-  for georeferenced (longitude and latitude) versions of data and
-  functions. [Details below](#longitude-and-latitude).
+- Support for parallel computation on Linux and macOS; limited support
+  for Windows.
+- Version \>= 0.9.0, offers provisional support for (georeferenced)
+  longitude and latitude for practically all data and functions.
+  [Details below](#longitude-and-latitude).
 
 #### getting started
 
@@ -145,11 +150,11 @@ Ultimately, for testing purposes we want the “expected” neighborhoods.
 For walking neighborhoods, I use the same approach but use simulated
 data. Using `sp::spsample()` and `sp::Polygon()`, I place 20,000
 regularly spaced points, which lie approximately 6 meters apart,
-`unitMeter(dist(regular.cases[1:2, ]))`, across the face of the map and
-then compute the shortest path to the nearest pump.
+`cholera:::unitMeter(dist(regular.cases[1:2, ]))`, across the face of
+the map and then compute the shortest path to the nearest pump.
 
 ``` r
-plot(neighborhoodWalking(case.set = "expected"), "area.polygons")
+plot(neighborhoodWalking(case.set = "expected"), type = "area.polygons")
 ```
 
 <img src="man/figures/README-unnamed-chunk-6-1.png" width="50%" />
@@ -219,7 +224,7 @@ the number of cores by passing an integer or by setting
 `multi.core = FALSE`. Note that although some precautions are taken in
 the R application, the developers of the ‘parallel’ package strongly
 discourage against using parallelization within a GUI or embedded
-environment. See `vignette("Parallelization")` for details. That said,
+environment. See `vignette("parallelization")` for details. That said,
 I’ve had few, if any, problems with using the package in parallel on
 macOS with either the [R application](https://www.r-project.org/) or the
 [RStudio IDE](https://posit.co/products/open-source/rstudio/).
@@ -227,49 +232,30 @@ macOS with either the [R application](https://www.r-project.org/) or the
 #### longitude and latitude
 
 [‘cholera’](https://cran.r-project.org/package=cholera) now has
-preliminary, limited support for georeferenced (longitude and latitude)
-versions of some data and functions. This support goes beyond a proof of
-concept but is currently less than a complete re-implementation of the
-package’s native (non-georeferenced) functionality. The georeferencing
-was done manually using [QGIS](https://qgis.org/en/site/); specifically
-its Georeferencer tool and its interface to
+georeferenced (longitude and latitude) versions of *nearly* all data and
+functions. For functions, this works by setting `latlong = TRUE` where
+available.
+
+Georeferencing was done using [QGIS](https://qgis.org/); specifically
+the Georeferencer tool and its interface to
 [OpenStreetMap](https://www.openstreetmap.org). The target coordinate
-reference system (CRS) of these data is EPSG:4326. What makes this
-effort preliminary is that the choice of ground control points,
-transformation type (e.g., thin plate spine), and resampling method
-(e.g., nearest neighbor) are still in flux. Thus, results and
-coordinates may change in the future.
+reference system (CRS) of these data is EPSG:4326. Note that the
+georeferenced results are still provisional: the choice of ground
+control points, transformation type (e.g., thin plate spine), and
+resampling method (e.g., nearest neighbor) may change in the future.
 
-Four functions are available:
-
-``` r
-snowMap(latlong = TRUE)
-```
-
-<img src="man/figures/README-latlong-1.png" width="50%" />
+Here's one example:
 
 ``` r
-plot(latlongNeighborhoodVoronoi(), euclidean.paths = TRUE)
+plot(walkingPath(latlong = TRUE))
+plot(walkingPath())  # Dodson and Tobler native scale for comparison
 ```
 
-<img src="man/figures/README-latlong_voronoi-1.png" width="50%" />
-
-``` r
-plot(latlongWalkingPath())
-```
-
-<img src="man/figures/README-latlong_walking_path-1.png" width="50%" />
-
-``` r
-plot(latlongNeighborhoodWalking())
-```
-
-<img src="man/figures/README-latlong_walking-1.png" width="50%" />
+<img src="man/figures/README-latlong_walking_path-1.png" width="50%" /><img src="man/figures/README-latlong_walking_path-2.png" width="50%" />
 
 #### vignettes
 
-The vignettes are available in the package as well as online at the
-links below.
+The vignettes are available online at the links below.
 
 [Duplicate and Missing
 Cases](https://github.com/lindbrook/cholera/blob/master/docs/vignettes/duplicate.missing.cases.md)
@@ -315,13 +301,18 @@ benchmark timings.
 
 #### lab notes
 
-The lab notes, which are only available online, go into detail about
-certain issues and topics discussed in the vignettes:
+The lab notes, which are available online, go into detail about certain 
+issues and topics discussed in the vignettes:
 
 [note on duplicate and missing
 cases](https://github.com/lindbrook/cholera/blob/master/docs/notes/duplicate.missing.cases.notes.md)
 documents the specifics of how I fixed the two apparent coding errors
-and three apparently misplaced case in Dodson and Tobler’s data.
+and three apparently misplaced cases in Dodson and Tobler’s data.
+
+[Clifford Street missing
+segment](https://github.com/lindbrook/cholera/blob/master/docs/notes/clifford.md)
+discusses the missing segment at the far Eastern end of Clifford Street
+in Dodson and Tobler’s (1992) digitization of Snow’s map.
 
 [computing street
 addresses](https://github.com/lindbrook/cholera/blob/master/docs/notes/unstacking.bars.notes.md)

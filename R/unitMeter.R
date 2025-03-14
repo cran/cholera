@@ -3,14 +3,14 @@
 #' A best guess estimate.
 #' @param x Numeric. Nominal map distance.
 #' @param distance.unit Character. Unit of distance: "meter", "yard" or "native". "native" uses the map's nominal scale. See \code{vignette("roads")} for information on conversion.
-#' @export
+#' @noRd
 
 unitMeter <- function(x, distance.unit = "meter") {
   if (is.numeric(x) == FALSE) stop('x must be numeric.')
 
   sel <- cholera::road.segments$name == "Carnaby Street"
   carnaby <- cholera::road.segments[sel, ]
-  carnaby <- carnaby[-c(8:9), ]
+  carnaby <- carnaby[!carnaby$street %in% c(261, 301), ] # excl. last 2 st segs
 
   carnaby.ft <- 463
   foot.unit <- carnaby.ft / stLength(carnaby)

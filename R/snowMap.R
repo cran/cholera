@@ -2,6 +2,7 @@
 #'
 #' @param vestry Logical. \code{TRUE} uses the 14 pumps from the map in the Vestry Report. \code{FALSE} uses the 13 pumps from the original map.
 #' @param stacked Logical. Use stacked fatalities.
+#' @param add.axes_box Logical. Add plot axes and plot box.
 #' @param add.cases Logical. Add observed cases.
 #' @param add.landmarks Logical. Add landmarks.
 #' @param add.pumps Logical. Add pumps.
@@ -19,9 +20,10 @@
 #' snowMap()
 #' snowMap(vestry = TRUE, stacked = FALSE)
 
-snowMap <- function(vestry = FALSE, stacked = TRUE, add.cases = TRUE,
-  add.landmarks = FALSE, add.pumps = TRUE, add.roads = TRUE, add.frame = TRUE,
-  main = NA, case.col = "gray", case.pch = 15, latlong = FALSE, ...) {
+snowMap <- function(vestry = FALSE, stacked = TRUE, add.axes_box = TRUE,
+  add.cases = TRUE, add.landmarks = FALSE, add.pumps = TRUE, add.roads = TRUE,
+  add.frame = TRUE, main = NA, case.col = "gray",
+  case.pch = 15, latlong = FALSE, ...) {
 
   if (latlong) {
     vars <- c("lon", "lat")
@@ -37,18 +39,26 @@ snowMap <- function(vestry = FALSE, stacked = TRUE, add.cases = TRUE,
     cases <- cholera::fatalities.address
   }
 
-  rng <- mapRange(latlong)
+  rng <- mapRange(latlong = latlong)
 
-  plot(cases[, vars], xlim = rng$x, ylim = rng$y, pch = NA, asp = asp,
-    main = main, ...)
-  if (add.roads) addRoads(latlong)
-  if (add.cases) points(cases[, vars], pch = case.pch, col = case.col,
-    cex = 0.5)
+  if (add.axes_box) {
+    plot(cases[, vars], xlim = rng$x, ylim = rng$y, pch = NA, asp = asp,
+      main = main, ...)
+  } else {
+    plot(cases[, vars], xlim = rng$x, ylim = rng$y, pch = NA, asp = asp,
+      main = main, xaxt = "n", yaxt = "n", xlab = NA, ylab = NA, bty = "n",
+      ...)
+  }
+
+  if (add.roads) addRoads(latlong = latlong)
+  if (add.cases) {
+    points(cases[, vars], pch = case.pch, col = case.col, cex = 0.5)
+  }
   if (add.pumps) {
     addPump(vestry = vestry, col = "blue", pch = 2, latlong = latlong)
   }
-  # if (add.landmarks) addLandmarks()
-  if (add.frame) addFrame(latlong)
+  if (add.landmarks) addLandmarks(latlong = latlong)
+  if (add.frame) addFrame(latlong = latlong)
 }
 
 #' Add all streets and roads to plot.
@@ -70,7 +80,7 @@ addRoads <- function(latlong = FALSE, col = "gray") {
 #' @param latlong Logical. Use estimated longitude and latitude.
 #' @param col Character. Color
 #' @param ... Additional plotting parameters.
-#' @export
+#' @noRd
 
 addFrame <- function(latlong = FALSE, col = "black", ...) {
   if (latlong) vars <- c("lon", "lat")

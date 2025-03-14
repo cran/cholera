@@ -4,17 +4,28 @@
 \alias{plot.walking}
 \title{Plot method for neighborhoodWalking().}
 \usage{
-\method{plot}{walking}(x, type = "roads", msg = FALSE,
-  tsp.method = "repetitive_nn", ...)
+\method{plot}{walking}(x, type = "area.points", add = FALSE,
+  tsp.method = "repetitive_nn", path.width = 2, alpha.level = 0.75,
+  polygon.type = "solid", polygon.col = NULL, polygon.lwd = 2, ...)
 }
 \arguments{
 \item{x}{An object of class "walking" created by \code{neighborhoodWalking()}.}
 
-\item{type}{Character. "roads", "area.points" or "area.polygons". "area" flavors only valid when \code{case.set = "expected"}.}
+\item{type}{Character. Type of expected plot: "roads", "area.points" or "area.polygons". Valid only when \code{case.set = "expected"}.}
 
-\item{msg}{Logical. Toggle in-progress messages.}
+\item{add}{Logical. Add graphic to plot.}
 
 \item{tsp.method}{Character. Traveling salesperson problem algorithm.}
+
+\item{path.width}{Numeric. Set width of paths.}
+
+\item{alpha.level}{Numeric. Alpha level transparency for area plot: a value in [0, 1].}
+
+\item{polygon.type}{Character. "border" or "solid".}
+
+\item{polygon.col}{Character.}
+
+\item{polygon.lwd}{Numeric.}
 
 \item{...}{Additional plotting parameters.}
 }
@@ -25,13 +36,5 @@ A base R plot.
 Plot method for neighborhoodWalking().
 }
 \note{
-When plotting area graphs with simulated data (i.e., \code{case.set = "expected"}), there may be discrepancies between observed cases and expected neighborhoods, particularly between neighborhoods.
-}
-\examples{
-\dontrun{
-plot(neighborhoodWalking())
-plot(neighborhoodWalking(case.set = "expected"))
-plot(neighborhoodWalking(case.set = "expected"), type = "area.points")
-plot(neighborhoodWalking(case.set = "expected"), type = "area.polygons")
-}
+When plotting area graphs with simulated data (i.e., \code{case.set = "expected"}), there may be discrepancies between observed cases and expected neighborhoods, particularly between neighborhoods. type = "roads" inspired by Shiode et. al. (2015).
 }

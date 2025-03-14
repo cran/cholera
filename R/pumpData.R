@@ -9,7 +9,7 @@
 #' @note Note: The location of the fourteenth pump, at Hanover Square, and the "correct" location of the Broad Street pump are approximate. This function documents the code that generates \code{\link{pumps}}, \code{\link{pumps.vestry}}, \code{\link{ortho.proj.pump}} and \code{\link{ortho.proj.pump.vestry}}.
 #' @export
 
-pumpData <- function(vestry = FALSE, orthogonal = FALSE, multi.core = TRUE) {
+pumpData <- function(vestry = FALSE, orthogonal = FALSE, multi.core = FALSE) {
   pumps <- HistData::Snow.pumps
   pumps$label <- c("Market Place", "Adam and Eve Court", "Berners Street",
     "Newman Street", "Marlborough Mews", "Little Marlborough Street",
@@ -109,7 +109,7 @@ pumpData <- function(vestry = FALSE, orthogonal = FALSE, multi.core = TRUE) {
         out <- out[1, ]
       }
 
-      out$node <- paste0(out$x.proj, "-", out$y.proj)
+      out$node <- paste0(out$x.proj, "_&_", out$y.proj)
       out$pump.id <- pump
       row.names(out) <- NULL
       out
@@ -118,3 +118,9 @@ pumpData <- function(vestry = FALSE, orthogonal = FALSE, multi.core = TRUE) {
   do.call(rbind, orthogonal.projection)
   }
 }
+
+# ortho.proj.pump <- pumpData(orthogonal = TRUE)
+# ortho.proj.pump.vestry <- pumpData(orthogonal = TRUE, vestry = TRUE)
+# usethis::use_data(ortho.proj.pump, overwrite = TRUE)
+# usethis::use_data(ortho.proj.pump.vestry, overwrite = TRUE)
+

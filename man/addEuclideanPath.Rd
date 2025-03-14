@@ -2,44 +2,50 @@
 % Please edit documentation in R/addEuclideanPath.R
 \name{addEuclideanPath}
 \alias{addEuclideanPath}
-\title{Add the path for the Euclidean distance between cases and/or pumps.}
+\title{Add Euclidean path from case/landmark to nearest or selected pump. (prototype)}
 \usage{
-addEuclideanPath(origin, destination = NULL, type = "case-pump",
-  observed = TRUE, case.location = "address", vestry = FALSE,
-  distance.unit = "meter", time.unit = "second", walking.speed = 5,
-  unit.posts = "distance", unit.interval = NULL, alpha.level = 1)
+addEuclideanPath(origin = 1, destination = NULL, type = "case-pump",
+  vestry = FALSE, latlong = FALSE, case.set = "observed",
+  location = "nominal", weighted = TRUE, distance.unit = "meter",
+  time.unit = "second", walking.speed = 5, include.landmarks = TRUE,
+  long.title = FALSE, mileposts = TRUE, milepost.unit = "distance",
+  milepost.interval = NULL, alpha.level = 1)
 }
 \arguments{
-\item{origin}{Numeric or Integer. Numeric ID of case or pump.}
+\item{origin}{Numeric. Vector of origin(s) (numeric ID or character name landmark/pump ).}
 
-\item{destination}{Numeric or Integer. Numeric ID(s) of case(s) or pump(s). Exclusion is possible via negative selection (e.g., -7). Default is \code{NULL}: this returns closest pump or "anchor" case.}
+\item{destination}{Numeric. Vector of destination(s) (numeric or landmark/pump name).}
 
-\item{type}{Character "case-pump", "cases" or "pumps".}
+\item{type}{Character. Path case to pump. FALSE is all other combinations of cases, landmarks and pumps.}
 
-\item{observed}{Logical. Use observed or simulated expected data.}
+\item{vestry}{Logical. \code{TRUE} uses the 14 pumps from the map in the Vestry Report. \code{FALSE} uses the 13 pumps from the original map.}
 
-\item{case.location}{Character. For \code{observed = FALSE}: "address" or "nominal". "address" is the x-y coordinate of a stack's "anchor" case. "nominal" is the x-y coordinate of a bar.}
+\item{latlong}{Logical.}
 
-\item{vestry}{Logical. \code{TRUE} uses the 14 pumps from the Vestry Report. \code{FALSE} uses the 13 pumps from the original map.}
+\item{case.set}{Character. "observed" or "expected".}
 
-\item{distance.unit}{Character. Unit of distance: "meter", "yard" or "native". "native" returns the map's native scale. See \code{vignette("roads")} for information on unit distances.}
+\item{location}{Character. For cases and pumps. "nominal", "anchor" or "orthogonal".}
+
+\item{weighted}{Logical. \code{TRUE} computes shortest path in terms of road length. \code{FALSE} computes shortest path in terms of the number of nodes.}
+
+\item{distance.unit}{Character. Unit of distance: "meter" or "yard".}
 
 \item{time.unit}{Character. "hour", "minute", or "second".}
 
 \item{walking.speed}{Numeric. Walking speed in km/hr.}
 
-\item{unit.posts}{Character. "distance" for mileposts; "time" for timeposts; \code{NULL} for no posts.}
+\item{include.landmarks}{Logical. Include landmarks as cases.}
 
-\item{unit.interval}{Numeric. Sets interval between \code{unit.posts}.}
+\item{long.title}{Logical. Tile with names.}
+
+\item{mileposts}{Logical. Plot mile/time posts.}
+
+\item{milepost.unit}{Character. "distance" or "time".}
+
+\item{milepost.interval}{Numeric. Mile post interval unit of distance (yard or meter) or unit of time (seconds).}
 
 \item{alpha.level}{Numeric. Alpha level transparency for path: a value in [0, 1].}
 }
-\value{
-An R list with 3 data frames: x-y coordinates for the origin and destination, and a summary of results.
-}
 \description{
-Add the path for the Euclidean distance between cases and/or pumps.
-}
-\note{
-Walking time is computed using \code{distanceTime()}.
+Add Euclidean path from case/landmark to nearest or selected pump. (prototype)
 }

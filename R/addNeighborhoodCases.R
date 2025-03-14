@@ -1,10 +1,11 @@
-#' Add observed cases by neighborhood.
+#' Add observed neighborhood cases.
 #'
-#' Add cases to a plot as "address" or "fatalities" and as points or IDs.
+#' Add cases to a plot as "nominal" or "fatalities" and as points or IDs.
 #' @param pump.subset Numeric. Vector of numeric pump IDs to subset from the neighborhoods defined by \code{pump.select}. Negative selection possible. \code{NULL} uses all pumps in \code{pump.select}.
 #' @param pump.select Numeric. Numeric vector of pump IDs that define which pump neighborhoods to consider (i.e., specify the "population"). Negative selection possible. \code{NULL} selects all pumps.
 #' @param metric Character. Type of neighborhood: "euclidean" or "walking".
-#' @param type Character. Type of case: "stack.base" (base of stack), or "stack" (entire stack). For observed = TRUE.
+#' @param case.set Character. "observed" or "expected".
+#' @param location Character. "nominal", "anchor" or "orthogonal".
 #' @param token Character. Type of token to plot: "point" or "id".
 #' @param text.size Numeric. Size of case ID text.
 #' @param pch Numeric.
@@ -12,55 +13,71 @@
 #' @param vestry Logical. \code{TRUE} uses the 14 pumps from the Vestry Report. \code{FALSE} uses the 13 in the original map.
 #' @param weighted Logical. \code{TRUE} computes shortest walking path weighted by road length. \code{FALSE} computes shortest walking path in terms of the number of nodes.
 #' @param color Character. Use a single color for all paths. \code{NULL} uses neighborhood colors defined by \code{snowColors().}
-#' @param case.location Character. For \code{metric = "euclidean"}: "address" uses \code{ortho.proj}; "nominal" uses \code{fatalities}.
 #' @param alpha.level Numeric. Alpha level transparency for area plot: a value in [0, 1].
+#' @param latlong Logical. Longitude and latitude coordinates.
 #' @param multi.core Logical or Numeric. \code{TRUE} uses \code{parallel::detectCores()}. \code{FALSE} uses one, single core. You can also specify the number logical cores. See \code{vignette("Parallelization")} for details.
 #' @export
 #' @examples
 #' \dontrun{
 #' snowMap(add.cases = FALSE)
+#' addNeighborhoodCases()
+#'
+#' snowMap(add.cases = FALSE)
 #' addNeighborhoodCases(pump.subset = c(6, 10))
 #'
 #' snowMap(add.cases = FALSE)
 #' addNeighborhoodCases(pump.select = c(6, 10))
+#'
+#' snowMap(add.cases = FALSE, latlong = TRUE)
+#' addNeighborhoodCases(latlong = TRUE)
+#'
+#' snowMap(add.cases = FALSE, latlong = TRUE)
+#' addNeighborhoodCases(pump.subset = c(6, 10), latlong = TRUE)
+#'
+#' snowMap(add.cases = FALSE, latlong = TRUE)
+#' addNeighborhoodCases(pump.select = c(6, 10), latlong = TRUE)
 #' }
 
 addNeighborhoodCases <- function(pump.subset = NULL, pump.select = NULL,
-  metric = "walking", type = "stack.base", token = "point", text.size = 0.5,
-  pch = 16, point.size = 0.5, vestry = FALSE, weighted = TRUE, color = NULL,
-  case.location = "nominal", alpha.level = 0.5, multi.core = TRUE) {
+  metric = "walking", case.set = "observed", location = "nominal",
+  token = "point", text.size = 0.5, pch = 16, point.size = 0.5, vestry = FALSE,
+  weighted = TRUE, color = NULL, alpha.level = 0.5, latlong = FALSE,
+  multi.core = FALSE) {
 
   if (metric %in% c("euclidean", "walking") == FALSE) {
-    stop('metric must be "euclidean" or "walking".')
+    stop('metric must be "euclidean" or "walking".', call. = FALSE)
   }
 
-  if (type %in% c("stack.base", "stack") == FALSE) {
-    stop('type must be "stack.base", "stack" or "simulated".')
+  if (case.set %in% c("observed", "expected") == FALSE) {
+    stop('case.set must be "observed" or "expected".', call. = FALSE)
+  }
+
+   if (location %in% c("nominal", "anchor", "orthogonal") == FALSE) {
+    stop('location must be "nominal", "anchor", or "orthogonal".',
+      call. = FALSE)
   }
 
   if (token %in% c("id", "point") == FALSE) {
-    stop('token must be "id" or "point".')
-  }
-
-  if (case.location %in% c("address", "nominal") == FALSE) {
-    stop('case.location must be "address" or "nominal".')
+    stop('token must be "id" or "point".', call. = FALSE)
   }
 
   cores <- multiCore(multi.core)
 
   arguments <- list(pump.select = pump.select,
+                    metric = metric,
                     vestry = vestry,
-                    case.location = case.location,
+                    latlong = latlong,
                     multi.core = cores)
 
-  if (metric == "euclidean") {
-    eucl.data <- do.call("neighborhoodEuclidean", arguments)
-    nearest.pump <- data.frame(case = eucl.data$anchor,
-                               pump = eucl.data$nearest.pump)
+  nearest.pump <- do.call("nearestPump", arguments)
+
+  if (metric == "euclidean" & latlong == FALSE) {
+    sel <- grep("origin", names(nearest.pump))
+    names(nearest.pump)[sel] <- c("case", "case.nm")
+    sel <- grep("destination", names(nearest.pump))
+    names(nearest.pump)[sel] <- c("pump", "pump.nm")
   } else if (metric == "walking") {
-    arguments$case.location <- NULL
-    walk.data <- do.call("nearestPump", arguments)
-    nearest.pump <- walk.data$distance[, c("case", "pump")]
+    nearest.pump <- nearest.pump$distance
   }
 
   snow.colors <- snowColors(vestry)
@@ -91,28 +108,32 @@ addNeighborhoodCases <- function(pump.subset = NULL, pump.select = NULL,
     }
   }
 
-  addr.data <- cholera::ortho.proj
-  nom.data <- cholera::fatalities
+  if (latlong) {
+    vars <- c("lon", "lat")
+  } else {
+    if (location %in% c("nominal", "anchor")) {
+      vars <- c("x", "y")
+    } else if (location == "orthogonal") {
+      vars <- c("x.proj", "y.proj")
+    }
+  }
 
-  if (case.location == "address") {
-    case.data <- addr.data
-    vars <- c("x.proj", "y.proj")
-  } else if (case.location == "nominal") {
-    case.data <- nom.data
-    vars <- c("x", "y")
-  } else stop("Invalid case.location!")
+  if (location == "nominal") {
+    case.data <- cholera::fatalities
+  } else if (location == "anchor") {
+    sel <- cholera::fatalities.address$anchor
+    case.data <-  cholera::fatalities[cholera::fatalities$case %in% sel, ]
+  } else if (location == "orthogonal") {
+    if (latlong) {
+      case.data <- cholera::latlong.ortho.addr
+    } else {
+      case.data <- cholera::ortho.proj
+    }
+  } else stop("Invalid 'location'!")
 
   invisible(lapply(selected.pumps, function(x) {
-    addr <- nearest.pump[nearest.pump$pump == x, "case"]
-    case.sel <- cholera::anchor.case$anchor %in% addr
-
-    if (type == "stack.base") {
-      id <- unique(cholera::anchor.case[case.sel, "anchor"])
-    } else if (type == "stack") {
-      id <- cholera::anchor.case[case.sel, "case"]
-    } else stop("Invalid type")
-
-    sel <- case.data$case %in% id
+    p.neighborhood <- nearest.pump[nearest.pump$pump == x, "case"]
+    sel <- case.data$case %in% p.neighborhood
 
     if (token == "point") {
       points(case.data[sel, vars], pch = pch, cex = point.size,

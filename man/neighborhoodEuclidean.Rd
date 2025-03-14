@@ -5,7 +5,8 @@
 \title{Compute Euclidean path pump neighborhoods.}
 \usage{
 neighborhoodEuclidean(pump.select = NULL, vestry = FALSE,
-  case.location = "nominal", case.set = "observed", multi.core = TRUE,
+  case.set = "observed", case.select = "address", latlong = FALSE,
+  location = "nominal", brute.force = FALSE, multi.core = FALSE,
   dev.mode = FALSE)
 }
 \arguments{
@@ -13,24 +14,23 @@ neighborhoodEuclidean(pump.select = NULL, vestry = FALSE,
 
 \item{vestry}{Logical. \code{TRUE} uses the 14 pumps from the Vestry Report. \code{FALSE} uses the 13 in the original map.}
 
-\item{case.location}{Character. "address" or "nominal". For \code{observed = TRUE}: "address" uses \code{ortho.proj} and "nominal" uses \code{fatalities}. For \code{observed = TRUE}: "address" uses \code{sim.ortho.proj} and "nominal" uses \code{regular.cases}.}
-
 \item{case.set}{Character. "observed" or "expected".}
+
+\item{case.select}{Character. Fatalities: "all" or "address".}
+
+\item{latlong}{Logical. Longitude and latitude coordinates}
+
+\item{location}{Character. "nominal", "anchor" or "orthogonal".}
+
+\item{brute.force}{Logical. For latlong = FALSE. TRUE computes nearest pump for each case. FALSE uses Voronoi cells as shortcut.}
 
 \item{multi.core}{Logical or Numeric. \code{TRUE} uses \code{parallel::detectCores()}. \code{FALSE} uses one, single core. You can also specify the number logical cores. See \code{vignette("Parallelization")} for details.}
 
 \item{dev.mode}{Logical. Development mode uses parallel::parLapply().}
 }
 \value{
-An R vector.
+An R list.
 }
 \description{
 Plots star graph from pump to its cases.
-}
-\examples{
-\dontrun{
-neighborhoodEuclidean()
-neighborhoodEuclidean(-6)
-neighborhoodEuclidean(pump.select = 6:7)
-}
 }

@@ -41,7 +41,7 @@
 #'
 #' \code{\link{streetNumberLocator}}
 #'
-#' @note \code{\link{fixFatalities}} documents the code for these data. For details, see \code{vignette}("duplicate.missing.cases").
+#' @note fixFatalities() documents the code for these data. For details, see \code{vignette}("duplicate.missing.cases").
 #' @seealso  \code{\link{caseLocator}}
 #'
 #' \code{\link{streetNameLocator}}
@@ -97,33 +97,35 @@
 #' @docType data
 "fatalities.unstacked"
 
-#' Orthogonal projection of landmarks onto road network.
+#' Landmark coordinates.
 #'
-#' @format A data frame with 6 variables that records the position of the orthogonal projection of landmarks onto the network of roads.
+#' @format A data frame of landmark coordinates with 20 observations and 11 variables.
 #'  \describe{
-#'     \item{\code{road.segment}}{"address" road segment}
-#'     \item{\code{x.proj}}{orthogonal x-coordinate}
-#'     \item{\code{y.proj}}{orthogonal y-coordinate}
-#'     \item{\code{ortho.dist}}{orthogonal distance to home road segment}
-#'      \item{\code{x}}{nominal x-coordinate}
-#'     \item{\code{y}}{nominal y-coordinate}
-#'     \item{\code{name}}{landmark name}
 #'     \item{\code{case}}{numeric case ID}
+#'     \item{\code{road.segment}}{"address" road segment}
+#'     \item{\code{x}}{nominal x-coordinate}
+#'     \item{\code{y}}{nominal y-coordinate}
+#'     \item{\code{x.lab}}{label x-coordinate}
+#'     \item{\code{y.lab}}{label y-coordinate}
 #'     \item{\code{lon}}{longitude}
 #'     \item{\code{lat}}{latitude}
+#'     \item{\code{lon.lab}}{label longitude}
+#'     \item{\code{lat.lab}}{label latitude}
+#'     \item{\code{name}}{landmark name}
 #'  }
-#' @note \code{\link{landmarkData}} and \code{\link{latlongLandmarks}} document the code for these data.
 #' @docType data
 "landmarks"
 
 #' Centers of city squares.
 #'
-#' @format A data frame with 6 variables that records the position of the orthogonal projection of landmarks onto the network of roads.
+#' @format A data frame with 2 observations and 6 variables that records the position of landmark square labels.
 #'  \describe{
-#'     \item{\code{name}}{square name}
+#'     \item{\code{case}}{numeric case ID}
 #'     \item{\code{x}}{x-coordinate}
 #'     \item{\code{y}}{y-coordinate}
-#'     \item{\code{case}}{numeric case ID}
+#'     \item{\code{lon}}{longitude}
+#'     \item{\code{lat}}{latitude}
+#'     \item{\code{name}}{square name}
 #'  }
 #' @docType data
 "landmark.squares"
@@ -132,11 +134,12 @@
 #'
 #' @format A data frame with 5 variables that records the position of the orthogonal projection of the 578 cases onto the network of roads.
 #'  \describe{
+#'     \item{\code{case}}{numeric case ID}
 #'     \item{\code{road.segment}}{"address" road segment}
 #'     \item{\code{x.proj}}{x-coordinate}
 #'     \item{\code{y.proj}}{y-coordinate}
-#'     \item{\code{ortho.dist}}{orthogonal distance to home road segment}
-#'     \item{\code{case}}{numeric case ID}
+#'     \item{\code{dist}}{distance to home road segment}
+#'     \item{\code{type}}{type of distance: orthogonal to road or Euclidean to endpoint}
 #'  }
 #' @note \code{\link{unstackFatalities}} documents the code for these data.
 #' @docType data
@@ -181,12 +184,12 @@
 #'
 #' @format A data frame with 6 variables that records the "address" of 19,993 simulate cases along the network of roads.
 #' \describe{
+#'     \item{\code{case}}{numeric case ID}
 #'     \item{\code{road.segment}}{"address" road segment}
 #'     \item{\code{x.proj}}{x-coordinate}
 #'     \item{\code{y.proj}}{y-coordinate}
 #'     \item{\code{dist}}{Euclidean or orthogonal distance to home road segment}
 #'     \item{\code{type}}{type of projection: Euclidean ("eucl") or orthogonal ("ortho")}
-#'     \item{\code{case}}{numeric case ID}
 #'  }
 #' @note \code{\link{simulateFatalities}} documents the code for these data.
 #' @docType data
@@ -202,8 +205,6 @@
 #'     \item{\code{y.proj}}{y-coordinate}
 #'     \item{\code{ortho.dist}}{orthogonal distance to home road segment}
 #'     \item{\code{node}}{node ID}
-#'     \item{\code{lon}}{longitude}
-#'     \item{\code{lat}}{latitude}
 #'  }
 #' @note \code{\link{pumpData}} documents the code for these data.
 #' @docType data
@@ -219,8 +220,6 @@
 #'     \item{\code{y.proj}}{y-coordinate}
 #'     \item{\code{ortho.dist}}{orthogonal distance to home road segment}
 #'     \item{\code{node}}{node ID}
-#'     \item{\code{lon}}{longitude}
-#'     \item{\code{lat}}{latitude}
 #'  }
 #' @note \code{\link{pumpData}} documents the code for these data.
 #' @docType data
@@ -236,24 +235,6 @@
 #'  }
 #' @docType data
 "rectangle.filter"
-
-#' Oxford monthly weather data, January 1853 - December 2019.
-#'
-#' Extract from UK Met Office (https://www.metoffice.gov.uk/pub/data/weather/uk/climate/stationdata/oxforddata.txt): Lat 51.761 Lon -1.262, 63 metres amsl. Approximate 90 km (55 miles) northwest of Soho.
-#'
-#' @format A data frame with 7 variables and 95 observations.
-#'  \describe{
-#'     \item{\code{year}}{yyyy}
-#'     \item{\code{mo}}{month (mm)}
-#'     \item{\code{tmax}}{maximum temperature degrees Celsius}
-#'     \item{\code{tmin}}{minimum temperature degrees Celsius}
-#'     \item{\code{airfrost}}{days}
-#'     \item{\code{rain}}{millimeters (mm)}
-#'     \item{\code{sun}}{sunshine hours}
-#'  }
-#' @note December 1860 excluded due to missing tmin observation.
-#' @docType data
-"oxford.weather"
 
 #' Plague pit coordinates.
 #'
@@ -319,7 +300,7 @@
 #'
 #' This data set transforms Dodson and Tobler's street data to give each straight line segment of a "road" a unique ID.
 #'
-#' @format A data frame with 657 observations and 7 variables. The data describe the straight line segments used to recreate the roads on Snow's map.
+#' @format A data frame with 658 observations and 7 variables. The data describe the straight line segments used to recreate the roads on Snow's map.
 #' \describe{
 #'   \item{\code{street}}{numeric street ID, which range between 1 and 528}
 #'   \item{\code{id}}{character segment ID}
@@ -346,7 +327,7 @@
 #'
 #' This data set adds road names from John Snow's map to Dodson and Tobler's street data. The latter are also available from HistData::Snow.streets.
 #'
-#' @format A data frame with 206 observations and 5 variables. The data describe the roads on Snow's map.
+#' @format A data frame with 1243 observations and 6 variables. The data describe the roads on Snow's map.
 #' \describe{
 #'   \item{\code{street}}{street segment number, which range between 1 and 528}
 #'   \item{\code{n}}{number of points in this street line segment}
@@ -457,7 +438,7 @@
 #'     \item{\code{x.proj}}{x-coordinate}
 #'     \item{\code{y.proj}}{y-coordinate}
 #'     \item{\code{ortho.dist}}{orthogonal distance to home road segment}
-#'     \item{\code{pump.id}}{numeric ID}
+#'     \item{\code{id}}{numeric ID}
 #'     \item{\code{lon}}{longitude}
 #'     \item{\code{lat}}{latitude}
 #'  }
@@ -473,10 +454,49 @@
 #'     \item{\code{x.proj}}{x-coordinate}
 #'     \item{\code{y.proj}}{y-coordinate}
 #'     \item{\code{ortho.dist}}{orthogonal distance to home road segment}
-#'     \item{\code{pump.id}}{numeric ID}
+#'     \item{\code{id}}{numeric ID}
 #'     \item{\code{lon}}{longitude}
 #'     \item{\code{lat}}{latitude}
 #'  }
 #' @note \code{\link{pumpData}} documents the code for these data.
 #' @docType data
 "latlong.ortho.pump.vestry"
+
+#' Road "address" of simulated (i.e., "expected") cases (latlong).
+#'
+#' @format A data frame with 8 variables that records the "address" of 19,993 regularly spaced simulated Cartesian/geodesic cases regularly spaced across map.
+#' \describe{
+#'     \item{\code{case}}{numeric case ID}
+#'     \item{\code{road.segment}}{"address" road segment}
+#'     \item{\code{x.proj}}{x-coordinate}
+#'     \item{\code{y.proj}}{y-coordinate}
+#'     \item{\code{dist}}{Euclidean or orthogonal distance to home road segment}
+#'     \item{\code{type}}{type of projection: Euclidean ("eucl") or orthogonal ("ortho")}
+#'     \item{\code{lon}}{longitude}
+#'     \item{\code{lat}}{latitude}
+#'  }
+#' @docType data
+"latlong.sim.ortho.proj"
+
+#' "Expected" cases (latlong).
+#'
+#' The result of using sp::spsample() and sp::Polygon() to generate 19,993 regularly spaced simulated Cartesian/geodesic cases within the map's borders.
+#'
+#' @format A data frame with 4 variables that records the position of 19,993 "expected" cases fitted by sp::spsample().
+#'  \describe{
+#'     \item{\code{x}}{x-coordinate}
+#'     \item{\code{y}}{y-coordinate}
+#'     \item{\code{lon}}{longitude}
+#'     \item{\code{lat}}{latitude}
+#'  }
+#' @docType data
+"latlong.regular.cases"
+
+#' Meter to yard conversion factor.
+#'
+#' @format A vector of length one.
+#'  \describe{
+#'     \item{\code{meter.to.yard}}{conversion factor = 1.093613}
+#'  }
+#' @docType data
+"meter.to.yard"

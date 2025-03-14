@@ -3,9 +3,11 @@
 #' Group cases into neighborhoods using Voronoi tessellation.
 #' @param pump.select Numeric. Vector of numeric pump IDs to define pump neighborhoods (i.e., the "population"). Negative selection possible. \code{NULL} selects all pumps.
 #' @param vestry Logical. \code{TRUE} uses the 14 pumps from the Vestry report. \code{FALSE} uses the 13 in the original map.
-#' @param case.location Character. "address" or "nominal". "address" uses the x-y coordinates of \code{ortho.proj}. "nominal" uses the x-y coordinates of \code{fatalities}.
-#' @param pump.location Character. "address" or "nominal". "address" uses the x-y coordinates of \code{ortho.proj.pump} or \code{ortho.proj.pump.vestry}. "nominal" uses the x-y coordinates of \code{pumps} or \code{pumps.vestry}.
+#' @param latlong Logical. Longitude and latitude coordinates
+#' @param location Character. "nominal" or "orthogonal". "nominal" uses the x-y coordinates of \code{fatalities.address}. "orthogonal"uses the x-y coordinates of \code{ortho.proj}.
 #' @param polygon.vertices Logical. \code{TRUE} returns a list of x-y coordinates of the vertices of Voronoi cells. Useful for \code{sp::point.in.polygon()} as used in \code{print.voronoi()} method.
+#' @importFrom deldir deldir
+#' @importFrom sp point.in.polygon
 #' @return An R list with 12 objects.
 #' \itemize{
 #'   \item{\code{pump.id}: vector of selected pumps}
@@ -23,6 +25,7 @@
 #' }
 #' @export
 #' @examples
+#' \dontrun{
 #' neighborhoodVoronoi()
 #' neighborhoodVoronoi(vestry = TRUE)
 #' neighborhoodVoronoi(pump.select = 6:7)
@@ -32,260 +35,27 @@
 #' # coordinates for vertices also available in the returned object.
 #' dat <- neighborhoodVoronoi(pump.select = -6)
 #' dat$coordinates
+#' }
 
 neighborhoodVoronoi <- function(pump.select = NULL, vestry = FALSE,
-  case.location = "address", pump.location = "nominal",
-  polygon.vertices = FALSE) {
+  latlong = FALSE, location = "nominal", polygon.vertices = FALSE) {
 
-  if (case.location %in% c("address", "nominal") == FALSE) {
-    stop('case.location must be "address" or "nominal".', call. = FALSE)
-  } else {
-    if (case.location == "address") statistic <- "address"
-    else if (case.location == "nominal") statistic <- "fatality"
-  }
-
-  if (pump.location == "address") {
-    if (vestry) {
-      pump.data <- cholera::ortho.proj.pump.vestry
-      pump.data$street <- cholera::pumps.vestry$street
-    } else {
-      pump.data <- cholera::ortho.proj.pump
-      pump.data$street <- cholera::pumps$street
-    }
-    sel <- names(pump.data) %in% c("x.proj", "y.proj", "pump.id")
-    names(pump.data)[sel] <- c("x", "y", "id")
-  } else if (pump.location == "nominal") {
-    if (vestry) {
-      pump.data <- cholera::pumps.vestry
-    } else {
-      pump.data <- cholera::pumps
-    }
-  }
-
-  if (is.null(pump.select) == FALSE) {
-    if (is.numeric(pump.select) == FALSE) {
-      stop("pump.select must be numeric.", call. = FALSE)
-    }
-    p.count <- nrow(pump.data)
-    p.ID <- seq_len(p.count)
-    if (any(abs(pump.select) %in% p.ID == FALSE)) {
-      stop('With vestry = ', vestry, ', 1 >= |pump.select| <= ', p.count,
+  if (!is.null(pump.select)) {
+    if (length(pump.select) == 1 & all(pump.select > 0))
+      stop("Use at least 2 pumps for 'pump.select' with Voronoi diagram.",
         call. = FALSE)
-    }
-    msg1 <- 'If specified,'
-    msg2 <- "'pump.select' must include at least 2 different pumps."
-    if (length(unique(p.ID[pump.select])) < 2) {
-      stop(paste(msg1, msg2), call. = FALSE)
-    }
   }
 
-  if (is.null(statistic) == FALSE) {
-    if (all(statistic %in% c("address", "fatality")) == FALSE) {
-      stop('If specified, statistic must either be "address" or "fatality".',
-        call. = FALSE)
-    }
-  }
-
-  x.rng <- range(cholera::roads$x)
-  y.rng <- range(cholera::roads$y)
-
-  snow.colors <- snowColors(vestry = vestry)
-
-  if (is.null(pump.select)) {
-    pump.id <- pump.data$id
-    voronoi <- deldir::deldir(pump.data[, c("x", "y")], rw = c(x.rng, y.rng),
-      suppressMsge = TRUE)
-    select.string <- NULL
+  if (latlong) {
+    args <- list(pump.select = pump.select, vestry = vestry,
+      location = location, polygon.vertices = polygon.vertices)
+    out <- do.call("voronoiLatlong", args)
+    out$latlong <- TRUE
   } else {
-    pump.id <- pump.data$id[pump.select]
-    voronoi <- deldir::deldir(pump.data[pump.select, c("x", "y")],
-      rw = c(x.rng, y.rng), suppressMsge = TRUE)
-    snow.colors <- snow.colors[pump.select]
-    select.string <- paste(sort(pump.select), collapse = ", ")
+    args <- list(pump.select = pump.select, vestry = vestry,
+      location = location, polygon.vertices = polygon.vertices)
+    out <- do.call("voronoiNominal", args)
+    out$latlong <- FALSE
   }
-
-  voronoi.order <- as.numeric(rownames(voronoi$summary))
-  pump.sel <- pump.data$id
-
-  if (is.null(pump.select)) {
-    pump.number <- pump.sel[voronoi.order]
-  } else {
-    pump.number <- pump.sel[pump.select][voronoi.order]
-  }
-
-  expected.data <- data.frame(pump = pump.number,
-                              area = voronoi$summary$dir.area,
-                              pct = voronoi$summary$dir.wts)
-
-  if (is.null(pump.select)) {
-    coordinates <- voronoiPolygons(pump.data, cholera::roads)
-  } else {
-    coordinates <- voronoiPolygons(pump.data[pump.select,], cholera::roads)
-  }
-
-  if (statistic == "address") {
-    statistic.data <- lapply(coordinates, function(cell) {
-      sp::point.in.polygon(cholera::fatalities.address$x,
-        cholera::fatalities.address$y, cell$x, cell$y)
-    })
-
-  } else if (statistic == "fatality") {
-    statistic.data <- lapply(coordinates, function(cell) {
-      sp::point.in.polygon(cholera::fatalities.unstacked$x,
-        cholera::fatalities.unstacked$y, cell$x, cell$y)
-    })
-  }
-
-  names(statistic.data) <- paste0("p", pump.number)
-
-  output <- list(pump.id = pump.id,
-                 voronoi = voronoi,
-                 case.location = case.location,
-                 snow.colors = snow.colors,
-                 x.rng = x.rng,
-                 y.rng = y.rng,
-                 select.string = select.string,
-                 expected.data = expected.data,
-                 coordinates = coordinates,
-                 statistic.data = statistic.data,
-                 pump.select = pump.select,
-                 vestry = vestry,
-                 statistic = statistic)
-
-  class(output) <- "voronoi"
-
-  if (polygon.vertices) {
-    output$coordinates
-  } else {
-    output
-  }
-}
-
-#' Plot Voronoi neighborhoods.
-#'
-#' @param x An object of class "voronoi" created by \code{neighborhoodVoronoi()}.
-#' @param voronoi.cells Logical. Plot Voronoi tessellation cells.
-#' @param delaunay.triangles Logical. Plot Delaunay triangles.
-#' @param euclidean.paths Logical. Plot all Euclidean paths (star graph).
-#' @param ... Additional plotting parameters.
-#' @return A base R graph.
-#' @seealso
-#'
-#' \code{neighborhoodVoronoi()}
-#'
-#' \code{addVoronoi()}
-#'
-#' @export
-#' @examples
-#' plot(neighborhoodVoronoi())
-
-plot.voronoi <- function(x, voronoi.cells = TRUE, delaunay.triangles = FALSE,
-  euclidean.paths = FALSE, ...) {
-
-  rd <- cholera::roads[cholera::roads$street %in% cholera::border == FALSE, ]
-  map.frame <- cholera::roads[cholera::roads$street %in% cholera::border, ]
-  roads.list <- split(rd[, c("x", "y")], rd$street)
-  border.list <- split(map.frame[, c("x", "y")], map.frame$street)
-
-  plot(cholera::fatalities.address[, c("x", "y")], xlim = x$x.rng,
-    ylim = x$y.rng, pch = NA, asp = 1)
-  invisible(lapply(roads.list, lines, col = "lightgray"))
-  invisible(lapply(border.list, lines))
-
-  if (is.null(x$pump.select)) {
-    if (x$case.location == "address") {
-      title(main = "Pump Neighborhoods: Voronoi (address)")
-    } else if (x$case.location == "nominal") {
-      title(main = "Pump Neighborhoods: Voronoi (nominal)")
-    }
-  } else {
-    if (x$case.location == "address") {
-      title(main = paste0("Pump Neighborhoods: Voronoi (address)", "\n",
-        "Pumps ", paste(sort(x$pump.select), collapse = ", ")))
-    } else if (x$case.location == "nominal") {
-      title(main = paste0("Pump Neighborhoods: Voronoi (nominal)", "\n",
-        "Pumps ", paste(sort(x$pump.select), collapse = ", ")))
-    }
-  }
-
-  pumpTokens(x, NULL)
-
-  if (voronoi.cells) {
-    plot(x$voronoi, add = TRUE, wline = "tess", showpoints = FALSE,
-      cmpnt_lty = "solid")
-  }
-
-  if (delaunay.triangles) {
-    plot(x$voronoi, add = TRUE, wline = "triang", showpoints = FALSE)
-  }
-
-  voronoi.case.id <- pumpCase(x)
-  voronoi.colors <- vector(length = length(unlist(voronoi.case.id)))
-
-  if (x$case.location == "address") {
-    names(voronoi.colors) <- cholera::fatalities.address$anchor
-  } else if (x$case.location == "nominal") {
-    names(voronoi.colors) <- cholera::fatalities$case
-  }
-
-  for (i in seq_along(voronoi.case.id)) {
-    id <- voronoi.case.id[[i]]
-    voronoi.colors[names(voronoi.colors) %in% id] <- x$snow.colors[i]
-  }
-
-  if (euclidean.paths) {
-    if (x$vestry) pump.data <- cholera::pumps.vestry
-    else pump.data <- cholera::pumps
-    invisible(lapply(names(voronoi.case.id), function(nm) {
-      p.data <- pump.data[paste0("p", pump.data$id) == nm, ]
-      sel <- cholera::fatalities.address$anchor %in% voronoi.case.id[[nm]]
-      n.data <- cholera::fatalities.address[sel, ]
-      n.color <- x$snow.colors[nm]
-      lapply(n.data$anchor, function(case) {
-        c.data <- n.data[n.data$anchor == case, ]
-        segments(c.data$x, c.data$y, p.data$x, p.data$y, col = n.color,
-          lwd = 0.5)
-      })
-    }))
-  } else {
-    if (x$case.location == "address") {
-      points(cholera::fatalities.address[, c("x", "y")], col = voronoi.colors,
-        pch = 20, cex = 0.75)
-    } else if (x$case.location == "nominal") {
-      points(cholera::fatalities[, c("x", "y")], col = voronoi.colors,
-        pch = 20, cex = 0.75)
-    }
-  }
-}
-
-#' Print method for neighborhoodVoronoi().
-#'
-#' Parameter values for neighborhoodVoronoi().
-#' @param x An object of class "voronoi" created by \code{neighborhoodVoronoi()}.
-#' @param ... Additional arguments.
-#' @return A list of argument values.
-#' @export
-#' @examples
-#' neighborhoodVoronoi()
-#' print(neighborhoodVoronoi())
-
-print.voronoi <- function(x, ...) {
-  print(x[c("pump.id", "case.location", "vestry", "statistic")])
-}
-
-#' Summary method for neighborhoodVoronoi().
-#'
-#' Return computed counts for Voronoi neighborhoods.
-#' @param object Object. An object of class "voronoi" created by \code{neighborhoodVoronoi()}.
-#' @param ... Additional arguments.
-#' @return A vector of counts by neighborhood.
-#' @seealso \code{addVoronoi()}
-#' \code{plot.voronoi()}
-#' @export
-#' @examples
-#' summary(neighborhoodVoronoi())
-
-summary.voronoi <- function(object, ...) {
-  census <- vapply(object$statistic.data, sum, numeric(1L))
-  stats::setNames(census, paste0("p", object$pump.id))
+  out
 }

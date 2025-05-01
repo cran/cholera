@@ -68,11 +68,16 @@ snowMap <- function(vestry = FALSE, stacked = TRUE, add.axes_box = TRUE,
 #' @export
 
 addRoads <- function(latlong = FALSE, col = "gray") {
-  if (latlong) vars <- c("lon", "lat")
-  else vars <- c("x", "y")
-  rd <- cholera::roads[cholera::roads$name != "Map Frame", ]
-  roads.list <- split(rd[, vars], rd$street)
-  invisible(lapply(roads.list, lines, col = col))
+  postfix <- c(1, 1, 2, 2)
+  if (latlong) {
+    vars <- paste0(c("lon", "lat"), postfix)
+  } else {
+    vars <- paste0(c("x", "y"), postfix)
+  }
+  segments(cholera::road.segments[, vars[1]],
+           cholera::road.segments[, vars[2]],
+           cholera::road.segments[, vars[3]],
+           cholera::road.segments[, vars[4]], col = col)
 }
 
 #' Add map border to plot.
@@ -83,11 +88,16 @@ addRoads <- function(latlong = FALSE, col = "gray") {
 #' @noRd
 
 addFrame <- function(latlong = FALSE, col = "black", ...) {
-  if (latlong) vars <- c("lon", "lat")
-  else vars <- c("x", "y")
-  borders <- cholera::roads[cholera::roads$name == "Map Frame", ]
-  border.list <- split(borders[, vars], borders$street)
-  invisible(lapply(border.list, lines, col = col, ...))
+  postfix <- c(1, 1, 2, 2)
+  if (latlong) {
+    vars <- paste0(c("lon", "lat"), postfix)
+  } else {
+    vars <- paste0(c("x", "y"), postfix)
+  }
+  segments(cholera::frame.segments[, vars[1]],
+           cholera::frame.segments[, vars[2]],
+           cholera::frame.segments[, vars[3]],
+           cholera::frame.segments[, vars[4]], col = col)
 }
 
 #' Compute xlim and ylim of Snow's map.

@@ -1,6 +1,5 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
-
 ## cholera: amend, augment and aid analysis of Snow’s cholera map
 
 #### package features

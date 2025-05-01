@@ -62,18 +62,17 @@ walkingPath <- function(origin = 1, destination = NULL, type = "case-pump",
     dstn.nm <- destination.chk$out.nm
   }
 
-  network.data <- neighborhoodData(vestry = vestry, case.set = case.set,
-    latlong = latlong)
+  network <- sohoGraph(vestry = vestry, case.set = case.set, latlong = latlong)
 
   if (type == "case-pump") {
-    path.data <- casePump(orgn, orgn.nm, dstn, dstn.nm, destination,
-      network.data, vestry, weighted)
+    path.data <- casePump(orgn, orgn.nm, dstn, dstn.nm, destination, network,
+      vestry, weighted)
   } else if (type == "cases") {
     path.data <- caseCase(orgn, orgn.nm, origin, dstn, dstn.nm, destination,
-      network.data, vestry, weighted)
+      network, vestry, weighted)
   } else if (type == "pumps") {
     path.data <- pumpPump(orgn, orgn.nm, origin, dstn, dstn.nm, destination,
-      network.data, vestry, weighted)
+      network, vestry, weighted)
   }
 
   p <- names(unlist(path.data$p))
@@ -88,7 +87,7 @@ walkingPath <- function(origin = 1, destination = NULL, type = "case-pump",
     data.frame(ep1 = p[i], ep2 = p[i + 1])
   }))
 
-  edges <- network.data$edges
+  edges <- network$edges
 
   ds <- vapply(seq_len(nrow(endpts)), function(i) {
     tmp <- endpts[i, ]
@@ -281,10 +280,8 @@ plot.walking_path <- function(x, zoom = TRUE, add = FALSE, long.title = TRUE,
 
   if (!add) {
     plot(rd[, vars], pch = NA, asp = asp, xlim = xlim, ylim = ylim)
-    roads.list <- split(rd[, vars], rd$street)
-    frame.list <- split(frame[, vars], frame$street)
-    invisible(lapply(roads.list, lines, col = "lightgray"))
-    invisible(lapply(frame.list, lines))
+    addRoads(latlong = latlong, col = "lightgray")
+    addFrame(latlong = latlong)
     if (x$case.set == "observed") {
       points(fatality[, vars], col = "lightgray", pch = 16, cex = 0.5)
     }
@@ -654,7 +651,7 @@ arrowData <- function(segs, census, distance.unit, latlong, milepost.unit,
           } else if (milepost.unit == "time") {
             h <- tmp$cumulative.t - p
           }
-          arrow.point <- quandrantCoordinates(meter.coords, h, theta)
+          arrow.point <- quadrantCoordinates(meter.coords, h, theta)
           data.frame(x1 = meter.coords[2, "x"],
                      y1 = meter.coords[2, "y"],
                      x2 = arrow.point$x,
@@ -667,7 +664,7 @@ arrowData <- function(segs, census, distance.unit, latlong, milepost.unit,
           } else if (milepost.unit == "time") {
             h <- tmp$cumulative.t - p
           }
-          arrow.point <- quandrantCoordinates(data.tmp, h, theta)
+          arrow.point <- quadrantCoordinates(data.tmp, h, theta)
           data.frame(x1 = data.tmp[2, "x"],
                      y1 = data.tmp[2, "y"],
                      x2 = arrow.point$x,
@@ -684,7 +681,7 @@ arrowData <- function(segs, census, distance.unit, latlong, milepost.unit,
         } else if (milepost.unit == "time") {
           h <- tmp$cumulative.t - post
         }
-        arrow.point <- quandrantCoordinates(meter.coords, h, theta)
+        arrow.point <- quadrantCoordinates(meter.coords, h, theta)
         data.frame(x1 = meter.coords[2, "x"],
                    y1 = meter.coords[2, "y"],
                    x2 = arrow.point$x,
@@ -695,7 +692,7 @@ arrowData <- function(segs, census, distance.unit, latlong, milepost.unit,
         } else if (milepost.unit == "time") {
           h <- tmp$cumulative.t - post
         }
-        arrow.point <- quandrantCoordinates(data.tmp, h, theta)
+        arrow.point <- quadrantCoordinates(data.tmp, h, theta)
         data.frame(x1 = data.tmp[2, "x"],
                    y1 = data.tmp[2, "y"],
                    x2 = arrow.point$x,
@@ -706,12 +703,12 @@ arrowData <- function(segs, census, distance.unit, latlong, milepost.unit,
   do.call(rbind, out)
 }
 
-casePump <- function(orgn, orgn.nm, dstn, dstn.nm, destination, network.data,
+casePump <- function(orgn, orgn.nm, dstn, dstn.nm, destination, network,
   vestry, weighted) {
 
-  g <- network.data$g
-  edges <- network.data$edges
-  nodes <- network.data$nodes
+  g <- network$g
+  edges <- network$edges
+  nodes <- network$nodes
 
   if (any(orgn < 1000L)) {
     fatal <- orgn[orgn < 1000L]
@@ -744,9 +741,15 @@ casePump <- function(orgn, orgn.nm, dstn, dstn.nm, destination, network.data,
   ego.node <- c(nodes[nodes$case %in% orgn, ]$node,
                 nodes[nodes$land %in% orgn, ]$node)
 
-  if (any(dstn == 2L)) {
-    # message("Note: Pump 2 excluded because it's a technical isolate.")
-    dstn <- dstn[dstn != 2L]
+  if (!is.null(destination)) {
+    if (2L %in% dstn) {
+      dstn.nm <- dstn.nm[dstn != 2L]
+      dstn <- dstn[dstn != 2L]
+      if (length(dstn) == 0) {
+        msg <- "Invalid destination. Pump 2 is a technical isolate."
+        stop(msg, call. = FALSE)
+      } else message("Note: Pump 2 excluded because it's a technical isolate.")
+    }
   }
 
   alters <- nodes[nodes$pump %in% dstn, ]
@@ -810,12 +813,12 @@ casePump <- function(orgn, orgn.nm, dstn, dstn.nm, destination, network.data,
        dstn.nm = dstn.nm[dstn == nearest.dstn], p = p[[1]])
 }
 
-caseCase <- function(orgn, orgn.nm, origin, dstn, dstn.nm, destination,
-  network.data, vestry, weighted) {
+caseCase <- function(orgn, orgn.nm, origin, dstn, dstn.nm, destination, network,
+  vestry, weighted) {
 
-  g <- network.data$g
-  edges <- network.data$edges
-  nodes <- network.data$nodes
+  g <- network$g
+  edges <- network$edges
+  nodes <- network$nodes
 
   if (any(orgn < 1000L)) {
     fatal <- orgn[orgn < 1000L]
@@ -949,12 +952,12 @@ caseCase <- function(orgn, orgn.nm, origin, dstn, dstn.nm, destination,
        dstn.nm = dstn.nm[dstn == nearest.dstn], p = p[[1]])
 }
 
-pumpPump <- function(orgn, orgn.nm, origin, dstn, dstn.nm, destination,
-  network.data, vestry, weighted) {
+pumpPump <- function(orgn, orgn.nm, origin, dstn, dstn.nm, destination, network,
+  vestry, weighted) {
 
-  g <- network.data$g
-  edges <- network.data$edges
-  nodes <- network.data$nodes
+  g <- network$g
+  edges <- network$edges
+  nodes <- network$nodes
 
   if (length(intersect(orgn, dstn)) != 0) {
     if (!is.null(origin) & is.null(destination) | all(destination < 0)) {
@@ -972,21 +975,23 @@ pumpPump <- function(orgn, orgn.nm, origin, dstn, dstn.nm, destination,
   alters <- nodes[nodes$pump %in% dstn, ]
   if (nrow(alters) > 1) alters <- alters[order(alters$pump), ]
 
-  if (2L %in% egos$pump) {
-    egos <- egos[egos$pump != 2, ]
-    if (nrow(egos) == 0) {
-      msg1 <- "No valid origins: "
-      msg2 <- "Pump 2 excluded because it's a technical isolate."
-      stop(msg1, msg2, call. = FALSE)
+  if (!is.null(origin)) {
+    if (2L %in% egos$pump) {
+      egos <- egos[egos$pump != 2, ]
+      if (nrow(egos) == 0) {
+        msg <- "Invalid origin. Pump 2 is a technical isolate."
+        stop(msg, call. = FALSE)
+      } else message("Note: Pump 2 excluded because it's a technical isolate.")
     }
   }
 
-  if (2L %in% alters$pump) {
-    alters <- alters[alters$pump != 2, ]
-    if (nrow(alters) == 0) {
-      msg1 <- "No valid destinations: "
-      msg2 <- "Pump 2 excluded because it's a technical isolate."
-      stop(msg1, msg2, call. = FALSE)
+  if (!is.null(destination)) {
+    if (2L %in% alters$pump) {
+      alters <- alters[alters$pump != 2, ]
+      if (nrow(alters) == 0) {
+        msg <- "Invalid destination. Pump 2 is a technical isolate."
+        stop(msg, call. = FALSE)
+      } else message("Note: Pump 2 excluded because it's a technical isolate.")
     }
   }
 

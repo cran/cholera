@@ -20,11 +20,13 @@
 #' @note With Dodson and Tobler's data, a street (e.g., Broad Street) is often comprised of multiple straight line segments. To identify each segment individually, an additional number is appended to form a text string ID (e.g., "116-2"). See \code{cholera::road.segments}.
 #' @export
 #' @examples
+#' \dontrun{
 #' segmentLocator("216-1")
 #' segmentLocator("216-1", zoom = -10)
 #' segmentLocator("216-1", latlong = TRUE, zoom = -10)
 #' segmentLocator("216-1", distance.unit = "yard")
 #' segmentLocator("216-1", zoom = FALSE)
+#' }
 
 segmentLocator <- function(segment.id = "216-1", zoom = TRUE, latlong = FALSE,
   cases = "address", token = "id", vestry = FALSE, add.pump = TRUE,
@@ -37,15 +39,14 @@ segmentLocator <- function(segment.id = "216-1", zoom = TRUE, latlong = FALSE,
     ew <- "lon"
     ns <- "lat"
     proj.data <- cholera::latlong.ortho.addr
-    rd.segs <- roadSegments(latlong = latlong)
   } else {
     asp  <- 1
     ew <- "x"
     ns <- "y"
     proj.data <- cholera::ortho.proj
-    rd.segs <- cholera::road.segments
   }
 
+  rd.segs <- cholera::road.segments
   vars <- c(ew, ns)
 
   if (!is.null(segment.id)) {
@@ -247,7 +248,7 @@ segmentLocator <- function(segment.id = "216-1", zoom = TRUE, latlong = FALSE,
       segment.length <- segmentLength(id = segment.id, latlong = latlong)
 
       if (length(segment.id) > 1) segment.length <- sum(segment.length)
-      
+
       est.time <- distanceTime(segment.length, distance.unit = distance.unit,
         time.unit = time.unit, walking.speed = walking.speed)
       nominal.time <- nominalTime(est.time, time.unit)

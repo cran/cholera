@@ -41,9 +41,7 @@ neighborhoodWalking <- function(pump.select = NULL, vestry = FALSE,
   # pumps to consider or target
   p.sel <- selectPump(pump.data, pump.select = pump.select, vestry = vestry)
 
-  dat <- neighborhoodData(case.set = case.set, vestry = vestry,
-    latlong = latlong)
-
+  dat <- sohoGraph(case.set = case.set, vestry = vestry, latlong = latlong)
   g <- dat$g
   nodes <- dat$nodes
   edges <- dat$edges
@@ -116,9 +114,9 @@ neighborhoodWalking <- function(pump.select = NULL, vestry = FALSE,
     p.select.adam.eve <- p.select[p.select$pump == 2, ]
     p.select <- p.select[p.select$pump != 2, ]
 
-    if (latlong) {
-      rd.segs <- roadSegments(latlong = TRUE)
+    rd.segs <- cholera::road.segments
 
+    if (latlong) {
       adam.eve.seg <- rd.segs[rd.segs$id == adam.eve.ct, ]
       adam.eve.seg$n1 <- paste0(adam.eve.seg$lon1, "_&_", adam.eve.seg$lat1)
       adam.eve.seg$n2 <- paste0(adam.eve.seg$lon2, "_&_", adam.eve.seg$lat2)
@@ -127,8 +125,6 @@ neighborhoodWalking <- function(pump.select = NULL, vestry = FALSE,
       rd.segs$n1 <- paste0(rd.segs$lon1, "_&_", rd.segs$lat1)
       rd.segs$n2 <- paste0(rd.segs$lon2, "_&_", rd.segs$lat2)
     } else {
-      rd.segs <- cholera::road.segments
-
       adam.eve.seg <- rd.segs[rd.segs$id == adam.eve.ct, ]
       adam.eve.seg$n1 <- paste0(adam.eve.seg$x1, "_&_", adam.eve.seg$y1)
       adam.eve.seg$n2 <- paste0(adam.eve.seg$x2, "_&_", adam.eve.seg$y2)
@@ -322,13 +318,12 @@ plot.walking <- function(x, type = "area.points", add = FALSE,
       latlong = x$latlong)
 
     if (x$latlong) {
-      rd.segs <- roadSegments(latlong = TRUE)
       reg.cases <- cholera::latlong.regular.cases[, c("lon", "lat")]
     } else {
-      rd.segs <- cholera::road.segments
       reg.cases <- cholera::regular.cases
     }
 
+    rd.segs <- cholera::road.segments
     case.fix <- ifelse(x$latlong, 0, 2000L)
 
     if (type == "roads") {

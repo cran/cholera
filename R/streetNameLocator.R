@@ -20,11 +20,13 @@
 #' @note See \code{streetNames()}.
 #' @export
 #' @examples
-#' streetNameLocator("broad street")
+#' \dontrun{
+#' #' streetNameLocator("broad street")
 #' streetNameLocator("Broad Street", zoom = -10)
 #' streetNameLocator("Broad Street", latlong = TRUE, zoom = -10)
 #' streetNameLocator("Broad Street", distance.unit = "yard")
 #' streetNameLocator("Broad Street", zoom = FALSE)
+#' }
 
 streetNameLocator <- function(street.name = "Broad Street", zoom = TRUE,
   latlong = FALSE, cases = "address", token = "id", vestry = FALSE,
@@ -37,16 +39,15 @@ streetNameLocator <- function(street.name = "Broad Street", zoom = TRUE,
     ew <- "lon"
     ns <- "lat"
     proj.data <- cholera::latlong.ortho.addr
-    rd.segs <- roadSegments(latlong = latlong)
   } else {
     asp  <- 1
     ew <- "x"
     ns <- "y"
     proj.data <- cholera::ortho.proj
-    rd.segs <- cholera::road.segments
   }
 
   rds <- cholera::roads
+  rd.segs <- cholera::road.segments
   vars <- c(ew, ns)
 
   if (!is.null(street.name)) {

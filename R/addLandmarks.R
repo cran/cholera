@@ -47,10 +47,10 @@ addLandmarks <- function(text.size = 0.5, text.col = "black",
     sel <- cholera::landmarks$name %in% c("Soho Square-E", "Soho Square-W")
     soho.EW <- cholera::landmarks[sel, vars]
 
-    golden <- squareCenter(golden.NS, golden.EW)
+    golden <- squareCenterB(golden.NS, golden.EW)
     text(golden, labels = "Golden\nSquare", cex = text.size, col = text.col)
 
-    soho <- squareCenter(soho.NS, soho.EW)
+    soho <- squareCenterB(soho.NS, soho.EW)
     text(soho, labels = "Soho\nSquare", cex = text.size, col = text.col)
 
     # Adam and Eve Court (isolate) #
@@ -227,14 +227,11 @@ addLandmarks <- function(text.size = 0.5, text.col = "black",
                  lion.brewery.west)
     model <- c(model.housing.north, model.housing.south, model.housing.east,
                model.housing.west)
-
-    invisible(lapply(c(brewery, model), function(id) {
-      landmarkPerimeter(id, latlong = latlong)
-    }))
+    landmarkPerimeter(c(brewery, model), latlong = latlong)
   }
 }
 
- squareCenter <- function(NS, EW) {
+ squareCenterB <- function(NS, EW) {
    line.NS <- stats::lm(lat ~ lon, data = NS)
    line.EW <- stats::lm(lat ~ lon, data = EW)
    lon.x <- stats::coef(line.NS)["lon"] -
@@ -273,19 +270,10 @@ addLandmarks <- function(text.size = 0.5, text.col = "black",
 
 landmarkPerimeter <- function(seg.id, col = "dodgerblue", latlong = FALSE,
   lwd = 2) {
-
-  if (latlong) {
-    rd.segs <- roadSegments(latlong = TRUE)
-    vars <- names(rd.segs)[-(1:3)]
-    lapply(seg.id, function(seg) {
-      dat <- rd.segs[rd.segs$id == seg, vars]
-      segments(dat$lon1, dat$lat1, dat$lon2, dat$lat2, col = col, lwd = lwd)
-    })
-  } else {
-    vars <- c("x1", "y1", "x2", "y2")
-    lapply(seg.id, function(seg) {
-      dat <- cholera::road.segments[cholera::road.segments$id == seg, vars]
-      segments(dat$x1, dat$y1, dat$x2, dat$y2, col = col, lwd = lwd)
-    })
-  }
+  postfix <- c(1, 1, 2, 2)
+  if (latlong) vars <- paste0(c("lon", "lat"), postfix)
+  else vars <- paste0(c("x", "y"), postfix)
+  lndmrk <- cholera::road.segments[cholera::road.segments$id %in% seg.id, vars]
+  segments(lndmrk[, vars[1]], lndmrk[, vars[2]], lndmrk[, vars[3]],
+    lndmrk[, vars[4]], col = col)
 }
